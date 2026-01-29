@@ -1,0 +1,10 @@
+[package]
+name = "service"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wit-bindgen = { version = "0.51.0", features = ['default', 'async-spawn', 'inter-task-wakeup'] }

@@ -1,0 +1,36 @@
+package my:service;
+
+// Define a minimal HTTP handler world
+world service {
+
+    import wasi:cli/types@0.3.0-rc-2026-01-06;
+    import wasi:cli/stdout@0.3.0-rc-2026-01-06;
+    import wasi:cli/stderr@0.3.0-rc-2026-01-06;
+    import wasi:cli/stdin@0.3.0-rc-2026-01-06;
+    import wasi:clocks/types@0.3.0-rc-2026-01-06;
+    import wasi:clocks/monotonic-clock@0.3.0-rc-2026-01-06;
+    import wasi:clocks/system-clock@0.3.0-rc-2026-01-06;
+    @unstable(feature = clocks-timezone)
+    import wasi:clocks/timezone@0.3.0-rc-2026-01-06;
+    import wasi:random/random@0.3.0-rc-2026-01-06;
+    import wasi:random/insecure@0.3.0-rc-2026-01-06;
+    import wasi:random/insecure-seed@0.3.0-rc-2026-01-06;
+
+    export handler;
+}
+
+interface handler {
+    use types.{request, response, error-code};
+
+    handle: async func(
+        request: request
+    ) -> result<response, error-code>;
+}
+
+interface types {
+    type request = string;
+
+    type response = string;
+
+    type error-code = u32;
+}
