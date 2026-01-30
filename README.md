@@ -31,8 +31,8 @@ TODO:
 - [x] Update the WAT docs below (for the `service`, fixed the typing!)
 - [x] Update the WAT docs below (for the `composed.wasm`)
 - [x] Get basic composition working
-- [ ] Document everything
-- [ ] Figure out how to inherit `Cargo.toml` from base of project
+- [x] Document everything
+- [x] Figure out how to inherit `Cargo.toml` from base of project
 - [ ] Write a build/run script
 
 # What is "middleware" in the realm of Wasi HTTP? #
