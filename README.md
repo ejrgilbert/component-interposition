@@ -1,4 +1,76 @@
-# Services with Middleware on Wasi P3 #
+# Wasi P3 `Service` + `Middleware` #
+
+The purpose of this project is to provide a standalone example on how bundle a server+middleware into a single Wasm
+component and run it on Wasmtime.
+
+Through following the instructions, a user should be able to get a fully working Wasm component that bundles a service
+with the following structure:
+
+```
+HTTP →
+  M → Service
+  M ← Response
+← HTTP
+```
+
+This can be read as: "We have 1 middleware, M, that can do preprocessing on an HTTP request, then invoke the service with that preprocessed request.
+Then, the same middleware, M, is returned to with the service's response. This response can be postprocessed by the middleware and returned."
+
+In a future iteration of this Proof of Concept, we can do a structure more like the following:
+```
+HTTP →
+  M1 → M2 → ... → Mn → Service
+  M1 ← M2 ← ... ← Mn ← Response
+← HTTP
+```
+
+This would demonstrate how to interpose N middlewares on a Wasm service.
+
+TODO:
+- [x] Get the `runner` working
+- [x] Update the WAT docs below (for the `service`, fixed the typing!)
+- [x] Update the WAT docs below (for the `composed.wasm`)
+- [x] Get basic composition working
+- [ ] Document everything
+- [ ] Figure out how to inherit `Cargo.toml` from base of project
+- [ ] Write a build/run script
+
+# What is "middleware" in the realm of Wasi HTTP? #
+
+At a high level, `wasi:http/middleware` is just a component that both exports a `handler.handle` and imports another handler.handle. Your middleware sits in between:
+
+```
+incoming request
+    ↓
+your handler.handle (middleware)
+    ↓ (forward)
+imported handler.handle (next service/middleware)
+    ↓
+response bubbles back
+```
+
+This is what the middleware world looks like in WIT:
+```wit
+world middleware {
+    include service;
+    import handler;
+}
+```
+
+So implementing middleware is simply:
+1. Export `handler.handle`
+2. Import `handler.handle` (the downstream handler, which would either be the `service` itself or even another middleware!)
+3. Do something before/after forwarding the request
+
+Mental model:
+- Middleware = handler that calls another handler
+- "Import" = downstream
+- "Export" = upstream
+
+This world captures HTTP services that forward HTTP requests to another handler.
+**Your middleware does not need to know what comes next — it just calls the imported `handler.handle`.**
+
+# How to build #
 
 To help future people get their environment setup, these are the versions of tools I used for this to actually work:
 - `cargo --version`: 1.93.0
@@ -6,16 +78,6 @@ To help future people get their environment setup, these are the versions of too
 - `wkg --version`: 0.13.0
 - `wac --version`: 0.9.0-dev
   - (this is from sha [fa25de6](https://github.com/bytecodealliance/wac/commit/fa25de65886d85cc0347df00159488c2024d4e04))
-
-TODO: 
-- [x] Get the `runner` working
-- [ ] Update the WAT docs below (for the `service`, fixed the typing!)
-- [x] Get basic composition working
-- [ ] Document everything
-- [ ] Figure out how to inherit `Cargo.toml` from base of project
-- [ ] Write a build/run script
-
-# How to build #
 
 Build the `service`:
 ```shell
@@ -161,7 +223,7 @@ Here's an explanation of the WAT you get from the compiled and componentized ser
         (callback $"[callback][async-lift]my:service/handler#handle")))
     
     ;; This shim component just re-exports a function with the exact WIT signature required by the world.
-    (component $my:service/handler-shim-component
+    (component $wasi:http/handler@0.3.0-rc-2026-01-06-shim-component
         ...
         (import "import-func-handle" (func ...)) ;; this is INTERNALLY DEFINED by the core module and passed in on instantiation!
         ...
@@ -170,7 +232,7 @@ Here's an explanation of the WAT you get from the compiled and componentized ser
     
     ;; --------------------------------------------------------------------------
     ;; And now we actually instantiate the SHIM that we defined above with the correct world signature!
-    (instance $my:service/handler-shim-instance (;11;) (instantiate $my:service/handler-shim-component
+    (instance $wasi:http/handler@0.3.0-rc-2026-01-06-shim-instance (;11;) (instantiate $wasi:http/handler@0.3.0-rc-2026-01-06-shim-component
         ;; The lifted handle we pulled from the core module
         (with "import-func-handle" (func $handle))
         (with "import-type-request" (type $"#type29 request"))
@@ -182,7 +244,7 @@ Here's an explanation of the WAT you get from the compiled and componentized ser
     ))
     
     ;; Export for the world :)
-    (export $my:service/handler (;12;) "my:service/handler" (instance $my:service/handler-shim-instance))
+    (export $wasi:http/handler@0.3.0-rc-2026-01-06 (;12;) "wasi:http/handler@0.3.0-rc-2026-01-06" (instance $wasi:http/handler@0.3.0-rc-2026-01-06-shim-instance))
     ...
 )
 ```
@@ -290,4 +352,35 @@ Now that we have that in our brains, what does the WAT mean?
 ```
 
 ### The full composition of the `middleware`+`service` ###
-TODO
+```webassembly
+(component
+    ...
+    
+    ;; The only part to really pay attention to is at the bottom of the component.
+    ;; This is the meat of what is accomplished with the `wac` script.
+    
+    ;; Create an instance that we plug the handler from the MIDDLEWARE into
+    (instance $mdl (;13;) (instantiate 1
+          (with "wasi:http/handler@0.3.0-rc-2026-01-06" (instance 12))  ;; points to the middleware instance
+          (with "wasi:cli/environment@0.2.6" (instance 1))
+          (with "wasi:cli/exit@0.2.6" (instance 2))
+          (with "wasi:io/error@0.2.6" (instance 3))
+          (with "wasi:io/streams@0.2.6" (instance 4))
+          (with "wasi:clocks/wall-clock@0.2.6" (instance 8))
+          (with "wasi:filesystem/types@0.2.6" (instance 9))
+          (with "wasi:filesystem/preopens@0.2.6" (instance 10))
+          (with "wasi:cli/stderr@0.2.6" (instance 7))
+          (with "wasi:cli/stdin@0.2.6" (instance 5))
+          (with "wasi:cli/stdout@0.2.6" (instance 6))
+          (with "wasi:http/types@0.3.0-rc-2026-01-06" (instance 0))
+        ))
+        
+    ;; Just allows this instance to be referred to in the export that follows.
+    (alias export $mdl "wasi:http/handler@0.3.0-rc-2026-01-06" (instance (;14;)))
+    
+    ;; Explicitly export the handler defined provided by the middleware instance that's
+    ;; now been stitched together appropriately with the core service above!
+    ;; Now we have the appropriate shape of a `service` world :)
+    (export (;15;) "wasi:http/handler@0.3.0-rc-2026-01-06" (instance 14))
+)
+```

@@ -92,7 +92,6 @@ async fn test_http_echo(component: &str, use_compression: bool, host_to_host: bo
     //
     // Note that this will read the entire body internally and wait for
     // everything to get collected before proceeding to below.
-
     let (store_tx, _) = tokio::sync::mpsc::channel::<UnsyncBoxBody<Bytes, ErrorCode>>(8);
     let response = futures::join!(
         run_http(
@@ -112,8 +111,7 @@ async fn test_http_echo(component: &str, use_compression: bool, host_to_host: bo
         Some(&HeaderValue::from_static("bar"))
     );
 
-    // The compression headers should be set if `use_compression` was turned
-    // on.
+    // The compression headers should be set if `use_compression` was turned on.
     if use_compression {
         assert_eq!(
             response.headers().get("content-encoding"),
@@ -193,7 +191,7 @@ async fn run_http<E: Into<ErrorCode> + 'static>(
             let res = rx.await?;
             let (parts, body) = res.into_parts();
             let body = body.collect().await.context("failed to collect body")?;
-            core::result::Result::Ok(http::Response::from_parts(parts, body))
+            Ok(http::Response::from_parts(parts, body))
         }
     )?;
 

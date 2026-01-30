@@ -2,12 +2,6 @@ mod bindings {
     wit_bindgen::generate!({
         world: "middleware",
         async: true,
-//         inline: "
-// package my:logging-middleware;
-//
-// world middleware {
-//   include wasi:http/middleware@0.3.0-rc-2026-01-06;
-// }",
         generate_all
     });
 }
@@ -25,6 +19,7 @@ impl Guest for LoggingMiddleware {
         log(">>> logging middleware reached");
 
         // Forward the request to the downstream handler
+        // NOTE: This can be either the core service OR another middleware!
         let response = handler::handle(request).await?;
 
         log("<<< logging middleware returning response");
