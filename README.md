@@ -3,11 +3,17 @@
 To help future people get their environment setup, these are the versions of tools I used for this to actually work:
 - `cargo --version`: 1.93.0
 - `wasm-tools --version`: 1.244.0
+- `wkg --version`: 0.13.0
+- `wac --version`: 0.9.0-dev
+  - (this is from sha [fa25de6](https://github.com/bytecodealliance/wac/commit/fa25de65886d85cc0347df00159488c2024d4e04))
 
 TODO: 
-- [ ] Get basic composition working
+- [x] Get the `runner` working
+- [ ] Update the WAT docs below (for the `service`, fixed the typing!)
+- [x] Get basic composition working
 - [ ] Document everything
 - [ ] Figure out how to inherit `Cargo.toml` from base of project
+- [ ] Write a build/run script
 
 # How to build #
 
@@ -20,22 +26,29 @@ wkg wit fetch
 
 # Build
 cargo build --target wasm32-wasip1
-SVC_PTH_MOD="./target/wasm32-wasip1/debug/service.wasm"
-SVC_PTH_MOD_WAT="./target/wasm32-wasip1/debug/service.wat"
+PTH_MOD="./target/wasm32-wasip1/debug/service.wasm"
+PTH_MOD_WAT="./target/wasm32-wasip1/debug/service.wat"
 
 # Check the WAT (should be a MODULE)
-ls -al $SVC_PTH_MOD
-wasm-tools print $SVC_PTH_MOD -o $SVC_PTH_MOD_WAT
+ls -al $PTH_MOD
+wasm-tools print $PTH_MOD -o $PTH_MOD_WAT
 
 # Convert to a component with the adapter
-SVC_PTH_COMP="./target/wasm32-wasip1/debug/service.comp.wasm"
-SVC_PTH_COMP_WAT="./target/wasm32-wasip1/debug/service.comp.wat"
+PTH_COMP="./target/wasm32-wasip1/debug/service.comp.wasm"
+PTH_COMP_WAT="./target/wasm32-wasip1/debug/service.comp.wat"
 ADAPTER_PTH="../wasi_snapshot_preview1.reactor.wasm"
-wasm-tools component new $SVC_PTH_MOD --adapt $ADAPTER_PTH --skip-validation -o $SVC_PTH_COMP
+wasm-tools component new $PTH_MOD --adapt $ADAPTER_PTH --skip-validation -o $PTH_COMP
 
 # Check the WAT (should be a COMPONENT, see the "What is happening in this WAT??" section for details)
-ls -al $SVC_PTH_COMP
-wasm-tools print $SVC_PTH_COMP -o $SVC_PTH_COMP_WAT
+ls -al $PTH_COMP
+wasm-tools print $PTH_COMP -o $PTH_COMP_WAT
+
+popd
+
+# The service should successfully run!
+pushd runner
+cargo run -- ../service/target/wasm32-wasip1/debug/service.comp.wasm
+# OUTPUTS: "[SERVICE] hello world!"
 
 popd
 ```
@@ -66,8 +79,45 @@ wasm-tools component new $PTH_MOD --adapt $ADAPTER_PTH --skip-validation -o $PTH
 ls -al $PTH_COMP
 wasm-tools print $PTH_COMP -o $PTH_COMP_WAT
 
+# NOTE: You can't just run the middleware directly
+
 popd
 
+```
+
+Compose the core service with the middleware:
+```shell
+PATH_SVC="./service/target/wasm32-wasip1/debug/service.comp.wasm"
+PATH_MDL="./middleware/target/wasm32-wasip1/debug/middleware.comp.wasm"
+
+wac compose composition.wac \
+  --dep my:service=$PATH_SVC \
+  --dep my:middleware=$PATH_MDL \
+  --output composed.wasm
+  
+  
+# Check the WAT (should be a COMPONENT, see the "What is happening in this WAT??" section for details)
+ls -al composed.wasm
+wasm-tools print composed.wasm -o composed.wat
+```
+
+Run the composition!
+```shell
+pushd runner
+cargo run -- ../service/target/wasm32-wasip1/debug/service.comp.wasm
+# SHOULD OUTPUT:
+
+# Running the echo test with host-to-host disabled
+# >>> logging middleware reached
+# [SERVICE] hello world!
+# <<< logging middleware returning response
+# 
+# Running the echo test with host-to-host enabled
+# >>> logging middleware reached
+# [SERVICE] hello world!
+# <<< logging middleware returning response
+
+popd
 ```
 
 ## What is happening in this WAT?? ##
@@ -238,3 +288,6 @@ Now that we have that in our brains, what does the WAT mean?
     ...
 )
 ```
+
+### The full composition of the `middleware`+`service` ###
+TODO

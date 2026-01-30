@@ -1,6 +1,7 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "middleware",
+        async: true,
 //         inline: "
 // package my:logging-middleware;
 //
@@ -21,12 +22,12 @@ impl Guest for LoggingMiddleware {
     async fn handle(
         request: handler::Request,
     ) -> Result<handler::Response, handler::ErrorCode> {
-        log(">>> logging middleware reached\n");
+        log(">>> logging middleware reached");
 
         // Forward the request to the downstream handler
         let response = handler::handle(request).await?;
 
-        log("<<< logging middleware returning response\n");
+        log("<<< logging middleware returning response");
 
         Ok(response)
     }
