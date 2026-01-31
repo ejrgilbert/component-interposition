@@ -26,6 +26,12 @@ HTTP →
 
 This would demonstrate how to interpose N middlewares on a Wasm service.
 
+# Next steps for this repository. #
+
+Now that I've gotten this base PoC working, I plan to:
+1. try to get this working for N middlewares placed before the service
+2. try to splice middleware between two services that have already been hooked up
+
 # What is "middleware" in the realm of Wasi HTTP? #
 
 At a high level, `wasi:http/middleware` is just a component that both exports a `handler.handle` and imports another handler.handle. Your middleware sits in between:
