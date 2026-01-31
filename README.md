@@ -26,15 +26,6 @@ HTTP →
 
 This would demonstrate how to interpose N middlewares on a Wasm service.
 
-TODO:
-- [x] Get the `runner` working
-- [x] Update the WAT docs below (for the `service`, fixed the typing!)
-- [x] Update the WAT docs below (for the `composed.wasm`)
-- [x] Get basic composition working
-- [x] Document everything
-- [x] Figure out how to inherit `Cargo.toml` from base of project
-- [ ] Write a build/run script
-
 # What is "middleware" in the realm of Wasi HTTP? #
 
 At a high level, `wasi:http/middleware` is just a component that both exports a `handler.handle` and imports another handler.handle. Your middleware sits in between:
@@ -72,115 +63,16 @@ This world captures HTTP services that forward HTTP requests to another handler.
 
 # How to build #
 
-To help future people get their environment setup, these are the versions of tools I used for this to actually work:
+The code to build, compose, and run the bundled service+middleware component is all inside the `run.sh` script.
+
+Simply run it with no arguments to do the full workflow or pass arguments to execute each step separately, see `run.sh --help` for usage.
+
+To help future people get their environment setup, these are the versions of tools I used for this to actually work (checked by `run.sh`):
 - `cargo --version`: 1.93.0
 - `wasm-tools --version`: 1.244.0
 - `wkg --version`: 0.13.0
 - `wac --version`: 0.9.0-dev
   - (this is from sha [fa25de6](https://github.com/bytecodealliance/wac/commit/fa25de65886d85cc0347df00159488c2024d4e04))
-
-Build the `service`:
-```shell
-pushd service
-
-# Pull in wit dependencies
-wkg wit fetch
-
-# Build
-cargo build --target wasm32-wasip1
-PTH_MOD="./target/wasm32-wasip1/debug/service.wasm"
-PTH_MOD_WAT="./target/wasm32-wasip1/debug/service.wat"
-
-# Check the WAT (should be a MODULE)
-ls -al $PTH_MOD
-wasm-tools print $PTH_MOD -o $PTH_MOD_WAT
-
-# Convert to a component with the adapter
-PTH_COMP="./target/wasm32-wasip1/debug/service.comp.wasm"
-PTH_COMP_WAT="./target/wasm32-wasip1/debug/service.comp.wat"
-ADAPTER_PTH="../wasi_snapshot_preview1.reactor.wasm"
-wasm-tools component new $PTH_MOD --adapt $ADAPTER_PTH --skip-validation -o $PTH_COMP
-
-# Check the WAT (should be a COMPONENT, see the "What is happening in this WAT??" section for details)
-ls -al $PTH_COMP
-wasm-tools print $PTH_COMP -o $PTH_COMP_WAT
-
-popd
-
-# The service should successfully run!
-pushd runner
-cargo run -- ../service/target/wasm32-wasip1/debug/service.comp.wasm
-# OUTPUTS: "[SERVICE] hello world!"
-
-popd
-```
-
-Build the `middleware`:
-```shell
-pushd middleware
-
-# Pull in wit dependencies
-wkg wit fetch
-
-# Build
-cargo build --target wasm32-wasip1
-PTH_MOD="./target/wasm32-wasip1/debug/middleware.wasm"
-PTH_MOD_WAT="./target/wasm32-wasip1/debug/middleware.wat"
-
-# Check the WAT (should be a MODULE)
-ls -al $PTH_MOD
-wasm-tools print $PTH_MOD -o $PTH_MOD_WAT
-
-# Convert to a component with the adapter
-PTH_COMP="./target/wasm32-wasip1/debug/middleware.comp.wasm"
-PTH_COMP_WAT="./target/wasm32-wasip1/debug/middleware.comp.wat"
-ADAPTER_PTH="../wasi_snapshot_preview1.reactor.wasm"
-wasm-tools component new $PTH_MOD --adapt $ADAPTER_PTH --skip-validation -o $PTH_COMP
-
-# Check the WAT (should be a COMPONENT, see the "What is happening in this WAT??" section for details)
-ls -al $PTH_COMP
-wasm-tools print $PTH_COMP -o $PTH_COMP_WAT
-
-# NOTE: You can't just run the middleware directly
-
-popd
-
-```
-
-Compose the core service with the middleware:
-```shell
-PATH_SVC="./service/target/wasm32-wasip1/debug/service.comp.wasm"
-PATH_MDL="./middleware/target/wasm32-wasip1/debug/middleware.comp.wasm"
-
-wac compose composition.wac \
-  --dep my:service=$PATH_SVC \
-  --dep my:middleware=$PATH_MDL \
-  --output composed.wasm
-  
-  
-# Check the WAT (should be a COMPONENT, see the "What is happening in this WAT??" section for details)
-ls -al composed.wasm
-wasm-tools print composed.wasm -o composed.wat
-```
-
-Run the composition!
-```shell
-pushd runner
-cargo run -- ../service/target/wasm32-wasip1/debug/service.comp.wasm
-# SHOULD OUTPUT:
-
-# Running the echo test with host-to-host disabled
-# >>> logging middleware reached
-# [SERVICE] hello world!
-# <<< logging middleware returning response
-# 
-# Running the echo test with host-to-host enabled
-# >>> logging middleware reached
-# [SERVICE] hello world!
-# <<< logging middleware returning response
-
-popd
-```
 
 ## What is happening in this WAT?? ##
 
