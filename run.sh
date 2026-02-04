@@ -79,7 +79,7 @@ check_env() {
         "cargo:1.93.0"
         "wasm-tools:1.244.0"
         "wkg:0.13.0"
-        "wac:0.9.0-dev"
+        "wac:0.9.0"
     )
 
     for tool_version in "${REQUIRED_TOOLS[@]}"; do

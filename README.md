@@ -3,6 +3,8 @@
 The purpose of this project is to provide a standalone example on how bundle a server+middleware into a single Wasm
 component and run it on Wasmtime.
 
+If interested, here's a live demonstration of this project as well: https://www.youtube.com/live/F0adyCd2RMs?si=cw4tIi5o33swh4gY&t=1039
+
 Through following the instructions, a user should be able to get a fully working Wasm component that bundles a service
 with the following structure:
 
@@ -29,8 +31,7 @@ This would demonstrate how to interpose N middlewares on a Wasm service.
 # Next steps for this repository. #
 
 Now that I've gotten this base PoC working, I plan to:
-1. try to get this working for N middlewares placed before the service
-2. try to splice middleware between two services that have already been hooked up
+1. try to splice middleware between two services that have already been hooked up
 
 # What is "middleware" in the realm of Wasi HTTP? #
 
@@ -77,8 +78,7 @@ To help future people get their environment setup, these are the versions of too
 - `cargo --version`: 1.93.0
 - `wasm-tools --version`: 1.244.0
 - `wkg --version`: 0.13.0
-- `wac --version`: 0.9.0-dev
-  - (this is from sha [fa25de6](https://github.com/bytecodealliance/wac/commit/fa25de65886d85cc0347df00159488c2024d4e04))
+- `wac --version`: 0.9.0
 
 ## What is happening in this WAT?? ##
 
