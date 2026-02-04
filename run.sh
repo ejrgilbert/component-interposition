@@ -5,7 +5,7 @@
 # Features:
 #   - Robust environment check with version validation and missing tool warnings
 #   - Auto-install hints for missing tools (Linux/macOS)
-#   - Building components (service/middleware)
+#   - Building components (service/middlewares)
 #   - Composing the service and middleware with wac
 #   - Running the composed component
 #   - Full workflow mode
@@ -38,16 +38,23 @@ log_success() { echo -e "${GREEN}[SUCCESS] $1${NC}"; }
 # Print usage with descriptions
 # -----------------------------------------------------------------------------
 print_usage() {
-    echo -e "${BLUE}Usage: $0 [option]${NC}"
+    echo -e "${BLUE}Usage: $0 [command] [option]${NC}"
     echo ""
-    echo -e "${BLUE}Options:${NC}"
+    echo -e "${BLUE}Commands:${NC}"
     echo -e "  env         : Check the environment and verify required tools and versions"
     echo -e "  service     : Build the service component"
-    echo -e "  middleware  : Build the middleware component"
-    echo -e "  compose     : Compose the service and middleware into a single component"
+    echo -e "  middleware  : Build the middleware components"
+    echo -e "  compose     : Compose the service and middleware(s) into a single component"
     echo -e "  run         : Run the composed component"
-    echo -e "  all         : Run the full workflow: env check, build service, build middleware, compose, and run"
-    echo -e "  --help      : Show this usage message"
+    echo -e "  run-service : Run the service standalone (without middleware(s))"
+    echo -e "  all         : Run the full workflow: env check, build service, build middlewares, compose, and run"
+    echo -e "  --help|-h   : Show this usage message"
+    echo ""
+    echo -e "${BLUE}Options:${NC}"
+    echo -e "  --single    : Wrap the service call with a SINGLE middleware (a)"
+    echo -e "  --multiple  : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --splice1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
+    echo -e "  --spliceAll : Splice a component with two services directly communicating with MULTIPLE middlewares (a, b, and c)"
     echo ""
 }
 
@@ -129,12 +136,13 @@ build_component() {
         log_error "Cargo build failed for $name. Exiting."
         exit 1
     fi
+    popd > /dev/null
 
     local PTH_MOD="./target/wasm32-wasip1/debug/${base}.wasm"
     local PTH_MOD_WAT="./target/wasm32-wasip1/debug/${base}.wat"
     local PTH_COMP="./target/wasm32-wasip1/debug/${base}.comp.wasm"
     local PTH_COMP_WAT="./target/wasm32-wasip1/debug/${base}.comp.wat"
-    local ADAPTER_PTH="../wasi_snapshot_preview1.reactor.wasm"
+    local ADAPTER_PTH="./wasi_snapshot_preview1.reactor.wasm"
 
     # ------------------------------
     # Programmatic check: is MODULE
@@ -166,7 +174,6 @@ build_component() {
     fi
     log_success "$name WAT is a valid COMPONENT"
 
-    popd > /dev/null
     log_success "'$name' component built successfully!"
 }
 
@@ -174,18 +181,40 @@ build_component() {
 # Compose service and middleware
 # -----------------------------------------------------------------------------
 compose() {
-    log_info "Composing service and middleware..."
+    log_info "Composing service and middleware(s)..."
 
-    PATH_SVC="./service/target/wasm32-wasip1/debug/service.comp.wasm"
-    PATH_MDL="./middleware/target/wasm32-wasip1/debug/middleware.comp.wasm"
-    OUTPUT="composed.wasm"
-    OUTPUT_WAT="composed.wat"
+    case "$1" in
+        --single)
+            compose_single
+            ;;
+        --multiple)
+            compose_multiple
+            ;;
+        --splice1)
+            compose_splice1
+            ;;
+        --spliceAll)
+            compose_spliceAll
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            print_usage
+            exit 1
+            ;;
+    esac
+}
 
-    if ! wac compose composition.wac \
+compose_single() {
+    PATH_SVC="./target/wasm32-wasip1/debug/service.comp.wasm"
+    PATH_MDL="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
+    OUTPUT="./compositions/composed-single.wasm"
+    OUTPUT_WAT="./compositions/composed-single.wat"
+
+    if ! wac compose ./wac/composition-single.wac \
           --dep my:service="$PATH_SVC" \
           --dep my:middleware="$PATH_MDL" \
           --output "$OUTPUT"; then
-        log_error "Creating the composition of the service+middleware failed"
+        log_error "Creating the composition of the service+middleware_a failed"
         exit 1
     fi
 
@@ -193,14 +222,68 @@ compose() {
     ls -al "$OUTPUT"
     wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
 
-    log_success "Composition completed successfully!"
+    log_success "Composition with a single middleware completed successfully!"
+}
+compose_multiple() {
+    PATH_SVC="./target/wasm32-wasip1/debug/service.comp.wasm"
+    PATH_MDL_A="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
+    PATH_MDL_B="./target/wasm32-wasip1/debug/middleware_b.comp.wasm"
+    PATH_MDL_C="./target/wasm32-wasip1/debug/middleware_c.comp.wasm"
+    OUTPUT="./compositions/composed-multiple.wasm"
+    OUTPUT_WAT="./compositions/composed-multiple.wat"
+
+    if ! wac compose ./wac/composition-multiple.wac \
+          --dep my:service="$PATH_SVC" \
+          --dep my:middleware-a="$PATH_MDL_A" \
+          --dep my:middleware-b="$PATH_MDL_B" \
+          --dep my:middleware-c="$PATH_MDL_C" \
+          --output "$OUTPUT"; then
+        log_error "Creating the composition of the service+middleware_a+middleware_b+middleware_c failed"
+        exit 1
+    fi
+
+    log_info "Checking WAT output of composed component..."
+    ls -al "$OUTPUT"
+    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
+
+    log_success "Composition with multiple middlewares completed successfully!"
+}
+compose_splice1() {
+    # TODO
+    log_error "We do not support component splicing of middleware yet."
+    exit 1
+}
+compose_spliceAll() {
+    # TODO
+    log_error "We do not support component splicing of multiple middlewares yet."
+    exit 1
 }
 
 # -----------------------------------------------------------------------------
 # Run the composed component
 # -----------------------------------------------------------------------------
 run_composition() {
-    COMPOSED="./composed.wasm"
+    case "$1" in
+        --single)
+            COMPOSED="./compositions/composed-single.wasm"
+            ;;
+        --multiple)
+            COMPOSED="./compositions/composed-multiple.wasm"
+            ;;
+        --splice1)
+            log_error "We do not support component splicing of middleware yet."
+            exit 1
+            ;;
+        --spliceAll)
+            log_error "We do not support component splicing of multiple middlewares yet."
+            exit 1
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            print_usage
+            exit 1
+            ;;
+    esac
 
     if [[ ! -f "$COMPOSED" ]]; then
         log_error "Composed component not found! Please run the compose step first."
@@ -215,13 +298,30 @@ run_composition() {
     popd > /dev/null
     log_success "Composition ran successfully!"
 }
+run_service() {
+    PATH_SVC="./target/wasm32-wasip1/debug/service.comp.wasm"
+
+    if [[ ! -f "$PATH_SVC" ]]; then
+        log_error "Service component not found! Please run the service step first."
+        exit 1
+    fi
+
+    log_info "Running service component..."
+    pushd runner > /dev/null
+
+    cargo run -- "../$PATH_SVC"
+
+    popd > /dev/null
+    log_success "Service ran successfully!"
+}
 
 # -----------------------------------------------------------------------------
 # Parse command line argument
 # -----------------------------------------------------------------------------
-ARG="${1:-all}"
+CMD="${1:-all}"
+OPT="${2:---single}"
 
-case "$ARG" in
+case "$CMD" in
     env)
         check_env
         ;;
@@ -231,29 +331,37 @@ case "$ARG" in
         ;;
     middleware)
         check_env
-        build_component "middleware" "middleware" "middleware"
+        build_component "middleware_a" "middleware_a" "middleware_a"
+        build_component "middleware_b" "middleware_b" "middleware_b"
+        build_component "middleware_c" "middleware_c" "middleware_c"
         ;;
     compose)
         check_env
-        compose
+        compose "$OPT"
         ;;
     run)
         check_env
-        run_composition
+        run_composition "$OPT"
+        ;;
+    run-service)
+        check_env
+        run_service
         ;;
     all)
         check_env
         build_component "service" "service" "service"
-        build_component "middleware" "middleware" "middleware"
-        compose
-        run_composition
+        build_component "middleware_a" "middleware_a" "middleware_a"
+        build_component "middleware_b" "middleware_b" "middleware_b"
+        build_component "middleware_c" "middleware_c" "middleware_c"
+        compose "$OPT"
+        run_composition "$OPT"
         log_success "All steps completed successfully!"
         ;;
     --help|-h)
         print_usage
         ;;
     *)
-        log_error "Unknown option: $ARG"
+        log_error "Unknown option: $CMD"
         print_usage
         exit 1
         ;;

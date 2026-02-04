@@ -16,13 +16,13 @@ impl Guest for LoggingMiddleware {
     async fn handle(
         request: handler::Request,
     ) -> Result<handler::Response, handler::ErrorCode> {
-        log(">>> logging middleware reached");
+        log(">>> [mdlB] enter");
 
         // Forward the request to the downstream handler
         // NOTE: This can be either the core service OR another middleware!
         let response = handler::handle(request).await?;
 
-        log("<<< logging middleware returning response");
+        log("<<< [mdlB] return");
 
         Ok(response)
     }

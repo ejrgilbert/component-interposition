@@ -1,0 +1,23 @@
+package example:composition; // targets wasi:http/service;
+
+// Instantiate the `service` component
+let srv = new my:service { ... };
+
+// Instantiate the first `middleware` component by plugging its `handle`
+// import with the `handle` export of the `service` component.
+let mdl-c = new my:middleware-c {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+// Now plug that middleware into the next one's handle
+let mdl-b = new my:middleware-b {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-c["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+// And again with the final middleware (outermost)
+let mdl-a = new my:middleware-a {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+// Export the `handle` function from the outermost `middleware` component.
+export mdl-a["wasi:http/handler@0.3.0-rc-2026-01-06"];

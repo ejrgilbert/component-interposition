@@ -1,7 +1,9 @@
 [workspace]
 resolver = "2"
 members = [
-    "middleware",
+    "middleware_a",
+    "middleware_b",
+    "middleware_c",
     "runner",
     "service"
 ]

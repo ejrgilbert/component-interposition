@@ -1,0 +1,18 @@
+package my:logging-middleware;
+
+world middleware {
+    include wasi:http/middleware@0.3.0-rc-2026-01-06;
+
+    // TODO: Remove below!!
+    // added just for now so `wac targets` is successful
+    import wasi:cli/environment@0.2.6;
+    import wasi:cli/exit@0.2.6;
+    import wasi:filesystem/preopens@0.2.6;
+    import wasi:filesystem/types@0.2.6;
+    import wasi:io/error@0.2.6;
+    import wasi:io/streams@0.2.6;
+    import wasi:clocks/wall-clock@0.2.6;
+    import wasi:cli/stderr@0.2.6;
+    import wasi:cli/stdin@0.2.6;
+    import wasi:cli/stdout@0.2.6;
+}
