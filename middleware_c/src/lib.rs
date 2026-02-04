@@ -16,24 +16,17 @@ impl Guest for LoggingMiddleware {
     async fn handle(
         request: handler::Request,
     ) -> Result<handler::Response, handler::ErrorCode> {
-        log(">>> [mdlC] enter");
+        println!(">>>>>>>>>>>>>>>>>> [mdlC] enter");
 
         // Forward the request to the downstream handler
         // NOTE: This can be either the core service OR another middleware!
         let response = handler::handle(request).await?;
 
-        log("<<< [mdlC] exit");
+        println!("<<<<<<<<<<<<<<<<<< [mdlC] exit");
 
         Ok(response)
     }
 }
-
-/// Helper to write to stdout
-
-fn log(msg: &str) {
-    println!("{msg}")
-}
-
 
 // Export the component
 bindings::export!( LoggingMiddleware with_types_in bindings );

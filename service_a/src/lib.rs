@@ -24,7 +24,7 @@ impl Guest for Service {
         let (_, result_rx) = wit_future::new(|| Ok(()));
         let (body, trailers) = Request::consume_body(request, result_rx).await;
 
-        println!("[SERVICE] hello world!");
+        println!("                          [svcA] hello world!");
         Ok(Response::new(headers, Some(body), trailers).await.0)
     }
 }

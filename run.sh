@@ -42,7 +42,7 @@ print_usage() {
     echo ""
     echo -e "${BLUE}Commands:${NC}"
     echo -e "  env         : Check the environment and verify required tools and versions"
-    echo -e "  service     : Build the service component"
+    echo -e "  service     : Build the service components"
     echo -e "  middleware  : Build the middleware components"
     echo -e "  compose     : Compose the service and middleware(s) into a single component"
     echo -e "  run         : Run the composed component"
@@ -113,9 +113,9 @@ check_env() {
 # -----------------------------------------------------------------------------
 # Generic component builder
 # Arguments:
-#   1 = component name (for logging, e.g., "service")
-#   2 = directory (e.g., "service")
-#   3 = wasm base name (e.g., "service")
+#   1 = component name (for logging, e.g., "service_a")
+#   2 = directory (e.g., "service_a")
+#   3 = wasm base name (e.g., "service_a")
 # -----------------------------------------------------------------------------
 build_component() {
     local name=$1
@@ -205,7 +205,7 @@ compose() {
 }
 
 compose_single() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service.comp.wasm"
+    PATH_SVC="./target/wasm32-wasip1/debug/service_a.comp.wasm"
     PATH_MDL="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
     OUTPUT="./compositions/composed-single.wasm"
     OUTPUT_WAT="./compositions/composed-single.wat"
@@ -225,7 +225,7 @@ compose_single() {
     log_success "Composition with a single middleware completed successfully!"
 }
 compose_multiple() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service.comp.wasm"
+    PATH_SVC="./target/wasm32-wasip1/debug/service_a.comp.wasm"
     PATH_MDL_A="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
     PATH_MDL_B="./target/wasm32-wasip1/debug/middleware_b.comp.wasm"
     PATH_MDL_C="./target/wasm32-wasip1/debug/middleware_c.comp.wasm"
@@ -299,7 +299,7 @@ run_composition() {
     log_success "Composition ran successfully!"
 }
 run_service() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service.comp.wasm"
+    PATH_SVC="./target/wasm32-wasip1/debug/service_a.comp.wasm"
 
     if [[ ! -f "$PATH_SVC" ]]; then
         log_error "Service component not found! Please run the service step first."
@@ -327,7 +327,7 @@ case "$CMD" in
         ;;
     service)
         check_env
-        build_component "service" "service" "service"
+        build_component "service_a" "service_a" "service_a"
         ;;
     middleware)
         check_env
@@ -349,7 +349,7 @@ case "$CMD" in
         ;;
     all)
         check_env
-        build_component "service" "service" "service"
+        build_component "service_a" "service_a" "service_a"
         build_component "middleware_a" "middleware_a" "middleware_a"
         build_component "middleware_b" "middleware_b" "middleware_b"
         build_component "middleware_c" "middleware_c" "middleware_c"
