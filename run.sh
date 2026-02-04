@@ -53,6 +53,7 @@ print_usage() {
     echo -e "${BLUE}Options:${NC}"
     echo -e "  --single    : Wrap the service call with a SINGLE middleware (a)"
     echo -e "  --multiple  : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --chained-services : Perform service chaining on the services (a and b)"
     echo -e "  --splice1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
     echo -e "  --spliceAll : Splice a component with two services directly communicating with MULTIPLE middlewares (a, b, and c)"
     echo ""
@@ -190,6 +191,9 @@ compose() {
         --multiple)
             compose_multiple
             ;;
+        --chained-services)
+            compose_chained_services
+            ;;
         --splice1)
             compose_splice1
             ;;
@@ -205,7 +209,7 @@ compose() {
 }
 
 compose_single() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service_a.comp.wasm"
+    PATH_SVC="./target/wasm32-wasip1/debug/service_b.comp.wasm"
     PATH_MDL="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
     OUTPUT="./compositions/composed-single.wasm"
     OUTPUT_WAT="./compositions/composed-single.wat"
@@ -225,7 +229,7 @@ compose_single() {
     log_success "Composition with a single middleware completed successfully!"
 }
 compose_multiple() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service_a.comp.wasm"
+    PATH_SVC="./target/wasm32-wasip1/debug/service_b.comp.wasm"
     PATH_MDL_A="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
     PATH_MDL_B="./target/wasm32-wasip1/debug/middleware_b.comp.wasm"
     PATH_MDL_C="./target/wasm32-wasip1/debug/middleware_c.comp.wasm"
@@ -248,6 +252,26 @@ compose_multiple() {
 
     log_success "Composition with multiple middlewares completed successfully!"
 }
+compose_chained_services() {
+    PATH_SVC_A="./target/wasm32-wasip1/debug/service_a.comp.wasm"
+    PATH_SVC_B="./target/wasm32-wasip1/debug/service_b.comp.wasm"
+    OUTPUT="./compositions/service-chaining.wasm"
+    OUTPUT_WAT="./compositions/service-chaining.wat"
+
+    if ! wac compose ./wac/composition-service_chaining.wac \
+          --dep my:service-a="$PATH_SVC_A" \
+          --dep my:service-b="$PATH_SVC_B" \
+          --output "$OUTPUT"; then
+        log_error "Creating the composition of the service-a+service-b failed"
+        exit 1
+    fi
+
+    log_info "Checking WAT output of composed component..."
+    ls -al "$OUTPUT"
+    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
+
+    log_success "Composition with service chaining completed successfully!"
+}
 compose_splice1() {
     # TODO
     log_error "We do not support component splicing of middleware yet."
@@ -269,6 +293,9 @@ run_composition() {
             ;;
         --multiple)
             COMPOSED="./compositions/composed-multiple.wasm"
+            ;;
+        --chained-services)
+            COMPOSED="./compositions/service-chaining.wasm"
             ;;
         --splice1)
             log_error "We do not support component splicing of middleware yet."
@@ -299,11 +326,11 @@ run_composition() {
     log_success "Composition ran successfully!"
 }
 run_services() {
-    PATH_SVC_A="./target/wasm32-wasip1/debug/service_a.comp.wasm"
     PATH_SVC_B="./target/wasm32-wasip1/debug/service_b.comp.wasm"
+    CHAINED="./compositions/service-chaining.wasm"
 
-    run_service $PATH_SVC_A
     run_service $PATH_SVC_B
+    run_service $CHAINED
 }
 run_service() {
     PATH_SVC="$1"

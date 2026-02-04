@@ -17,6 +17,8 @@ impl Guest for Service {
     async fn handle(
         request: handler::Request,
     ) -> Result<handler::Response, handler::ErrorCode> {
+        println!("                          [svcB] entered!");
+        
         // Just copy the request's headers
         let headers = request.get_headers().await;
 
@@ -24,7 +26,6 @@ impl Guest for Service {
         let (_, result_rx) = wit_future::new(|| Ok(()));
         let (body, trailers) = Request::consume_body(request, result_rx).await;
 
-        println!("                          [svcB] hello world!");
         Ok(Response::new(headers, Some(body), trailers).await.0)
     }
 }
