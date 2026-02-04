@@ -298,21 +298,28 @@ run_composition() {
     popd > /dev/null
     log_success "Composition ran successfully!"
 }
+run_services() {
+    PATH_SVC_A="./target/wasm32-wasip1/debug/service_a.comp.wasm"
+    PATH_SVC_B="./target/wasm32-wasip1/debug/service_b.comp.wasm"
+
+    run_service $PATH_SVC_A
+    run_service $PATH_SVC_B
+}
 run_service() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service_a.comp.wasm"
+    PATH_SVC="$1"
 
     if [[ ! -f "$PATH_SVC" ]]; then
         log_error "Service component not found! Please run the service step first."
         exit 1
     fi
 
-    log_info "Running service component..."
+    log_info "Running service A component..."
     pushd runner > /dev/null
 
     cargo run -- "../$PATH_SVC"
 
     popd > /dev/null
-    log_success "Service ran successfully!"
+    log_success "Service A ran successfully!"
 }
 
 # -----------------------------------------------------------------------------
@@ -328,6 +335,7 @@ case "$CMD" in
     service)
         check_env
         build_component "service_a" "service_a" "service_a"
+        build_component "service_b" "service_b" "service_b"
         ;;
     middleware)
         check_env
@@ -345,11 +353,12 @@ case "$CMD" in
         ;;
     run-service)
         check_env
-        run_service
+        run_services
         ;;
     all)
         check_env
         build_component "service_a" "service_a" "service_a"
+        build_component "service_b" "service_b" "service_b"
         build_component "middleware_a" "middleware_a" "middleware_a"
         build_component "middleware_b" "middleware_b" "middleware_b"
         build_component "middleware_c" "middleware_c" "middleware_c"

@@ -5,7 +5,8 @@ members = [
     "middleware_b",
     "middleware_c",
     "runner",
-    "service_a"
+    "service_a",
+    "service_b"
 ]
 
 [workspace.dependencies]
