@@ -22,7 +22,7 @@ impl Guest for LoggingMiddleware {
         // NOTE: This can be either the core service OR another middleware!
         let response = handler::handle(request).await?;
 
-        log("<<< [mdlB] return");
+        log("<<< [mdlB] exit");
 
         Ok(response)
     }
