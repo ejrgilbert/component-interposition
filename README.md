@@ -18,15 +18,13 @@ HTTP →
 This can be read as: "We have 1 middleware, M, that can do preprocessing on an HTTP request, then invoke the service with that preprocessed request.
 Then, the same middleware, M, is returned to with the service's response. This response can be postprocessed by the middleware and returned."
 
-In a future iteration of this Proof of Concept, we can do a structure more like the following:
+This project also demonstrates how to interpose _N_ middlewares as in the following structure::
 ```
 HTTP →
   M1 → M2 → ... → Mn → Service
   M1 ← M2 ← ... ← Mn ← Response
 ← HTTP
 ```
-
-This would demonstrate how to interpose N middlewares on a Wasm service.
 
 # Next steps for this repository. #
 
