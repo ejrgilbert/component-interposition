@@ -6,7 +6,7 @@ component and run it on Wasmtime.
 If interested, here's a live demonstration of this project as well: https://www.youtube.com/live/F0adyCd2RMs?si=cw4tIi5o33swh4gY&t=1039
 
 Through following the instructions, a user should be able to get a fully working Wasm component that bundles a service
-with the following structure:
+with the following structure(`./run.sh`):
 
 ```
 HTTP →
@@ -18,7 +18,7 @@ HTTP →
 This can be read as: "We have 1 middleware, M, that can do preprocessing on an HTTP request, then invoke the service with that preprocessed request.
 Then, the same middleware, M, is returned to with the service's response. This response can be postprocessed by the middleware and returned."
 
-This project also demonstrates how to interpose _N_ middlewares as in the following structure::
+This project also demonstrates how to interpose _N_ middlewares as in the following structure(`./run.sh all --multiple`):
 ```
 HTTP →
   M1 → M2 → ... → Mn → Service
@@ -26,10 +26,33 @@ HTTP →
 ← HTTP
 ```
 
+Further, let's say you have a component that already has been composed with service chaining, e.g.:
+```
+HTTP →
+  S1 → S2
+  S1 ← S2_response
+← HTTP
+```
+If this is the case, interposition would need to occur in a way that _splices_ between the composed services, as in:
+```
+HTTP →
+  S1 → M1 → ... → Mn → S2
+  S1 ← M1 ← ... ← Mn ← S2_response
+← HTTP
+```
+We have already solved this problem for interposing a single middleware (`./run.sh all --splice1`), _but_ it assumes that it already knows the composition of the component it's splicing middleware into.
+We plan to generalize this capability to:
+1. Discover the composition of the component.
+2. Plan how to splice the middleware in between the services that have already been composed (will need to figure out how to specify this)
+3. Generate the `wac` that performs the splice plan
+4. Build and run the component
+See details in [the PR](https://github.com/ejrgilbert/component-interposition/pull/1) for how we are going to do this work.
+
 # Next steps for this repository. #
 
 Now that I've gotten this base PoC working, I plan to:
-1. try to splice middleware between two services that have already been hooked up
+1. discover a component's composition and retain it during middleware interposition
+2. generalize the splicing capability to _N_ middlewares
 
 # What is "middleware" in the realm of Wasi HTTP? #
 
