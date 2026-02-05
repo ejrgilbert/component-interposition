@@ -18,12 +18,12 @@ impl Guest for Service {
         request: handler::Request,
     ) -> Result<handler::Response, handler::ErrorCode> {
 
-        println!("                          [svcA] entered!");
+        println!("    [svcA] entered!");
 
         // Nothing fancy, just send the request to the downstream service.
         let response = handle(request).await?;
         
-        println!("                          [svcA] received response from svcB!");
+        println!("    [svcA] received response from svcB!");
 
         Ok(response)
     }

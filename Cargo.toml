@@ -4,12 +4,14 @@ members = [
     "middleware_a",
     "middleware_b",
     "middleware_c",
-    "runner",
     "service_a",
-    "service_b"
+    "service_b",
+    "runner",
+    "decompose"
 ]
 
 [workspace.dependencies]
+wirm = { path = "../../research/compilers/wirm-COMP/wirm" }
 wit-bindgen = { version = "0.51.0", features = ['default', 'async-spawn', 'inter-task-wakeup', 'async'] }
 wasmtime = { version = "41.0.1", features = ["cranelift", "incremental-cache"] }
 wasmtime-wasi = { version = "41.0.1", features = ["p3"] }

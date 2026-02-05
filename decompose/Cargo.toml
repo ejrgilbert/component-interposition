@@ -1,0 +1,12 @@
+[package]
+name = "decompose"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+doc = false
+name = "decompose"
+path = "src/main.rs"
+
+[dependencies]
+wirm = { workspace = true }

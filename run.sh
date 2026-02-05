@@ -195,9 +195,11 @@ compose() {
             compose_chained_services
             ;;
         --splice1)
+            compose --chained-services
             compose_splice1
             ;;
         --spliceAll)
+            compose --chained-services
             compose_spliceAll
             ;;
         *)
@@ -273,9 +275,38 @@ compose_chained_services() {
     log_success "Composition with service chaining completed successfully!"
 }
 compose_splice1() {
-    # TODO
-    log_error "We do not support component splicing of middleware yet."
-    exit 1
+    PATH_SVC="./compositions/service-chaining.wasm"
+    PATH_MDL_A="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
+    PATH_DECOMP_A="./decompose/split1.wasm"
+    PATH_DECOMP_B="./decompose/split0.wasm"
+    OUTPUT="./compositions/spliced1.wasm"
+    OUTPUT_WAT="./compositions/spliced1.wat"
+
+    log_info "Splitting the chained component..."
+    pushd decompose > /dev/null
+
+    if ! cargo run -- "../$PATH_SVC"; then
+        log_error "Failed to split out the chained component."
+        exit 1
+    fi
+
+    popd > /dev/null
+    log_success "Successfully split the chained component."
+
+    if ! wac compose ./wac/composition-splice1.wac \
+          --dep my:service-a="$PATH_DECOMP_A" \
+          --dep my:service-b="$PATH_DECOMP_B" \
+          --dep my:middleware="$PATH_MDL_A" \
+          --output "$OUTPUT"; then
+        log_error "Splicing in the middleware for service-a+mdl+service-b failed"
+        exit 1
+    fi
+
+    log_info "Checking WAT output of spliced component..."
+    ls -al "$OUTPUT"
+    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
+
+    log_success "Splicing in middleware between chained services completed successfully!"
 }
 compose_spliceAll() {
     # TODO
@@ -298,8 +329,7 @@ run_composition() {
             COMPOSED="./compositions/service-chaining.wasm"
             ;;
         --splice1)
-            log_error "We do not support component splicing of middleware yet."
-            exit 1
+            COMPOSED="./compositions/spliced1.wasm"
             ;;
         --spliceAll)
             log_error "We do not support component splicing of multiple middlewares yet."
@@ -320,7 +350,10 @@ run_composition() {
     log_info "Running composed component..."
     pushd runner > /dev/null
 
-    cargo run -- "../$COMPOSED"
+    if ! cargo run -- "../$COMPOSED"; then
+        log_error "Failed to run the composition."
+        exit 1
+    fi
 
     popd > /dev/null
     log_success "Composition ran successfully!"

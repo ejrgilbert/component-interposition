@@ -17,7 +17,7 @@ impl Guest for Service {
     async fn handle(
         request: handler::Request,
     ) -> Result<handler::Response, handler::ErrorCode> {
-        println!("                          [svcB] entered!");
+        println!("    [svcB] entered!");
         
         // Just copy the request's headers
         let headers = request.get_headers().await;
