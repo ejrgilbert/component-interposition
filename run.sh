@@ -18,6 +18,14 @@
 set -euo pipefail
 
 # -----------------------------------------------------------------------------
+# Some helpful globals
+# -----------------------------------------------------------------------------
+PATH_WASI_TARGET="./target/wasm32-wasip1/debug"
+PATH_COMPOSED="./compositions"
+PATH_DECOMP="./decompose"
+PATH_WAC="./wac"
+
+# -----------------------------------------------------------------------------
 # Color codes for logs
 # -----------------------------------------------------------------------------
 BLUE="\033[1;34m"
@@ -42,8 +50,7 @@ print_usage() {
     echo ""
     echo -e "${BLUE}Commands:${NC}"
     echo -e "  env         : Check the environment and verify required tools and versions"
-    echo -e "  service     : Build the service components"
-    echo -e "  middleware  : Build the middleware components"
+    echo -e "  build       : Build the service and middleware components"
     echo -e "  compose     : Compose the service and middleware(s) into a single component"
     echo -e "  run         : Run the composed component"
     echo -e "  run-service : Run the service standalone (without middleware(s))"
@@ -139,10 +146,10 @@ build_component() {
     fi
     popd > /dev/null
 
-    local PTH_MOD="./target/wasm32-wasip1/debug/${base}.wasm"
-    local PTH_MOD_WAT="./target/wasm32-wasip1/debug/${base}.wat"
-    local PTH_COMP="./target/wasm32-wasip1/debug/${base}.comp.wasm"
-    local PTH_COMP_WAT="./target/wasm32-wasip1/debug/${base}.comp.wat"
+    local PTH_MOD="$PATH_WASI_TARGET/${base}.wasm"
+    local PTH_MOD_WAT="$PATH_WASI_TARGET/${base}.wat"
+    local PTH_COMP="$PATH_WASI_TARGET/${base}.comp.wasm"
+    local PTH_COMP_WAT="$PATH_WASI_TARGET/${base}.comp.wat"
     local ADAPTER_PTH="./wasi_snapshot_preview1.reactor.wasm"
 
     # ------------------------------
@@ -210,82 +217,68 @@ compose() {
     esac
 }
 
-compose_single() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service_b.comp.wasm"
-    PATH_MDL="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
-    OUTPUT="./compositions/composed-single.wasm"
-    OUTPUT_WAT="./compositions/composed-single.wat"
+# -----------------------------------------------------------------------------
+# Generic wrapper for invoking `wac compose`.
+# -----------------------------------------------------------------------------
+run_wac() {
+    local wac_file="$1"
+    local output_wasm="$2"
+    shift 2
 
-    if ! wac compose ./wac/composition-single.wac \
-          --dep my:service="$PATH_SVC" \
-          --dep my:middleware="$PATH_MDL" \
-          --output "$OUTPUT"; then
-        log_error "Creating the composition of the service+middleware_a failed"
+    log_info "Running wac compose using $(basename "$wac_file")..."
+
+    if ! wac compose "$wac_file" "$@" --output "$output_wasm"; then
+        log_error "Composition with '$(basename "$wac_file")' completed failed!"
         exit 1
     fi
 
-    log_info "Checking WAT output of composed component..."
-    ls -al "$OUTPUT"
-    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
+    log_info "Validating composed component..."
 
-    log_success "Composition with a single middleware completed successfully!"
+    local output_wat
+    output_wat="$(basename "$output_wasm").wat"
+    if ! wasm-tools print "$output_wasm" -o "$output_wat"; then
+        log_error "Failed to generate WAT for $output_wasm"
+        exit 1
+    fi
+
+    # Programmatic validation: ensure it's a component
+    if ! head -n 1 "$output_wat" | grep -q "(component"; then
+        log_error "Output is not a valid component."
+        exit 1
+    fi
+
+    log_success "Composition with '$(basename "$wac_file")' completed successfully!"
 }
+
+compose_single() {
+    run_wac \
+        "$PATH_WAC/composition-single.wac" \
+        "$PATH_COMPOSED/composed-single.wasm" \
+          --dep my:service="$PATH_WASI_TARGET/service_b.comp.wasm" \
+          --dep my:middleware="$PATH_WASI_TARGET/middleware_a.comp.wasm"
+}
+
 compose_multiple() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service_b.comp.wasm"
-    PATH_MDL_A="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
-    PATH_MDL_B="./target/wasm32-wasip1/debug/middleware_b.comp.wasm"
-    PATH_MDL_C="./target/wasm32-wasip1/debug/middleware_c.comp.wasm"
-    OUTPUT="./compositions/composed-multiple.wasm"
-    OUTPUT_WAT="./compositions/composed-multiple.wat"
-
-    if ! wac compose ./wac/composition-multiple.wac \
-          --dep my:service="$PATH_SVC" \
-          --dep my:middleware-a="$PATH_MDL_A" \
-          --dep my:middleware-b="$PATH_MDL_B" \
-          --dep my:middleware-c="$PATH_MDL_C" \
-          --output "$OUTPUT"; then
-        log_error "Creating the composition of the service+middleware_a+middleware_b+middleware_c failed"
-        exit 1
-    fi
-
-    log_info "Checking WAT output of composed component..."
-    ls -al "$OUTPUT"
-    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
-
-    log_success "Composition with multiple middlewares completed successfully!"
+    run_wac \
+        "$PATH_WAC/composition-multiple.wac" \
+        "$PATH_COMPOSED/composed-multiple.wasm" \
+          --dep my:service="$PATH_WASI_TARGET/service_b.comp.wasm" \
+          --dep my:middleware-a="$PATH_WASI_TARGET/middleware_a.comp.wasm" \
+          --dep my:middleware-b="$PATH_WASI_TARGET/middleware_b.comp.wasm" \
+          --dep my:middleware-c="$PATH_WASI_TARGET/middleware_c.comp.wasm"
 }
 compose_chained_services() {
-    PATH_SVC_A="./target/wasm32-wasip1/debug/service_a.comp.wasm"
-    PATH_SVC_B="./target/wasm32-wasip1/debug/service_b.comp.wasm"
-    OUTPUT="./compositions/service-chaining.wasm"
-    OUTPUT_WAT="./compositions/service-chaining.wat"
-
-    if ! wac compose ./wac/composition-service_chaining.wac \
-          --dep my:service-a="$PATH_SVC_A" \
-          --dep my:service-b="$PATH_SVC_B" \
-          --output "$OUTPUT"; then
-        log_error "Creating the composition of the service-a+service-b failed"
-        exit 1
-    fi
-
-    log_info "Checking WAT output of composed component..."
-    ls -al "$OUTPUT"
-    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
-
-    log_success "Composition with service chaining completed successfully!"
+    run_wac \
+        "$PATH_WAC/composition-service_chaining.wac" \
+        "$PATH_COMPOSED/service-chaining.wasm" \
+          --dep my:service-a="$PATH_WASI_TARGET/service_a.comp.wasm" \
+          --dep my:service-b="$PATH_WASI_TARGET/service_b.comp.wasm"
 }
 compose_splice1() {
-    PATH_SVC="./compositions/service-chaining.wasm"
-    PATH_MDL_A="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
-    PATH_DECOMP_A="./decompose/split1.wasm"
-    PATH_DECOMP_B="./decompose/split0.wasm"
-    OUTPUT="./compositions/spliced1.wasm"
-    OUTPUT_WAT="./compositions/spliced1.wat"
-
     log_info "Splitting the chained component..."
     pushd decompose > /dev/null
 
-    if ! cargo run -- "../$PATH_SVC"; then
+    if ! cargo run -- "../$PATH_COMPOSED/service-chaining.wasm"; then
         log_error "Failed to split out the chained component."
         exit 1
     fi
@@ -293,20 +286,12 @@ compose_splice1() {
     popd > /dev/null
     log_success "Successfully split the chained component."
 
-    if ! wac compose ./wac/composition-splice1.wac \
-          --dep my:service-a="$PATH_DECOMP_A" \
-          --dep my:service-b="$PATH_DECOMP_B" \
-          --dep my:middleware="$PATH_MDL_A" \
-          --output "$OUTPUT"; then
-        log_error "Splicing in the middleware for service-a+mdl+service-b failed"
-        exit 1
-    fi
-
-    log_info "Checking WAT output of spliced component..."
-    ls -al "$OUTPUT"
-    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
-
-    log_success "Splicing in middleware between chained services completed successfully!"
+    run_wac \
+        "$PATH_WAC/composition-splice1.wac" \
+        "$PATH_COMPOSED/spliced1.wasm" \
+          --dep my:service-a="$PATH_DECOMP/split1.wasm" \
+          --dep my:service-b="$PATH_DECOMP/split0.wasm" \
+          --dep my:middleware="$PATH_WASI_TARGET/middleware_a.comp.wasm"
 }
 compose_spliceAll() {
     # TODO
@@ -320,16 +305,16 @@ compose_spliceAll() {
 run_composition() {
     case "$1" in
         --single)
-            COMPOSED="./compositions/composed-single.wasm"
+            COMPOSED="$PATH_COMPOSED/composed-single.wasm"
             ;;
         --multiple)
-            COMPOSED="./compositions/composed-multiple.wasm"
+            COMPOSED="$PATH_COMPOSED/composed-multiple.wasm"
             ;;
         --chained-services)
-            COMPOSED="./compositions/service-chaining.wasm"
+            COMPOSED="$PATH_COMPOSED/service-chaining.wasm"
             ;;
         --splice1)
-            COMPOSED="./compositions/spliced1.wasm"
+            COMPOSED="$PATH_COMPOSED/spliced1.wasm"
             ;;
         --spliceAll)
             log_error "We do not support component splicing of multiple middlewares yet."
@@ -359,8 +344,8 @@ run_composition() {
     log_success "Composition ran successfully!"
 }
 run_services() {
-    PATH_SVC_B="./target/wasm32-wasip1/debug/service_b.comp.wasm"
-    CHAINED="./compositions/service-chaining.wasm"
+    PATH_SVC_B="$PATH_WASI_TARGET/service_b.comp.wasm"
+    CHAINED="$PATH_COMPOSED/service-chaining.wasm"
 
     run_service $PATH_SVC_B
     run_service $CHAINED
@@ -382,6 +367,16 @@ run_service() {
     log_success "Service A ran successfully!"
 }
 
+build() {
+    check_env
+    build_component "service_a" "service_a" "service_a"
+    build_component "service_b" "service_b" "service_b"
+    build_component "middleware_a" "middleware_a" "middleware_a"
+    build_component "middleware_b" "middleware_b" "middleware_b"
+    build_component "middleware_c" "middleware_c" "middleware_c"
+    compose --chained-services
+}
+
 # -----------------------------------------------------------------------------
 # Parse command line argument
 # -----------------------------------------------------------------------------
@@ -392,16 +387,8 @@ case "$CMD" in
     env)
         check_env
         ;;
-    service)
-        check_env
-        build_component "service_a" "service_a" "service_a"
-        build_component "service_b" "service_b" "service_b"
-        ;;
-    middleware)
-        check_env
-        build_component "middleware_a" "middleware_a" "middleware_a"
-        build_component "middleware_b" "middleware_b" "middleware_b"
-        build_component "middleware_c" "middleware_c" "middleware_c"
+    build)
+        build
         ;;
     compose)
         check_env
@@ -416,12 +403,7 @@ case "$CMD" in
         run_services
         ;;
     all)
-        check_env
-        build_component "service_a" "service_a" "service_a"
-        build_component "service_b" "service_b" "service_b"
-        build_component "middleware_a" "middleware_a" "middleware_a"
-        build_component "middleware_b" "middleware_b" "middleware_b"
-        build_component "middleware_c" "middleware_c" "middleware_c"
+        build
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"
