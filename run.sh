@@ -118,6 +118,25 @@ check_env() {
     log_success "Environment check passed!"
 }
 
+check_encoding() {
+    local fmt="$1"
+    local wasm_file="$2"
+    local wat_file="$3"
+    local name
+    name=$(basename "$wasm_file")
+    log_info "Checking that $name $fmt WAT is valid..."
+    if ! wasm-tools print "$wasm_file" -o "$wat_file"; then
+        log_error "Failed to generate WAT for $output_wasm"
+        exit 1
+    fi
+
+    if ! head -n 1 "$wat_file" | grep -q "($fmt"; then
+        log_error "$name WAT check failed: expected a $fmt."
+        exit 1
+    fi
+    log_success "$name WAT is a valid $fmt"
+}
+
 # -----------------------------------------------------------------------------
 # Generic component builder
 # Arguments:
@@ -152,35 +171,14 @@ build_component() {
     local PTH_COMP_WAT="$PATH_WASI_TARGET/${base}.comp.wat"
     local ADAPTER_PTH="./wasi_snapshot_preview1.reactor.wasm"
 
-    # ------------------------------
-    # Programmatic check: is MODULE
-    # ------------------------------
-    log_info "Checking that $name module WAT is valid..."
-    wasm-tools print "$PTH_MOD" -o "$PTH_MOD_WAT"
-
-    if ! head -n 1 "$PTH_MOD_WAT" | grep -q "(module"; then
-        log_error "$name WAT check failed: expected a MODULE."
-        exit 1
-    fi
-    log_success "$name WAT is a valid MODULE"
+    check_encoding "module" "$PTH_MOD" "$PTH_MOD_WAT"
 
     log_info "Converting '$name' to a component..."
     if ! wasm-tools component new "$PTH_MOD" --adapt "$ADAPTER_PTH" --skip-validation -o "$PTH_COMP"; then
         log_error "Generating a component from the compiled module failed for $name!"
         exit 1
     fi
-
-    # ------------------------------
-    # Programmatic check: is COMPONENT
-    # ------------------------------
-    log_info "Checking that $name component WAT is valid..."
-    wasm-tools print "$PTH_COMP" -o "$PTH_COMP_WAT"
-
-    if ! head -n 1 "$PTH_COMP_WAT" | grep -q "(component"; then
-        log_error "$name component WAT check failed: expected a COMPONENT."
-        exit 1
-    fi
-    log_success "$name WAT is a valid COMPONENT"
+    check_encoding "component" "$PTH_COMP" "$PTH_COMP_WAT"
 
     log_success "'$name' component built successfully!"
 }
@@ -226,30 +224,14 @@ run_wac() {
     shift 2
 
     log_info "Running wac compose using $(basename "$wac_file")..."
-
     if ! wac compose "$wac_file" "$@" --output "$output_wasm"; then
         log_error "Composition with '$(basename "$wac_file")' completed failed!"
         exit 1
     fi
-
-    log_info "Validating composed component..."
-
-    local output_wat
-    output_wat="$(basename "$output_wasm").wat"
-    if ! wasm-tools print "$output_wasm" -o "$output_wat"; then
-        log_error "Failed to generate WAT for $output_wasm"
-        exit 1
-    fi
-
-    # Programmatic validation: ensure it's a component
-    if ! head -n 1 "$output_wat" | grep -q "(component"; then
-        log_error "Output is not a valid component."
-        exit 1
-    fi
+    check_encoding "component" "$output_wasm" "$(basename "$output_wasm").wat"
 
     log_success "Composition with '$(basename "$wac_file")' completed successfully!"
 }
-
 compose_single() {
     run_wac \
         "$PATH_WAC/composition-single.wac" \
@@ -257,7 +239,6 @@ compose_single() {
           --dep my:service="$PATH_WASI_TARGET/service_b.comp.wasm" \
           --dep my:middleware="$PATH_WASI_TARGET/middleware_a.comp.wasm"
 }
-
 compose_multiple() {
     run_wac \
         "$PATH_WAC/composition-multiple.wac" \
