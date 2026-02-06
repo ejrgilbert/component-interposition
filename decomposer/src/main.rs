@@ -3,7 +3,7 @@ use wirm::{Component};
 
 fn main() -> Result<(), std::io::Error> {
     let Some(app_wasm_path) = env::args().nth(1) else {
-        panic!("usage: decompose <composition.wasm>");
+        panic!("usage: decomposer <composition.wasm>");
     };
 
     let buff = std::fs::read(app_wasm_path).unwrap();

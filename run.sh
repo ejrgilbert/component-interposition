@@ -22,7 +22,7 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 PATH_WASI_TARGET="./target/wasm32-wasip1/debug"
 PATH_COMPOSED="./compositions"
-PATH_DECOMP="./decompose"
+PATH_DECOMP="./decomposer"
 PATH_WAC="./wac"
 
 # -----------------------------------------------------------------------------
@@ -258,7 +258,7 @@ compose_chained_services() {
 }
 compose_splice1() {
     log_info "Splitting the chained component..."
-    pushd decompose > /dev/null
+    pushd $PATH_DECOMP > /dev/null
 
     if ! cargo run -- "../$PATH_COMPOSED/service-chaining.wasm"; then
         log_error "Failed to split out the chained component."

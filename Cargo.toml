@@ -1,14 +1,6 @@
 [workspace]
 resolver = "2"
-members = [
-    "middleware_a",
-    "middleware_b",
-    "middleware_c",
-    "service_a",
-    "service_b",
-    "runner",
-    "decompose"
-]
+members = ["middleware_a", "middleware_b", "middleware_c", "service_a", "service_b", "runner", "decomposer"]
 
 [workspace.dependencies]
 wirm = { path = "../../research/compilers/wirm-COMP/wirm" }

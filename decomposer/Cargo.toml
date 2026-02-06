@@ -1,11 +1,11 @@
 [package]
-name = "decompose"
+name = "decomposer"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
 doc = false
-name = "decompose"
+name = "decomposer"
 path = "src/main.rs"
 
 [dependencies]
