@@ -55,6 +55,7 @@ print_usage() {
     echo -e "  run         : Run the composed component"
     echo -e "  run-service : Run the service standalone (without middleware(s))"
     echo -e "  all         : Run the full workflow: env check, build service, build middlewares, compose, and run"
+    echo -e "  __testme    : A utility to help quickly test this script (exercises all run configs)"
     echo -e "  --help|-h   : Show this usage message"
     echo ""
     echo -e "${BLUE}Options:${NC}"
@@ -283,6 +284,32 @@ compose_spliceAll() {
 # -----------------------------------------------------------------------------
 # Run the composed component
 # -----------------------------------------------------------------------------
+run() {
+    local component=$1
+
+    if [[ ! -f "$component" ]]; then
+        log_error "Component not found at '$component'! Please run the 'build' and 'compose' steps first."
+        exit 1
+    fi
+
+    log_info "Running component at $component..."
+    pushd runner > /dev/null
+
+    if ! cargo run -- "../$component"; then
+        log_error "Failed to run the component at $component."
+        exit 1
+    fi
+
+    popd > /dev/null
+    log_success "Component at $component ran successfully!"
+}
+run_services() {
+    PATH_SVC_B="$PATH_WASI_TARGET/service_b.comp.wasm"
+    CHAINED="$PATH_COMPOSED/service-chaining.wasm"
+
+    run $PATH_SVC_B
+    run $CHAINED
+}
 run_composition() {
     case "$1" in
         --single)
@@ -308,44 +335,7 @@ run_composition() {
             ;;
     esac
 
-    if [[ ! -f "$COMPOSED" ]]; then
-        log_error "Composed component not found! Please run the compose step first."
-        exit 1
-    fi
-
-    log_info "Running composed component..."
-    pushd runner > /dev/null
-
-    if ! cargo run -- "../$COMPOSED"; then
-        log_error "Failed to run the composition."
-        exit 1
-    fi
-
-    popd > /dev/null
-    log_success "Composition ran successfully!"
-}
-run_services() {
-    PATH_SVC_B="$PATH_WASI_TARGET/service_b.comp.wasm"
-    CHAINED="$PATH_COMPOSED/service-chaining.wasm"
-
-    run_service $PATH_SVC_B
-    run_service $CHAINED
-}
-run_service() {
-    PATH_SVC="$1"
-
-    if [[ ! -f "$PATH_SVC" ]]; then
-        log_error "Service component not found! Please run the service step first."
-        exit 1
-    fi
-
-    log_info "Running service A component..."
-    pushd runner > /dev/null
-
-    cargo run -- "../$PATH_SVC"
-
-    popd > /dev/null
-    log_success "Service A ran successfully!"
+    run "$COMPOSED"
 }
 
 build() {
@@ -356,6 +346,25 @@ build() {
     build_component "middleware_b" "middleware_b" "middleware_b"
     build_component "middleware_c" "middleware_c" "middleware_c"
     compose --chained-services
+}
+
+run_tests() {
+    implemented_options=("--single" "--multiple" "--chained-services" "--splice1")
+    log_info "Running all different configurations, these should all execute successfully!\n"
+
+    check_env
+    build
+
+    # Iterate and build a command for each item
+    for opt in "${implemented_options[@]}"; do
+        log_info "Executing with option: $opt"
+        compose "$opt"
+        run_composition "$opt"
+        log_info "Option completed successfully: $opt"
+    done
+
+    echo
+    log_success "All configurations of this run.sh script still work! BOOYAH! :)"
 }
 
 # -----------------------------------------------------------------------------
@@ -388,6 +397,9 @@ case "$CMD" in
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"
+        ;;
+    __testme)
+        run_tests
         ;;
     --help|-h)
         print_usage

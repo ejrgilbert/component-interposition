@@ -2,6 +2,7 @@
 *.wat
 wkg.lock
 **/wit/deps/
+decompose/*.wasm
 
 *.bk
 *.pyc
