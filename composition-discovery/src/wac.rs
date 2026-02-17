@@ -116,6 +116,7 @@ pub fn generate_wac(
     let mut mdl_override = None;
     let mut last;
     let mut instance_vars: HashMap<u32, String> = HashMap::new();
+    let mut outer_instances: HashMap<u32, String> = HashMap::new(); // orig_inst_id -> generated_outer_var
     for Chain {interface: chain_interface, chain, middleware_plan} in chains.iter() {
         for (i, id) in chain.iter().enumerate() {
             let node = &composition.nodes[id];
@@ -133,15 +134,23 @@ pub fn generate_wac(
                     mdl_override = Some((chain_interface.clone(), last.clone()));
                 }
             }
+            if i == chain.len() - 1 {
+                // If we're at the end of the chain, remember what our outermost layer is now.
+                // This makes sure we actually export middleware if it overrode the outermost service.
+                outer_instances.insert(*id, last.clone());
+            }
         }
     }
 
     // Generate WAC to export the appropriate functions
     for (export_name, outer_inst_id) in composition.component_exports.iter() {
-        let outer_node = &composition.nodes[outer_inst_id];
-        let node_var = get_or_create_inst(*outer_inst_id, outer_node, &mut instance_vars, &None, &mut wac_lines);
+        let node_var = if let Some(generated_outer) = outer_instances.get(outer_inst_id) {
+            generated_outer.clone()
+        } else {
+            let outer_node = &composition.nodes[outer_inst_id];
+            get_or_create_inst(*outer_inst_id, outer_node, &mut instance_vars, &None, &mut wac_lines)
+        };
 
-        // TODO: This needs to actually export middleware if it overrode the outermost service
         let export_line = format!("export {node_var}[\"{export_name}\"];");
         wac_lines.push(export_line);
     }
