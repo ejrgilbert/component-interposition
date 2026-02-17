@@ -4,7 +4,7 @@ rules:
   - match_on:
       interface: wasi:http/handler@0.3.0-rc-2026-01-06
       between:
-        inner: srv-b
+        inner: srv-NA
         outer: srv
     inject:
       middlewares:

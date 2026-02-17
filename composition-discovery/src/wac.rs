@@ -96,7 +96,10 @@ pub fn generate_wac(
             let node = &composition.nodes[id];
             let node_var = get_or_create_inst(*id, node, &mut instance_vars, &mdl_override, &mut wac_lines);
 
+            // set up what to wire in next
             last = node_var;
+            mdl_override = Some((chain_interface.clone(), last.clone()));
+
             // if the NEXT node has a middleware BEFORE it, inject here!
             if let Some(middlewares) = middleware_plan.get(&(i + 1)) {
                 for mdl in middlewares.iter() {
