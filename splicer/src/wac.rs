@@ -96,7 +96,10 @@ pub fn generate_wac(
 
             // if the NEXT node has a middleware BEFORE it, inject here!
             if let Some(middlewares) = inject_plan.get(&(i + 1)) {
-                for mdl in middlewares.iter() {
+                // Reverse the list of items to inject (this keeps me from having to deal with this in the `wac` generation logic).
+                // Through doing this, the order of middlewares invoked will follow the order of declaration in the configuration.
+                let reversed_list = reverse_set(middlewares);
+                for mdl in reversed_list.iter() {
                     // instantiate
                     last = create_mdl(&last, mdl, chain_interface, &mut wac_lines);
                     mdl_override = Some((chain_interface.clone(), last.clone()));
@@ -215,4 +218,12 @@ fn get_name(node: &ComponentNode) -> &str {
 }
 fn to_var_name(name: &str) -> String {
     name.replace("-", "_").to_string()
+}
+
+fn reverse_set(set: &IndexSet<String>) -> Vec<String> {
+    let mut res = vec![];
+    for item in set.iter() {
+        res.insert(0, item.clone());
+    }
+    res
 }

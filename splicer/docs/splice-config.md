@@ -162,6 +162,12 @@ rules:
 ```
 
 The middleware(s) to inject at the specified match location (`before` or `between` some interface function invocation).
+The order of the middleware in this list will follow the order of invocation on the chain.
+
+For example, the above `yaml` will produce the following chain if matching between A and B (middleware-a gets invoked first):
+```
+A → middleware-a → middleware-b → B
+```
 
 # Ordering Semantics
 
