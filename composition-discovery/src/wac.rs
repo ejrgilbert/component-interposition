@@ -1,5 +1,6 @@
+use std::cmp::Reverse;
 use crate::model::{ComponentNode, CompositionGraph, InterfaceConnection};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use wirm::wasmparser::collections::IndexSet;
 
 const INST_PREFIX: &str = "my";
@@ -19,14 +20,21 @@ pub fn generate_wac(
 ) -> String {
     let mut wac_lines = vec!["package example:composition;".to_string()];
 
-    // construct all the chains in the component
+    let mut handled_interfaces = HashSet::new();
+
     let mut chains = vec![];
-    for (outer_node_id, node) in composition.nodes.iter() {
-        for InterfaceConnection {interface_name, source_instance, ..} in node.imports.iter() {
+    let mut ordered_node_ids = composition.nodes.keys().collect::<Vec<_>>();
+    ordered_node_ids.sort_by_key(|id| Reverse(**id));
+    for outer_node_id in ordered_node_ids {
+        let node = &composition.nodes[outer_node_id];
+
+        // construct all the chains in the component
+        // must do so by starting at largest instance IDs to smallest to get the largest chain!
+        for InterfaceConnection {interface_name, source_instance, is_host_import} in node.imports.iter() {
             let mut chain = vec![*outer_node_id];
+            if !is_host_import { chain.push(*source_instance); }
             let mut current_id = *source_instance;
             while let Some(node) = composition.nodes.get(&current_id) {
-                chain.push(current_id);
                 if let Some(conn) = node.imports.iter().find(|c| c.interface_name == *interface_name) {
                     if !conn.is_host_import {
                         let src_id = conn.source_instance;
@@ -38,14 +46,31 @@ pub fn generate_wac(
                 break;
             }
 
-            chain.reverse();
-            if chain.len() > 1 { chains.push(Chain {
-                interface: interface_name.to_string(),
-                chain,
-                middleware_plan: HashMap::new()
-            }) }
+            if !handled_interfaces.contains(interface_name) && chain.len() > 1 {
+                chain.reverse();
+                chains.push(Chain {
+                    interface: interface_name.to_string(),
+                    chain,
+                    middleware_plan: HashMap::new()
+                });
+            }
+            handled_interfaces.insert(interface_name.to_string());
         }
     }
+
+    // handle standalone exported interfaces!
+    for (interface, source_inst) in composition.component_exports.iter() {
+        if handled_interfaces.contains(interface) { continue; }
+
+        // if we've reached this point, it's guaranteed to not be a chain (chains were handled above)
+        // this is just a single exported service func.
+        chains.push(Chain {
+            interface: interface.clone(),
+            chain: vec![*source_inst],
+            middleware_plan: HashMap::new()
+        });
+    }
+
 
     for Chain {interface: chain_interface, chain, middleware_plan} in chains.iter_mut() {
         for (i, window) in chain.windows(2).enumerate() {
@@ -116,6 +141,7 @@ pub fn generate_wac(
         let outer_node = &composition.nodes[outer_inst_id];
         let node_var = get_or_create_inst(*outer_inst_id, outer_node, &mut instance_vars, &None, &mut wac_lines);
 
+        // TODO: This needs to actually export middleware if it overrode the outermost service
         let export_line = format!("export {node_var}[\"{export_name}\"];");
         wac_lines.push(export_line);
     }

@@ -103,61 +103,61 @@ mod testcases {
                   "interface": "import-func-handle",
                   "short": "import-func-handle",
                   "source_instance": 16,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-request",
                   "short": "import-type-request",
                   "source_instance": 37,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-response",
                   "short": "import-type-response",
                   "source_instance": 38,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-DNS-error-payload",
                   "short": "import-type-DNS-error-payload",
                   "source_instance": 39,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-TLS-alert-received-payload",
                   "short": "import-type-TLS-alert-received-payload",
                   "source_instance": 40,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-field-size-payload",
                   "short": "import-type-field-size-payload",
                   "source_instance": 41,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-error-code",
                   "short": "import-type-error-code",
                   "source_instance": 42,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-request0",
                   "short": "import-type-request0",
                   "source_instance": 23,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-response0",
                   "short": "import-type-response0",
                   "source_instance": 24,
-                  "is_host_import": false
+                  "is_host_import": true
                 },
                 {
                   "interface": "import-type-error-code0",
                   "short": "import-type-error-code0",
                   "source_instance": 25,
-                  "is_host_import": false
+                  "is_host_import": true
                 }
               ]
             }
@@ -1042,12 +1042,12 @@ export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
         r#"
 package example:composition;
 
-let srv-c = new my:srv-c {
+let srv_c = new my:srv-c {
     ...
 };
 
 let middleware_a = new my:middleware-a {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": srv-c["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv_c["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
 };
 
 let middleware_b = new my:middleware-b {
