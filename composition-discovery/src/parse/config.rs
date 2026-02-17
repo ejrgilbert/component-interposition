@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 pub fn parse_yaml(yaml_str: &str) -> anyhow::Result<Vec<SpliceRule>> {
     let config: ConfigFile = serde_yaml::from_str(yaml_str)?;
-    
+
     // i'm only able to parse this config version!
     assert_eq!(config.version, 1);
     Ok(config.to_splice_rules())
@@ -17,23 +17,22 @@ pub struct ConfigFile {
 }
 
 #[derive(Debug, Deserialize)]
-#[serde(untagged)]
-pub enum YamlRule {
-    Inject {
-        match_on: YamlMatch,
-        inject: YamlInject,
-    },
-    Between {
-        match_on: YamlMatch,
-        between: YamlBetweenComponent,
-        middlewares: Vec<String>,
-    },
+pub struct YamlRule {
+    match_on: YamlMatch,
+    inject: YamlInject,
 }
 
 #[derive(Debug, Deserialize)]
-pub struct YamlMatch {
-    pub interface: String,
-    pub provider_name: Option<String>,
+#[serde(untagged)]
+pub enum YamlMatch {
+    Two {
+        interface: String,
+        between: YamlBetweenComponent,
+    },
+    One {
+        interface: String,
+        provider_name: Option<String>,
+    },
 }
 
 #[derive(Debug, Deserialize)]
@@ -66,17 +65,17 @@ pub enum SpliceRule {
 impl ConfigFile {
     /// Convert YAML parsed rules into normalized [SpliceRule]
     pub fn to_splice_rules(&self) -> Vec<SpliceRule> {
-        self.rules.iter().map(|r| match r {
-            YamlRule::Inject { match_on, inject } => SpliceRule::Inject {
-                interface: match_on.interface.clone(),
-                provider_name: match_on.provider_name.clone(),
+        self.rules.iter().map(| YamlRule { match_on, inject } | match match_on {
+            YamlMatch::One { interface, provider_name } => SpliceRule::Inject {
+                interface: interface.clone(),
+                provider_name: provider_name.clone(),
                 middlewares: inject.middlewares.clone(),
             },
-            YamlRule::Between { match_on, between, middlewares } => SpliceRule::Between {
-                interface: match_on.interface.clone(),
+            YamlMatch::Two { interface, between } => SpliceRule::Between {
+                interface: interface.clone(),
                 inner: between.inner.clone(),
                 outer: between.outer.clone(),
-                middlewares: middlewares.clone(),
+                middlewares: inject.middlewares.clone(),
             },
         }).collect()
     }
