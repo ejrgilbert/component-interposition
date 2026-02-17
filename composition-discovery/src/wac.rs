@@ -128,9 +128,10 @@ fn get_or_create_inst(inst_id: u32, node: &ComponentNode, instance_vars: &mut Ha
         return var.clone();
     }
     // it hasn't been instantiated yet! do so here
-    let node_var = instance_vars.entry(inst_id).or_insert_with(|| get_name(node).to_string()).clone();
+    let pkg = get_name(node);
+    let node_var = instance_vars.entry(inst_id).or_insert_with(|| to_var_name(pkg)).clone();
 
-    let mut line = format!("let {var} = new {INST_PREFIX}:{var} {{", var=node_var);
+    let mut line = format!("let {node_var} = new {INST_PREFIX}:{pkg} {{");
     for conn in &node.imports {
         if !conn.is_host_import {
             let src_id = conn.source_instance;
@@ -155,9 +156,9 @@ fn get_or_create_inst(inst_id: u32, node: &ComponentNode, instance_vars: &mut Ha
 }
 
 fn create_mdl(input_inst: &String, mw: &String, interface: &String, wac_lines: &mut Vec<String>) -> String {
-    let mw_var = mw.replace("-", "_").to_string();
+    let mw_var = to_var_name(mw);
     let mw_line = format!(
-        "let {mw_var} = new {INST_PREFIX}:{mw} {{\n    \"{interface}\": {input_inst}[\"{interface}\"],\n}};"
+        "let {mw_var} = new {INST_PREFIX}:{mw} {{\n    \"{interface}\": {input_inst}[\"{interface}\"], ...\n}};"
     );
     wac_lines.push(mw_line);
 
@@ -167,4 +168,7 @@ fn create_mdl(input_inst: &String, mw: &String, interface: &String, wac_lines: &
 /// Helper to get the instance name from a node
 fn get_name(node: &ComponentNode) -> &str {
     node.display_label()
+}
+fn to_var_name(name: &str) -> String {
+    name.replace("-", "_").to_string()
 }

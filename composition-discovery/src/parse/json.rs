@@ -11,7 +11,19 @@ pub fn parse_json(json_reader: &File) -> anyhow::Result<CompositionGraph> {
     Ok(graph)
 }
 
+pub fn parse_json_str(json: &str) -> anyhow::Result<CompositionGraph> {
+    let graph = CompositionGraph::from_json_str(json)?;
+    if let Err(e) = graph.validate() {
+        serde_json::Error::custom(e.to_string());
+    }
+    Ok(graph)
+}
+
 impl CompositionGraph {
+    pub fn from_json_str(input: &str) -> Result<Self, serde_json::Error> {
+        let model: JsonCompositionGraph = serde_json::from_str(input)?;
+        Ok(Self::from_json_model(model))
+    }
     pub fn from_json_reader<R: std::io::Read>(
         reader: R,
     ) -> Result<Self, serde_json::Error> {

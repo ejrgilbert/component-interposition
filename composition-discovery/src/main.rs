@@ -1,6 +1,8 @@
 mod model;
 mod parse;
 mod wac;
+#[cfg(test)]
+mod tests;
 
 use std::path::PathBuf;
 
