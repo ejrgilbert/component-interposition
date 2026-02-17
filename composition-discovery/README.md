@@ -7,6 +7,7 @@ This project can do the following (must add tests though):
 4. Match on a subset of the chain
    - BEFORE: srv → srv-b → srv-c, go before c
    - BETWEEN: srv → srv-b → srv-c, splice between b and c
+5. Apply multiple rules at once.
 
 TODO:
 1. What if there are multiple chains? As in the instance is created with multiple imports

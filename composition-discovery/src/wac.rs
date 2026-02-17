@@ -71,45 +71,12 @@ pub fn generate_wac(
         });
     }
 
-
-    for Chain {interface: chain_interface, chain, middleware_plan} in chains.iter_mut() {
-        for (i, window) in chain.windows(2).enumerate() {
-            let inner_id = window[0];
-            let outer_id = window[1];
-            let inner_node = &composition.nodes[&inner_id];
-            let outer_node = &composition.nodes[&outer_id];
-
-            let inner_var = get_name(inner_node).to_string();
-            let outer_var = get_name(outer_node).to_string();
-            for rule in rules.iter() {
-                if let SpliceRule::Between { interface, inner, outer, middlewares } = rule {
-                    if interface != chain_interface { continue; }
-                    if *inner == inner_var && *outer == outer_var {
-                        // matches! We want to inject BEFORE the outer's index
-                        middleware_plan.entry(i + 1).or_insert(
-                            IndexSet::from_iter(middlewares.iter().cloned())
-                        ).extend(middlewares.iter().cloned());
-                    }
-                }
-            }
-        }
-
-        for (i, id) in chain.iter().enumerate() {
-            for rule in rules {
-                if let SpliceRule::Inject { interface, provider_name, middlewares } = rule {
-                    if interface != chain_interface { continue; }
-                    let outer_node = &composition.nodes[id];
-                    if let Some(provider) = provider_name {
-                        if get_name(outer_node) != *provider {
-                            continue;
-                        }
-                    }
-                    // matches! We want to inject BEFORE the instance this guy's plugged into
-                    middleware_plan.entry(i + 1).or_insert(
-                        IndexSet::from_iter(middlewares.iter().cloned())
-                    ).extend(middlewares.iter().cloned());
-                }
-            }
+    // Apply the rules in order of their declaration in the configuration.
+    // This enforces an ordering semantic for the rule application.
+    for rule in rules.iter() {
+        for chain in chains.iter_mut() {
+            apply_rule_between(rule, chain, composition);
+            apply_rule_inject(rule, chain, composition);
         }
     }
 
@@ -157,6 +124,47 @@ pub fn generate_wac(
     }
 
     wac_lines.join("\n\n")
+}
+
+fn apply_rule_between(rule: &SpliceRule, chain: &mut Chain, composition: &CompositionGraph) {
+    let Chain {interface: chain_interface, chain, middleware_plan} = chain;
+    if let SpliceRule::Between { interface, inner, outer, middlewares } = rule {
+        for (i, window) in chain.windows(2).enumerate() {
+            let inner_id = window[0];
+            let outer_id = window[1];
+            let inner_node = &composition.nodes[&inner_id];
+            let outer_node = &composition.nodes[&outer_id];
+
+            let inner_var = get_name(inner_node).to_string();
+            let outer_var = get_name(outer_node).to_string();
+            if interface != chain_interface { continue; }
+            if *inner == inner_var && *outer == outer_var {
+                // matches! We want to inject BEFORE the outer's index
+                middleware_plan.entry(i + 1).or_insert(
+                    IndexSet::from_iter(middlewares.iter().cloned())
+                ).extend(middlewares.iter().cloned());
+            }
+        }
+    }
+}
+
+fn apply_rule_inject(rule: &SpliceRule, chain: &mut Chain, composition: &CompositionGraph) {
+    let Chain {interface: chain_interface, chain, middleware_plan} = chain;
+    if let SpliceRule::Inject { interface, provider_name, middlewares } = rule {
+        for (i, id) in chain.iter().enumerate() {
+            if interface != chain_interface { continue; }
+            let outer_node = &composition.nodes[id];
+            if let Some(provider) = provider_name {
+                if get_name(outer_node) != *provider {
+                    continue;
+                }
+            }
+            // matches! We want to inject BEFORE the instance this guy's plugged into
+            middleware_plan.entry(i + 1).or_insert(
+                IndexSet::from_iter(middlewares.iter().cloned())
+            ).extend(middlewares.iter().cloned());
+        }
+    }
 }
 
 fn get_or_create_inst(inst_id: u32, node: &ComponentNode, instance_vars: &mut HashMap<u32, String>, with_override: &Option<(String, String)>, wac_lines: &mut Vec<String>) -> String {

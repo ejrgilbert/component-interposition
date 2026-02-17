@@ -56,6 +56,14 @@ fn splice_nomatch_on_all() -> anyhow::Result<()> {
     )
 }
 
+#[test]
+fn multi_rule_on_all() -> anyhow::Result<()> {
+    run_all(
+        testcases::yaml_multi_rule(),
+        testcases::yaml_multi_rule_all_exp()
+    )
+}
+
 fn run_all(yaml: &str, exp: HashMap<String, String>) -> anyhow::Result<()> {
     let cfg = parse::config::parse_yaml(yaml)?;
 
@@ -88,7 +96,7 @@ mod testcases {
     const SHORT: &str = "short";
     const LONG: &str = "long";
 
-    pub fn json_one_service() -> &'static str {
+    fn json_one_service() -> &'static str {
         // service-b.json
         r#"
         {
@@ -171,7 +179,7 @@ mod testcases {
         }
         "#
     }
-    pub fn json_short_chain() -> &'static str {
+    fn json_short_chain() -> &'static str {
         // short-chain.json
         r#"
         {
@@ -339,7 +347,7 @@ mod testcases {
         }
         "#
     }
-    pub fn json_long_chain() -> &'static str {
+    fn json_long_chain() -> &'static str {
         // long-chain.json
         r#"
         {
@@ -593,7 +601,7 @@ mod testcases {
             (LONG.to_string(), json_long_chain().to_string()),
         ])
     }
-    pub fn wac_one_identity() -> &'static str {
+    fn wac_one_identity() -> &'static str {
         r#"
 package example:composition;
 
@@ -604,7 +612,7 @@ let srv_b = new my:srv-b {
 export srv_b["wasi:http/handler@0.3.0-rc-2026-01-06"];
         "#
     }
-    pub fn wac_short_identity() -> &'static str {
+    fn wac_short_identity() -> &'static str {
         r#"
 package example:composition;
 
@@ -620,7 +628,7 @@ let srv = new my:srv {
 export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
         "#
     }
-    pub fn wac_long_identity() -> &'static str {
+    fn wac_long_identity() -> &'static str {
         r#"
 package example:composition;
 
@@ -641,7 +649,7 @@ let srv = new my:srv {
 export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
         "#
     }
-    pub fn wac_all_identities() -> HashMap<String, String> {
+    fn wac_all_identities() -> HashMap<String, String> {
         HashMap::from_iter(vec![
             (ONE.to_string(), wac_one_identity().to_string()),
             (SHORT.to_string(), wac_short_identity().to_string()),
@@ -663,7 +671,7 @@ export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
                 - middleware-b
         "#
     }
-    pub fn yaml_before_on_one_exp() -> &'static str {
+    fn yaml_before_on_one_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -682,7 +690,7 @@ let middleware_b = new my:middleware-b {
 export middleware_b["wasi:http/handler@0.3.0-rc-2026-01-06"];
         "#
     }
-    pub fn yaml_before_on_short_exp() -> &'static str {
+    fn yaml_before_on_short_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -706,7 +714,7 @@ let srv = new my:srv {
 export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
         "#
     }
-    pub fn yaml_before_on_long_exp() -> &'static str {
+    fn yaml_before_on_long_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -756,7 +764,7 @@ export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
             - middleware-b
     "#
     }
-    pub fn yaml_before_noprov_on_one_exp() -> &'static str {
+    fn yaml_before_noprov_on_one_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -775,7 +783,7 @@ let middleware_b = new my:middleware-b {
 export middleware_b["wasi:http/handler@0.3.0-rc-2026-01-06"];
         "#
     }
-    pub fn yaml_before_noprov_on_short_exp() -> &'static str {
+    fn yaml_before_noprov_on_short_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -807,7 +815,7 @@ let middleware_b = new my:middleware-b {
 export middleware_b["wasi:http/handler@0.3.0-rc-2026-01-06"];
         "#
     }
-    pub fn yaml_before_noprov_on_long_exp() -> &'static str {
+    fn yaml_before_noprov_on_long_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -874,13 +882,13 @@ export middleware_b["wasi:http/handler@0.3.0-rc-2026-01-06"];
                 - middleware-b
         "#
     }
-    pub fn yaml_before_long_on_one_exp() -> &'static str {
+    fn yaml_before_long_on_one_exp() -> &'static str {
         wac_one_identity()
     }
-    pub fn yaml_before_long_on_short_exp() -> &'static str {
+    fn yaml_before_long_on_short_exp() -> &'static str {
         wac_short_identity()
     }
-    pub fn yaml_before_long_on_long_exp() -> &'static str {
+    fn yaml_before_long_on_long_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -951,10 +959,10 @@ export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
                 - middleware-b
         "#
     }
-    pub fn yaml_splice_on_one_exp() -> &'static str {
+    fn yaml_splice_on_one_exp() -> &'static str {
         wac_one_identity()
     }
-    pub fn yaml_splice_on_short_exp() -> &'static str {
+    fn yaml_splice_on_short_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -978,7 +986,7 @@ let srv = new my:srv {
 export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
         "#
     }
-    pub fn yaml_splice_on_long_exp() -> &'static str {
+    fn yaml_splice_on_long_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -1032,13 +1040,13 @@ export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
 
         "#
     }
-    pub fn yaml_splice_long_on_one_exp() -> &'static str {
+    fn yaml_splice_long_on_one_exp() -> &'static str {
         wac_one_identity()
     }
-    pub fn yaml_splice_long_on_short_exp() -> &'static str {
+    fn yaml_splice_long_on_short_exp() -> &'static str {
         wac_short_identity()
     }
-    pub fn yaml_splice_long_on_long_exp() -> &'static str {
+    fn yaml_splice_long_on_long_exp() -> &'static str {
         r#"
 package example:composition;
 
@@ -1093,5 +1101,144 @@ export srv["wasi:http/handler@0.3.0-rc-2026-01-06"];
     }
     pub fn yaml_splice_nomatch_all_exp() -> HashMap<String, String> {
         wac_all_identities()
+    }
+    pub fn yaml_multi_rule() -> &'static str {
+        r#"
+        version: 1
+
+        rules:
+          - match_on:
+              interface: wasi:http/handler@0.3.0-rc-2026-01-06
+            inject:
+              middlewares:
+                - middleware-a
+          - match_on:
+              interface: wasi:http/handler@0.3.0-rc-2026-01-06
+              provider_name: srv-b
+            inject:
+              middlewares:
+                - middleware-b
+                - middleware-c
+          - match_on:
+              interface: wasi:http/handler@0.3.0-rc-2026-01-06
+              between:
+                inner: srv-c
+                outer: srv-b
+            inject:
+              middlewares:
+                - middleware-d
+                - middleware-e
+        "#
+    }
+    fn yaml_multi_rule_on_one_exp() -> &'static str {
+        r#"
+package example:composition;
+
+let srv_b = new my:srv-b {
+    ...
+};
+
+let middleware_a = new my:middleware-a {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv_b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let middleware_b = new my:middleware-b {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_a["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let middleware_c = new my:middleware-c {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+export middleware_c["wasi:http/handler@0.3.0-rc-2026-01-06"];
+        "#
+    }
+    fn yaml_multi_rule_on_short_exp() -> &'static str {
+        r#"
+package example:composition;
+
+let srv_b = new my:srv-b {
+    ...
+};
+
+let middleware_a = new my:middleware-a {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv_b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let middleware_b = new my:middleware-b {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_a["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let middleware_c = new my:middleware-c {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let srv = new my:srv {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_c["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    ...
+};
+
+let middleware_a = new my:middleware-a {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+export middleware_a["wasi:http/handler@0.3.0-rc-2026-01-06"];
+        "#
+    }
+    fn yaml_multi_rule_on_long_exp() -> &'static str {
+        r#"
+package example:composition;
+
+let srv_c = new my:srv-c {
+    ...
+};
+
+let middleware_a = new my:middleware-a {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv_c["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let middleware_d = new my:middleware-d {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_a["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let middleware_e = new my:middleware-e {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_d["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let srv_b = new my:srv-b {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_e["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    ...
+};
+
+let middleware_a = new my:middleware-a {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv_b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let middleware_b = new my:middleware-b {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_a["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let middleware_c = new my:middleware-c {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+let srv = new my:srv {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": middleware_c["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    ...
+};
+
+let middleware_a = new my:middleware-a {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+};
+
+export middleware_a["wasi:http/handler@0.3.0-rc-2026-01-06"];
+        "#
+    }
+    pub fn yaml_multi_rule_all_exp() -> HashMap<String, String> {
+        HashMap::from_iter(vec![
+            (ONE.to_string(), yaml_multi_rule_on_one_exp().to_string()),
+            (SHORT.to_string(), yaml_multi_rule_on_short_exp().to_string()),
+            (LONG.to_string(), yaml_multi_rule_on_long_exp().to_string()),
+        ])
     }
 }
