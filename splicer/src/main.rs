@@ -14,6 +14,17 @@ use crate::parse::config::SpliceRule;
 #[derive(Parser, Debug)]
 #[command(name = "splicer")]
 #[command(about = "Plan how to splice middleware into a WebAssembly component")]
+#[command(after_long_help = r#"
+SPLICE CONFIG FORMAT (YAML)
+
+This splice configuration describes how middleware components
+should be inserted into a composition graph.
+
+Minimal example:
+
+Full format documentation:
+https://github.com/ejrgilbert/component-interposition/blob/main/splice-config.md
+"#)]
 struct Args {
     /// Path to the composition graph in JSON format.
     #[arg(value_name = "JSON_GRAPH")]

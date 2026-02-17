@@ -1,11 +1,11 @@
 [package]
-name = "discovery"
+name = "splicer"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
 doc = false
-name = "discovery"
+name = "splicer"
 path = "src/main.rs"
 
 [dependencies]
