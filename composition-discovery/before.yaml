@@ -1,0 +1,9 @@
+version: 1
+
+rules:
+  - match_on:
+      interface: wasi:http/handler@0.3.0-rc-2026-01-06
+      provider_name: srv-b
+    inject:
+      middlewares:
+        - middleware-a
