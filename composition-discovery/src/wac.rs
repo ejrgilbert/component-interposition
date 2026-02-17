@@ -98,15 +98,16 @@ pub fn generate_wac(
             for rule in rules {
                 if let SpliceRule::Inject { interface, provider_name, middlewares } = rule {
                     if interface != chain_interface { continue; }
+                    let outer_node = &composition.nodes[id];
                     if let Some(provider) = provider_name {
-                        let outer_node = &composition.nodes[id];
-                        if get_name(outer_node) == *provider {
-                            // matches! We want to inject BEFORE the instance this guy's plugged into
-                            middleware_plan.entry(i + 1).or_insert(
-                                IndexSet::from_iter(middlewares.iter().cloned())
-                            ).extend(middlewares.iter().cloned());
+                        if get_name(outer_node) != *provider {
+                            continue;
                         }
                     }
+                    // matches! We want to inject BEFORE the instance this guy's plugged into
+                    middleware_plan.entry(i + 1).or_insert(
+                        IndexSet::from_iter(middlewares.iter().cloned())
+                    ).extend(middlewares.iter().cloned());
                 }
             }
         }
