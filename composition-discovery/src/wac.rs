@@ -1,5 +1,6 @@
 use crate::model::{ComponentNode, CompositionGraph, InterfaceConnection};
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
+use wirm::wasmparser::collections::IndexSet;
 
 const INST_PREFIX: &str = "my";
 use crate::parse::config::SpliceRule;
@@ -8,7 +9,7 @@ struct Chain {
     interface: String,
     chain: Vec<u32>,
     // middlewares to inject after the specified index in the chain
-    middleware_plan: HashMap<usize, HashSet<String>>  // chain_idx -> set of middlewares to inject AFTER
+    middleware_plan: HashMap<usize, IndexSet<String>>  // chain_idx -> set of middlewares to inject AFTER
 }
 
 /// Generate WAC from a composition graph and a set of splicing rules.
@@ -59,9 +60,9 @@ pub fn generate_wac(
                 if let SpliceRule::Between { interface, inner, outer, middlewares } = rule {
                     if interface != chain_interface { continue; }
                     if *inner == inner_var && *outer == outer_var {
-                        // matches!
-                        middleware_plan.entry(i).or_insert(
-                            HashSet::from_iter(middlewares.iter().cloned())
+                        // matches! We want to inject BEFORE the outer's index
+                        middleware_plan.entry(i + 1).or_insert(
+                            IndexSet::from_iter(middlewares.iter().cloned())
                         ).extend(middlewares.iter().cloned());
                     }
                 }
@@ -75,8 +76,9 @@ pub fn generate_wac(
                     if let Some(provider) = provider_name {
                         let outer_node = &composition.nodes[id];
                         if get_name(outer_node) == *provider {
-                            middleware_plan.entry(i).or_insert(
-                                HashSet::from_iter(middlewares.iter().cloned())
+                            // matches! We want to inject BEFORE the instance this guy's plugged into
+                            middleware_plan.entry(i + 1).or_insert(
+                                IndexSet::from_iter(middlewares.iter().cloned())
                             ).extend(middlewares.iter().cloned());
                         }
                     }
@@ -95,11 +97,11 @@ pub fn generate_wac(
             let node_var = get_or_create_inst(*id, node, &mut instance_vars, &mdl_override, &mut wac_lines);
 
             last = node_var;
-            if let Some(middlewares) = middleware_plan.get(&i) {
+            // if the NEXT node has a middleware BEFORE it, inject here!
+            if let Some(middlewares) = middleware_plan.get(&(i + 1)) {
                 for mdl in middlewares.iter() {
                     // instantiate
                     last = create_mdl(&last, mdl, chain_interface, &mut wac_lines);
-
                     mdl_override = Some((chain_interface.clone(), last.clone()));
                 }
             }
