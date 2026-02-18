@@ -6,7 +6,7 @@ fn main() -> Result<(), std::io::Error> {
         panic!("usage: decomposer <composition.wasm>");
     };
 
-    let buff = std::fs::read(app_wasm_path).unwrap();
+    let buff = std::fs::read(app_wasm_path)?;
     let mut component = Component::parse(&buff, false, false).expect("Unable to parse");
 
     for (i, internal_comp) in component.components.iter_mut().enumerate() {

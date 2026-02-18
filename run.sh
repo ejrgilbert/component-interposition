@@ -23,7 +23,9 @@ set -euo pipefail
 PATH_WASI_TARGET="./target/wasm32-wasip1/debug"
 PATH_COMPOSED="./compositions"
 PATH_DECOMP="./decomposer"
-PATH_WAC="./wac"
+PATH_WAC="./generated-wac"
+PATH_RULES="./splicer-rules"
+PATH_HANDLERS="./handlers"
 
 # -----------------------------------------------------------------------------
 # Color codes for logs
@@ -63,7 +65,7 @@ print_usage() {
     echo -e "  --multiple  : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
     echo -e "  --chained-services : Perform service chaining on the services (a and b)"
     echo -e "  --splice1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
-    echo -e "  --spliceAll : Splice a component with two services directly communicating with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --spliceN   : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
     echo ""
 }
 
@@ -156,7 +158,7 @@ check_encoding() {
 # -----------------------------------------------------------------------------
 build_component() {
     local name=$1
-    local dir=$2
+    local dir="$PATH_HANDLERS/$2"
     local base=$3
 
     log_info "Building '$name' component..."
@@ -213,9 +215,9 @@ compose() {
             compose --chained-services
             compose_splice1
             ;;
-        --spliceAll)
+        --spliceN)
             compose --chained-services
-            compose_spliceAll
+            compose_spliceN
             ;;
         *)
             log_error "Unknown option: $1"
@@ -235,59 +237,113 @@ run_wac() {
 
     log_info "Running wac compose using $(basename "$wac_file")..."
     if ! wac compose "$wac_file" "$@" --output "$output_wasm"; then
-        log_error "Composition with '$(basename "$wac_file")' completed failed!"
+        log_error "Composition with '$(basename "$wac_file")' failed!"
         exit 1
     fi
     check_encoding "component" "$output_wasm" "$(basename "$output_wasm").wat"
 
     log_success "Composition with '$(basename "$wac_file")' completed successfully!"
 }
+run_splicer() {
+    local wasm_file="$1"
+    local rule_file="$2"
+    local output_wac="$3"
+    shift 3
+
+    log_info "Running splicer with rule set '$(basename "$rule_file")'..."
+    if ! splicer "$wasm_file" "$rule_file" -o "$output_wac" ; then
+        log_error "Splice with '$(basename "$rule_file")' failed!"
+        exit 1
+    fi
+    log_success "Splice with '$(basename "$rule_file")' completed successfully!"
+}
+
 compose_single() {
+    run_splicer \
+        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_RULES/single.yaml" \
+        "$PATH_WAC/single.wac"
+
     run_wac \
-        "$PATH_WAC/composition-single.wac" \
+        "$PATH_WAC/single.wac" \
         "$PATH_COMPOSED/composed-single.wasm" \
-          --dep my:service="$PATH_WASI_TARGET/service_b.comp.wasm" \
-          --dep my:middleware="$PATH_WASI_TARGET/middleware_a.comp.wasm"
+          --dep my:srv="$PATH_WASI_TARGET/service_b.comp.wasm" \
+          --dep my:mdl-a="$PATH_WASI_TARGET/middleware_a.comp.wasm"
 }
 compose_multiple() {
+    run_splicer \
+        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_RULES/multiple.yaml" \
+        "$PATH_WAC/multiple.wac"
+
     run_wac \
-        "$PATH_WAC/composition-multiple.wac" \
+        "$PATH_WAC/multiple.wac" \
         "$PATH_COMPOSED/composed-multiple.wasm" \
-          --dep my:service="$PATH_WASI_TARGET/service_b.comp.wasm" \
-          --dep my:middleware-a="$PATH_WASI_TARGET/middleware_a.comp.wasm" \
-          --dep my:middleware-b="$PATH_WASI_TARGET/middleware_b.comp.wasm" \
-          --dep my:middleware-c="$PATH_WASI_TARGET/middleware_c.comp.wasm"
+          --dep my:srv="$PATH_WASI_TARGET/service_b.comp.wasm" \
+          --dep my:mdl-a="$PATH_WASI_TARGET/middleware_a.comp.wasm" \
+          --dep my:mdl-b="$PATH_WASI_TARGET/middleware_b.comp.wasm" \
+          --dep my:mdl-c="$PATH_WASI_TARGET/middleware_c.comp.wasm"
 }
 compose_chained_services() {
+    run_splicer \
+        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_RULES/chain.yaml" \
+        "$PATH_WAC/chain.wac"
+
     run_wac \
-        "$PATH_WAC/composition-service_chaining.wac" \
+        "$PATH_WAC/chain.wac" \
         "$PATH_COMPOSED/service-chaining.wasm" \
-          --dep my:service-a="$PATH_WASI_TARGET/service_a.comp.wasm" \
-          --dep my:service-b="$PATH_WASI_TARGET/service_b.comp.wasm"
+          --dep my:srv-a="$PATH_WASI_TARGET/service_a.comp.wasm" \
+          --dep my:srv-b="$PATH_WASI_TARGET/service_b.comp.wasm"
 }
 compose_splice1() {
+    local wasm_file="$PATH_COMPOSED/service-chaining.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/splice1.yaml" \
+        "$PATH_WAC/splice1.wac"
+
+    decompose "$wasm_file"
+
+    run_wac \
+        "$PATH_WAC/splice1.wac" \
+        "$PATH_COMPOSED/spliced1.wasm" \
+          --dep my:srv-a="$PATH_DECOMP/split1.wasm" \
+          --dep my:srv-b="$PATH_DECOMP/split0.wasm" \
+          --dep my:mdl-a="$PATH_WASI_TARGET/middleware_a.comp.wasm"
+}
+
+compose_spliceN() {
+    local wasm_file="$PATH_COMPOSED/service-chaining.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/spliceN.yaml" \
+        "$PATH_WAC/spliceN.wac"
+
+    decompose "$wasm_file"
+
+    run_wac \
+        "$PATH_WAC/spliceN.wac" \
+        "$PATH_COMPOSED/splicedN.wasm" \
+          --dep my:srv-a="$PATH_DECOMP/split1.wasm" \
+          --dep my:srv-b="$PATH_DECOMP/split0.wasm" \
+          --dep my:mdl-a="$PATH_WASI_TARGET/middleware_a.comp.wasm" \
+          --dep my:mdl-b="$PATH_WASI_TARGET/middleware_b.comp.wasm" \
+          --dep my:mdl-c="$PATH_WASI_TARGET/middleware_c.comp.wasm"
+}
+decompose() {
+    local wasm_file="$1"
+
     log_info "Splitting the chained component..."
     pushd $PATH_DECOMP > /dev/null
 
-    if ! cargo run -- "../$PATH_COMPOSED/service-chaining.wasm"; then
+    if ! cargo run -- "../$wasm_file"; then
         log_error "Failed to split out the chained component."
         exit 1
     fi
 
     popd > /dev/null
     log_success "Successfully split the chained component."
-
-    run_wac \
-        "$PATH_WAC/composition-splice1.wac" \
-        "$PATH_COMPOSED/spliced1.wasm" \
-          --dep my:service-a="$PATH_DECOMP/split1.wasm" \
-          --dep my:service-b="$PATH_DECOMP/split0.wasm" \
-          --dep my:middleware="$PATH_WASI_TARGET/middleware_a.comp.wasm"
-}
-compose_spliceAll() {
-    # TODO
-    log_error "We do not support component splicing of multiple middlewares yet."
-    exit 1
 }
 
 # -----------------------------------------------------------------------------
@@ -333,9 +389,8 @@ run_composition() {
         --splice1)
             COMPOSED="$PATH_COMPOSED/spliced1.wasm"
             ;;
-        --spliceAll)
-            log_error "We do not support component splicing of multiple middlewares yet."
-            exit 1
+        --spliceN)
+            COMPOSED="$PATH_COMPOSED/splicedN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -358,7 +413,7 @@ build() {
 }
 
 run_tests() {
-    implemented_options=("--single" "--multiple" "--chained-services" "--splice1")
+    implemented_options=("--single" "--multiple" "--chained-services" "--splice1" "--spliceN")
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
@@ -400,6 +455,9 @@ case "$CMD" in
     run-service)
         check_env
         run_services
+        ;;
+    viz)
+        echo "TODO"
         ;;
     all)
         build

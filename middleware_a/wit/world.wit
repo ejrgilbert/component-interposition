@@ -1,5 +1,0 @@
-package my:logging-middleware;
-
-world middleware {
-    include wasi:http/middleware@0.3.0-rc-2026-01-06;
-}
