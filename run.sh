@@ -70,11 +70,18 @@ print_usage() {
 # -----------------------------------------------------------------------------
 # Helper: Auto-install hints
 # -----------------------------------------------------------------------------
+CARGO_INST="cargo"
 install_hint() {
     local tool=$1
+    local fmt=$2
+
     echo -e "${YELLOW}Hint: You can install $tool with:${NC}"
-    echo "  macOS: brew install $tool"
-    echo "  Linux: sudo apt update && sudo apt install -y $tool"
+    if [[ "$fmt" == "$CARGO_INST" ]]; then
+        echo "  cargo install $tool"
+    else
+        echo "  macOS: brew install $tool"
+        echo "  Linux: sudo apt update && sudo apt install -y $tool"
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -85,19 +92,21 @@ check_env() {
     MISSING_TOOLS=0
 
     REQUIRED_TOOLS=(
-        "cargo:1.93.0"
-        "wasm-tools:1.244.0"
-        "wkg:0.13.0"
-        "wac:0.9.0"
+        "cargo:1.93.0:brew"
+        "wasm-tools:1.244.0:$CARGO_INST"
+        "wkg:0.13.0:$CARGO_INST"
+        "splicer:1.0.0:$CARGO_INST"
+        "wac:0.9.0:$CARGO_INST"
     )
 
     for tool_version in "${REQUIRED_TOOLS[@]}"; do
-        tool="${tool_version%%:*}"
-        expected="${tool_version##*:}"
+        tool="$(echo "$tool_version" | cut -d ':' -f 1)"
+        expected="$(echo "$tool_version" | cut -d ':' -f 2)"
+        fmt="$(echo "$tool_version" | cut -d ':' -f 3)"
 
         if ! command -v "$tool" &> /dev/null; then
             log_error "$tool is not installed or not in PATH!"
-            install_hint "$tool"
+            install_hint "$tool" "$fmt"
             MISSING_TOOLS=1
             continue
         fi
