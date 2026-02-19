@@ -9,4 +9,5 @@ rules:
       outer:
         name: srv-a
     inject:
-      - mdl-a
+      - name: mdl-a
+        path: "./target/wasm32-wasip1/debug/middleware_a.comp.wasm"

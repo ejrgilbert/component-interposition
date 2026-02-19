@@ -9,6 +9,9 @@ rules:
       outer:
         name: srv-a
     inject:
-      - mdl-a
-      - mdl-b
-      - mdl-c
+      - name: mdl-a
+        path: "./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
+      - name: mdl-b
+        path: "./target/wasm32-wasip1/debug/middleware_b.comp.wasm"
+      - name: mdl-c
+        path: "./target/wasm32-wasip1/debug/middleware_c.comp.wasm"
