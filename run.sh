@@ -22,7 +22,6 @@ set -euo pipefail
 # -----------------------------------------------------------------------------
 PATH_WASI_TARGET="./target/wasm32-wasip1/debug"
 PATH_COMPOSED="./compositions"
-PATH_DECOMP="./decomposer"
 PATH_WAC="./generated-wac"
 PATH_RULES="./splicer-rules"
 PATH_HANDLERS="./handlers"
@@ -231,20 +230,7 @@ compose() {
 # -----------------------------------------------------------------------------
 # Generic wrapper for invoking `wac compose`.
 # -----------------------------------------------------------------------------
-run_wac() {
-    local wac_file="$1"
-    local output_wasm="$2"
-    shift 2
 
-    log_info "Running wac compose using $(basename "$wac_file")..."
-    if ! wac compose "$wac_file" "$@" --output "$output_wasm"; then
-        log_error "Composition with '$(basename "$wac_file")' failed!"
-        exit 1
-    fi
-    check_encoding "component" "$output_wasm" "$(basename "$output_wasm").wat"
-
-    log_success "Composition with '$(basename "$wac_file")' completed successfully!"
-}
 run_splicer() {
     local wasm_file="$1"
     local rule_file="$2"
@@ -306,15 +292,6 @@ compose_spliceN() {
         "$PATH_RULES/spliceN.yaml" \
         "$PATH_WAC/spliceN.wac" \
         "$PATH_COMPOSED/splicedN.wasm"
-
-#    run_wac \
-#        "$PATH_WAC/spliceN.wac" \
-#        "$PATH_COMPOSED/splicedN.wasm" \
-#          --dep my:srv-a="$PATH_DECOMP/split1.wasm" \
-#          --dep my:srv-b="$PATH_DECOMP/split0.wasm" \
-#          --dep my:mdl-a="$PATH_WASI_TARGET/middleware_a.comp.wasm" \
-#          --dep my:mdl-b="$PATH_WASI_TARGET/middleware_b.comp.wasm" \
-#          --dep my:mdl-c="$PATH_WASI_TARGET/middleware_c.comp.wasm"
 }
 
 # -----------------------------------------------------------------------------
@@ -340,10 +317,14 @@ run() {
     log_success "Component at $component ran successfully!"
 }
 run_services() {
+    PATH_SVC_A="$PATH_WASI_TARGET/service_a.comp.wasm"
     PATH_SVC_B="$PATH_WASI_TARGET/service_b.comp.wasm"
+    PATH_SVC_C="$PATH_WASI_TARGET/service_c.comp.wasm"
     CHAINED="$PATH_COMPOSED/chained.wasm"
 
+    run $PATH_SVC_A
     run $PATH_SVC_B
+    run $PATH_SVC_C
     run $CHAINED
 }
 run_composition() {
@@ -370,8 +351,50 @@ run_composition() {
             ;;
     esac
 
+    log_info "Visualization of the component at $COMPOSED:"
+    viz "$COMPOSED"
+    echo
+
     run "$COMPOSED"
 }
+
+# -----------------------------------------------------------------------------
+# Visualize the component
+# -----------------------------------------------------------------------------
+viz() {
+    local component=$1
+    cviz-cli "$component"
+}
+viz_composition() {
+    case "$1" in
+        --single)
+            COMPOSED="$PATH_COMPOSED/single.wasm"
+            ;;
+        --multiple)
+            COMPOSED="$PATH_COMPOSED/multiple.wasm"
+            ;;
+        --chain)
+            COMPOSED="$PATH_COMPOSED/chained.wasm"
+            ;;
+        --splice1)
+            COMPOSED="$PATH_COMPOSED/spliced1.wasm"
+            ;;
+        --spliceN)
+            COMPOSED="$PATH_COMPOSED/splicedN.wasm"
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            print_usage
+            exit 1
+            ;;
+    esac
+
+    viz "$COMPOSED"
+}
+
+# -----------------------------------------------------------------------------
+# Build the component
+# -----------------------------------------------------------------------------
 
 build() {
     check_env
@@ -380,7 +403,7 @@ build() {
     build_component "middleware_a" "middleware_a" "middleware_a"
     build_component "middleware_b" "middleware_b" "middleware_b"
     build_component "middleware_c" "middleware_c" "middleware_c"
-#    compose --chain
+    compose --chain
 }
 
 run_tests() {
@@ -428,7 +451,8 @@ case "$CMD" in
         run_services
         ;;
     viz)
-        echo "TODO"
+        check_env
+        viz_composition "$OPT"
         ;;
     all)
         build
