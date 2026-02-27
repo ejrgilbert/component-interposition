@@ -5,7 +5,6 @@ splits/
 *.wat
 wkg.lock
 **/wit/deps/
-decomposer/*.wasm
 
 *.bk
 *.pyc

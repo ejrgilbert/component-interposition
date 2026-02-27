@@ -5,7 +5,6 @@ members = ["handlers/middleware_a", "handlers/middleware_b", "handlers/middlewar
 [workspace.dependencies]
 clap = { version = "4.5.58", features = ["derive"] }
 wat = "1"
-wirm = { path = "../../research/compilers/wirm-COMP/wirm" }
 wit-bindgen = { version = "0.51.0", features = ['default', 'async-spawn', 'inter-task-wakeup', 'async'] }
 wasmtime = { version = "41.0.1", features = ["cranelift", "incremental-cache"] }
 wasmtime-wasi = { version = "41.0.1", features = ["p3"] }
