@@ -1,0 +1,17 @@
+version: 1
+
+# Search for the http handler of srv-a and insert a single middleware (mdl-a)
+rules:
+  - before:
+      interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
+      provider:
+        # Must use an alias since the instance name is incompatible with WAC variable naming:
+        #      `wasi:http/handler@0.3.0-rc-2026-01-06-shim-instance`
+        alias: "srv"
+    inject:
+      - name: mdl-a
+        path: "./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
+      - name: mdl-b
+        path: "./target/wasm32-wasip1/debug/middleware_b.comp.wasm"
+      - name: mdl-c
+        path: "./target/wasm32-wasip1/debug/middleware_c.comp.wasm"

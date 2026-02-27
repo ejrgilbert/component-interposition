@@ -1,3 +1,6 @@
+# Generated splits
+splits/
+
 # Wasm things
 *.wat
 wkg.lock

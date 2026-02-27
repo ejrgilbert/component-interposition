@@ -6,7 +6,7 @@ component and run it on Wasmtime.
 If interested, here's a live demonstration of this project as well: https://www.youtube.com/live/F0adyCd2RMs?si=cw4tIi5o33swh4gY&t=1039
 
 Through following the instructions, a user should be able to get a fully working Wasm component that bundles a service
-with the following structure:
+with the following structure (demo with `./run.sh`):
 
 ```
 HTTP →
@@ -18,7 +18,7 @@ HTTP →
 This can be read as: "We have 1 middleware, M, that can do preprocessing on an HTTP request, then invoke the service with that preprocessed request.
 Then, the same middleware, M, is returned to with the service's response. This response can be postprocessed by the middleware and returned."
 
-This project also demonstrates how to interpose _N_ middlewares as in the following structure::
+This project also demonstrates how to interpose _N_ middlewares as in the following structure (demo with `./run.sh all --multiple`):
 ```
 HTTP →
   M1 → M2 → ... → Mn → Service
@@ -26,11 +26,37 @@ HTTP →
 ← HTTP
 ```
 
-# Next steps for this repository. #
+Further, let's say you have a component that already has been composed with service chaining, e.g.:
+```
+HTTP →
+  S1 → S2
+  S1 ← S2_response
+← HTTP
+```
+If this is the case, interposition would need to occur in a way that _splices_ between the composed services, as in:
+```
+HTTP →
+  S1 → M1 → ... → Mn → S2
+  S1 ← M1 ← ... ← Mn ← S2_response
+← HTTP
+```
+We have solved this problem for interposing 1 to N middleware(s) (demo with `./run.sh all --splice1`)  through leveraging
+the [`splicer`](https://github.com/ejrgilbert/splicer) tool. This tool generalizes the application of interposition rules
+to arbitrary component compositions through:
+1. Discovering the composition of the component.
+2. Planning how to splice the middleware in between the services that have already been composed based on some Yaml config.
+3. Generating the `wac` script and command that performs the splice plan
+4. Perform the `wac` operation to compose the service+middleware component.
 
-Now that I've gotten this base PoC working, I plan to:
-1. try to splice middleware between two services that have already been hooked up
+# Next Steps #
 
+- [ ] **Enforce typing** validation at _splice_ plan time (does this Yaml configuration work with the type signatures?)
+- [ ] **More tests** with more compositions (demonstrate generality). This has been demonstrated to work with components
+      that contain single services and chained compositions. Should add:
+  - multiple chains for a single instance
+  - nested chain
+- [ ] Build **standardized middleware** components that can port across compositions using the `splicer`
+ 
 # What is "middleware" in the realm of Wasi HTTP? #
 
 At a high level, `wasi:http/middleware` is just a component that both exports a `handler.handle` and imports another handler.handle. Your middleware sits in between:

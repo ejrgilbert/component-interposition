@@ -18,6 +18,15 @@
 set -euo pipefail
 
 # -----------------------------------------------------------------------------
+# Some helpful globals
+# -----------------------------------------------------------------------------
+PATH_WASI_TARGET="./target/wasm32-wasip1/debug"
+PATH_COMPOSED="./compositions"
+PATH_WAC="./generated-wac"
+PATH_RULES="./splicer-rules"
+PATH_HANDLERS="./handlers"
+
+# -----------------------------------------------------------------------------
 # Color codes for logs
 # -----------------------------------------------------------------------------
 BLUE="\033[1;34m"
@@ -42,31 +51,38 @@ print_usage() {
     echo ""
     echo -e "${BLUE}Commands:${NC}"
     echo -e "  env         : Check the environment and verify required tools and versions"
-    echo -e "  service     : Build the service components"
-    echo -e "  middleware  : Build the middleware components"
+    echo -e "  build       : Build the service and middleware components"
     echo -e "  compose     : Compose the service and middleware(s) into a single component"
     echo -e "  run         : Run the composed component"
     echo -e "  run-service : Run the service standalone (without middleware(s))"
     echo -e "  all         : Run the full workflow: env check, build service, build middlewares, compose, and run"
+    echo -e "  __testme    : A utility to help quickly test this script (exercises all run configs)"
     echo -e "  --help|-h   : Show this usage message"
     echo ""
     echo -e "${BLUE}Options:${NC}"
     echo -e "  --single    : Wrap the service call with a SINGLE middleware (a)"
     echo -e "  --multiple  : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
-    echo -e "  --chained-services : Perform service chaining on the services (a and b)"
+    echo -e "  --chain     : Perform service chaining on the services (a and b)"
     echo -e "  --splice1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
-    echo -e "  --spliceAll : Splice a component with two services directly communicating with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --spliceN   : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
     echo ""
 }
 
 # -----------------------------------------------------------------------------
 # Helper: Auto-install hints
 # -----------------------------------------------------------------------------
+CARGO_INST="cargo"
 install_hint() {
     local tool=$1
+    local fmt=$2
+
     echo -e "${YELLOW}Hint: You can install $tool with:${NC}"
-    echo "  macOS: brew install $tool"
-    echo "  Linux: sudo apt update && sudo apt install -y $tool"
+    if [[ "$fmt" == "$CARGO_INST" ]]; then
+        echo "  cargo install $tool"
+    else
+        echo "  macOS: brew install $tool"
+        echo "  Linux: sudo apt update && sudo apt install -y $tool"
+    fi
 }
 
 # -----------------------------------------------------------------------------
@@ -77,19 +93,22 @@ check_env() {
     MISSING_TOOLS=0
 
     REQUIRED_TOOLS=(
-        "cargo:1.93.0"
-        "wasm-tools:1.244.0"
-        "wkg:0.13.0"
-        "wac:0.9.0"
+        "cargo:1.93.0:brew"
+        "wasm-tools:1.244.0:$CARGO_INST"
+        "wkg:0.13.0:$CARGO_INST"
+        "splicer:1.1.0:$CARGO_INST"
+        "cviz-cli:1.1.0:$CARGO_INST"
+        "wac:0.9.0:$CARGO_INST"
     )
 
     for tool_version in "${REQUIRED_TOOLS[@]}"; do
-        tool="${tool_version%%:*}"
-        expected="${tool_version##*:}"
+        tool="$(echo "$tool_version" | cut -d ':' -f 1)"
+        expected="$(echo "$tool_version" | cut -d ':' -f 2)"
+        fmt="$(echo "$tool_version" | cut -d ':' -f 3)"
 
         if ! command -v "$tool" &> /dev/null; then
             log_error "$tool is not installed or not in PATH!"
-            install_hint "$tool"
+            install_hint "$tool" "$fmt"
             MISSING_TOOLS=1
             continue
         fi
@@ -111,6 +130,25 @@ check_env() {
     log_success "Environment check passed!"
 }
 
+check_encoding() {
+    local fmt="$1"
+    local wasm_file="$2"
+    local wat_file="$3"
+    local name
+    name=$(basename "$wasm_file")
+    log_info "Checking that $name $fmt WAT is valid..."
+    if ! wasm-tools print "$wasm_file" -o "$wat_file"; then
+        log_error "Failed to generate WAT for $output_wasm"
+        exit 1
+    fi
+
+    if ! head -n 1 "$wat_file" | grep -q "($fmt"; then
+        log_error "$name WAT check failed: expected a $fmt."
+        exit 1
+    fi
+    log_success "$name WAT is a valid $fmt"
+}
+
 # -----------------------------------------------------------------------------
 # Generic component builder
 # Arguments:
@@ -120,7 +158,7 @@ check_env() {
 # -----------------------------------------------------------------------------
 build_component() {
     local name=$1
-    local dir=$2
+    local dir="$PATH_HANDLERS/$2"
     local base=$3
 
     log_info "Building '$name' component..."
@@ -139,41 +177,20 @@ build_component() {
     fi
     popd > /dev/null
 
-    local PTH_MOD="./target/wasm32-wasip1/debug/${base}.wasm"
-    local PTH_MOD_WAT="./target/wasm32-wasip1/debug/${base}.wat"
-    local PTH_COMP="./target/wasm32-wasip1/debug/${base}.comp.wasm"
-    local PTH_COMP_WAT="./target/wasm32-wasip1/debug/${base}.comp.wat"
+    local PTH_MOD="$PATH_WASI_TARGET/${base}.wasm"
+    local PTH_MOD_WAT="$PATH_WASI_TARGET/${base}.wat"
+    local PTH_COMP="$PATH_WASI_TARGET/${base}.comp.wasm"
+    local PTH_COMP_WAT="$PATH_WASI_TARGET/${base}.comp.wat"
     local ADAPTER_PTH="./wasi_snapshot_preview1.reactor.wasm"
 
-    # ------------------------------
-    # Programmatic check: is MODULE
-    # ------------------------------
-    log_info "Checking that $name module WAT is valid..."
-    wasm-tools print "$PTH_MOD" -o "$PTH_MOD_WAT"
-
-    if ! head -n 1 "$PTH_MOD_WAT" | grep -q "(module"; then
-        log_error "$name WAT check failed: expected a MODULE."
-        exit 1
-    fi
-    log_success "$name WAT is a valid MODULE"
+    check_encoding "module" "$PTH_MOD" "$PTH_MOD_WAT"
 
     log_info "Converting '$name' to a component..."
     if ! wasm-tools component new "$PTH_MOD" --adapt "$ADAPTER_PTH" --skip-validation -o "$PTH_COMP"; then
         log_error "Generating a component from the compiled module failed for $name!"
         exit 1
     fi
-
-    # ------------------------------
-    # Programmatic check: is COMPONENT
-    # ------------------------------
-    log_info "Checking that $name component WAT is valid..."
-    wasm-tools print "$PTH_COMP" -o "$PTH_COMP_WAT"
-
-    if ! head -n 1 "$PTH_COMP_WAT" | grep -q "(component"; then
-        log_error "$name component WAT check failed: expected a COMPONENT."
-        exit 1
-    fi
-    log_success "$name WAT is a valid COMPONENT"
+    check_encoding "component" "$PTH_COMP" "$PTH_COMP_WAT"
 
     log_success "'$name' component built successfully!"
 }
@@ -191,14 +208,16 @@ compose() {
         --multiple)
             compose_multiple
             ;;
-        --chained-services)
-            compose_chained_services
+        --chain)
+            compose_chain
             ;;
         --splice1)
+            compose --chain
             compose_splice1
             ;;
-        --spliceAll)
-            compose_spliceAll
+        --spliceN)
+            compose --chain
+            compose_spliceN
             ;;
         *)
             log_error "Unknown option: $1"
@@ -208,102 +227,122 @@ compose() {
     esac
 }
 
-compose_single() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service_b.comp.wasm"
-    PATH_MDL="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
-    OUTPUT="./compositions/composed-single.wasm"
-    OUTPUT_WAT="./compositions/composed-single.wat"
+# -----------------------------------------------------------------------------
+# Generic wrapper for invoking `wac compose`.
+# -----------------------------------------------------------------------------
 
-    if ! wac compose ./wac/composition-single.wac \
-          --dep my:service="$PATH_SVC" \
-          --dep my:middleware="$PATH_MDL" \
-          --output "$OUTPUT"; then
-        log_error "Creating the composition of the service+middleware_a failed"
+run_splicer() {
+    local wasm_file="$1"
+    local rule_file="$2"
+    local output_wac="$3"
+    local output_wasm="$4"
+    shift 4
+
+    log_info "Running splicer with rule set '$(basename "$rule_file")'..."
+    if ! wac_cmd=$(splicer "$wasm_file" "$rule_file" -o "$output_wac") ; then
+        log_error "Splice with '$(basename "$rule_file")' failed! Used the following command:"
+        echo splicer "$wasm_file" "$rule_file" -o "$output_wac"
         exit 1
     fi
+    log_success "Splicer generated splits and a wac composition with '$(basename "$rule_file")' successfully!"
 
-    log_info "Checking WAT output of composed component..."
-    ls -al "$OUTPUT"
-    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
+    log_info "Running the wac composition generated for '$(basename "$rule_file")'..."
+    if ! eval "$wac_cmd  -o $output_wasm"; then
+        log_error "Failed to run wac command:"
+        echo "$wac_cmd"
+        exit 1
+    fi
+    log_success "The 'wac compose' ran successfully '$(basename "$rule_file")'..."
+}
 
-    log_success "Composition with a single middleware completed successfully!"
+compose_single() {
+    run_splicer \
+        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_RULES/single.yaml" \
+        "$PATH_WAC/single.wac" \
+        "$PATH_COMPOSED/single.wasm"
 }
 compose_multiple() {
-    PATH_SVC="./target/wasm32-wasip1/debug/service_b.comp.wasm"
-    PATH_MDL_A="./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
-    PATH_MDL_B="./target/wasm32-wasip1/debug/middleware_b.comp.wasm"
-    PATH_MDL_C="./target/wasm32-wasip1/debug/middleware_c.comp.wasm"
-    OUTPUT="./compositions/composed-multiple.wasm"
-    OUTPUT_WAT="./compositions/composed-multiple.wat"
-
-    if ! wac compose ./wac/composition-multiple.wac \
-          --dep my:service="$PATH_SVC" \
-          --dep my:middleware-a="$PATH_MDL_A" \
-          --dep my:middleware-b="$PATH_MDL_B" \
-          --dep my:middleware-c="$PATH_MDL_C" \
-          --output "$OUTPUT"; then
-        log_error "Creating the composition of the service+middleware_a+middleware_b+middleware_c failed"
-        exit 1
-    fi
-
-    log_info "Checking WAT output of composed component..."
-    ls -al "$OUTPUT"
-    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
-
-    log_success "Composition with multiple middlewares completed successfully!"
+    run_splicer \
+        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_RULES/multiple.yaml" \
+        "$PATH_WAC/multiple.wac" \
+        "$PATH_COMPOSED/multiple.wasm"
 }
-compose_chained_services() {
-    PATH_SVC_A="./target/wasm32-wasip1/debug/service_a.comp.wasm"
-    PATH_SVC_B="./target/wasm32-wasip1/debug/service_b.comp.wasm"
-    OUTPUT="./compositions/service-chaining.wasm"
-    OUTPUT_WAT="./compositions/service-chaining.wat"
-
-    if ! wac compose ./wac/composition-service_chaining.wac \
-          --dep my:service-a="$PATH_SVC_A" \
-          --dep my:service-b="$PATH_SVC_B" \
-          --output "$OUTPUT"; then
-        log_error "Creating the composition of the service-a+service-b failed"
-        exit 1
-    fi
-
-    log_info "Checking WAT output of composed component..."
-    ls -al "$OUTPUT"
-    wasm-tools print "$OUTPUT" -o "$OUTPUT_WAT"
-
-    log_success "Composition with service chaining completed successfully!"
+compose_chain() {
+    run_splicer \
+        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_RULES/chain.yaml" \
+        "$PATH_WAC/chain.wac" \
+        "$PATH_COMPOSED/chained.wasm"
 }
 compose_splice1() {
-    # TODO
-    log_error "We do not support component splicing of middleware yet."
-    exit 1
+    local wasm_file="$PATH_COMPOSED/chained.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/splice1.yaml" \
+        "$PATH_WAC/splice1.wac" \
+        "$PATH_COMPOSED/spliced1.wasm"
 }
-compose_spliceAll() {
-    # TODO
-    log_error "We do not support component splicing of multiple middlewares yet."
-    exit 1
+
+compose_spliceN() {
+    local wasm_file="$PATH_COMPOSED/chained.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/spliceN.yaml" \
+        "$PATH_WAC/spliceN.wac" \
+        "$PATH_COMPOSED/splicedN.wasm"
 }
 
 # -----------------------------------------------------------------------------
 # Run the composed component
 # -----------------------------------------------------------------------------
+run() {
+    local component=$1
+
+    if [[ ! -f "$component" ]]; then
+        log_error "Component not found at '$component'! Please run the 'build' and 'compose' steps first."
+        exit 1
+    fi
+
+    log_info "Running component at $component..."
+    pushd runner > /dev/null
+
+    if ! cargo run -- "../$component"; then
+        log_error "Failed to run the component at $component."
+        exit 1
+    fi
+
+    popd > /dev/null
+    log_success "Component at $component ran successfully!"
+}
+run_services() {
+    PATH_SVC_A="$PATH_WASI_TARGET/service_a.comp.wasm"
+    PATH_SVC_B="$PATH_WASI_TARGET/service_b.comp.wasm"
+    PATH_SVC_C="$PATH_WASI_TARGET/service_c.comp.wasm"
+    CHAINED="$PATH_COMPOSED/chained.wasm"
+
+    run $PATH_SVC_A
+    run $PATH_SVC_B
+    run $PATH_SVC_C
+    run $CHAINED
+}
 run_composition() {
     case "$1" in
         --single)
-            COMPOSED="./compositions/composed-single.wasm"
+            COMPOSED="$PATH_COMPOSED/single.wasm"
             ;;
         --multiple)
-            COMPOSED="./compositions/composed-multiple.wasm"
+            COMPOSED="$PATH_COMPOSED/multiple.wasm"
             ;;
-        --chained-services)
-            COMPOSED="./compositions/service-chaining.wasm"
+        --chain)
+            COMPOSED="$PATH_COMPOSED/chained.wasm"
             ;;
         --splice1)
-            log_error "We do not support component splicing of middleware yet."
-            exit 1
+            COMPOSED="$PATH_COMPOSED/spliced1.wasm"
             ;;
-        --spliceAll)
-            log_error "We do not support component splicing of multiple middlewares yet."
-            exit 1
+        --spliceN)
+            COMPOSED="$PATH_COMPOSED/splicedN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -312,41 +351,78 @@ run_composition() {
             ;;
     esac
 
-    if [[ ! -f "$COMPOSED" ]]; then
-        log_error "Composed component not found! Please run the compose step first."
-        exit 1
-    fi
+    log_info "Visualization of the component at $COMPOSED:"
+    viz "$COMPOSED"
+    echo
 
-    log_info "Running composed component..."
-    pushd runner > /dev/null
-
-    cargo run -- "../$COMPOSED"
-
-    popd > /dev/null
-    log_success "Composition ran successfully!"
+    run "$COMPOSED"
 }
-run_services() {
-    PATH_SVC_B="./target/wasm32-wasip1/debug/service_b.comp.wasm"
-    CHAINED="./compositions/service-chaining.wasm"
 
-    run_service $PATH_SVC_B
-    run_service $CHAINED
+# -----------------------------------------------------------------------------
+# Visualize the component
+# -----------------------------------------------------------------------------
+viz() {
+    local component=$1
+    cviz-cli "$component"
 }
-run_service() {
-    PATH_SVC="$1"
+viz_composition() {
+    case "$1" in
+        --single)
+            COMPOSED="$PATH_COMPOSED/single.wasm"
+            ;;
+        --multiple)
+            COMPOSED="$PATH_COMPOSED/multiple.wasm"
+            ;;
+        --chain)
+            COMPOSED="$PATH_COMPOSED/chained.wasm"
+            ;;
+        --splice1)
+            COMPOSED="$PATH_COMPOSED/spliced1.wasm"
+            ;;
+        --spliceN)
+            COMPOSED="$PATH_COMPOSED/splicedN.wasm"
+            ;;
+        *)
+            log_error "Unknown option: $1"
+            print_usage
+            exit 1
+            ;;
+    esac
 
-    if [[ ! -f "$PATH_SVC" ]]; then
-        log_error "Service component not found! Please run the service step first."
-        exit 1
-    fi
+    viz "$COMPOSED"
+}
 
-    log_info "Running service A component..."
-    pushd runner > /dev/null
+# -----------------------------------------------------------------------------
+# Build the component
+# -----------------------------------------------------------------------------
 
-    cargo run -- "../$PATH_SVC"
+build() {
+    check_env
+    build_component "service_a" "service_a" "service_a"
+    build_component "service_b" "service_b" "service_b"
+    build_component "middleware_a" "middleware_a" "middleware_a"
+    build_component "middleware_b" "middleware_b" "middleware_b"
+    build_component "middleware_c" "middleware_c" "middleware_c"
+    compose --chain
+}
 
-    popd > /dev/null
-    log_success "Service A ran successfully!"
+run_tests() {
+    implemented_options=("--single" "--multiple" "--chain" "--splice1" "--spliceN")
+    log_info "Running all different configurations, these should all execute successfully!\n"
+
+    check_env
+    build
+
+    # Iterate and build a command for each item
+    for opt in "${implemented_options[@]}"; do
+        log_info "Executing with option: $opt"
+        compose "$opt"
+        run_composition "$opt"
+        log_info "Option completed successfully: $opt"
+    done
+
+    echo
+    log_success "All configurations of this run.sh script still work! BOOYAH! :)"
 }
 
 # -----------------------------------------------------------------------------
@@ -359,16 +435,8 @@ case "$CMD" in
     env)
         check_env
         ;;
-    service)
-        check_env
-        build_component "service_a" "service_a" "service_a"
-        build_component "service_b" "service_b" "service_b"
-        ;;
-    middleware)
-        check_env
-        build_component "middleware_a" "middleware_a" "middleware_a"
-        build_component "middleware_b" "middleware_b" "middleware_b"
-        build_component "middleware_c" "middleware_c" "middleware_c"
+    build)
+        build
         ;;
     compose)
         check_env
@@ -382,16 +450,18 @@ case "$CMD" in
         check_env
         run_services
         ;;
-    all)
+    viz)
         check_env
-        build_component "service_a" "service_a" "service_a"
-        build_component "service_b" "service_b" "service_b"
-        build_component "middleware_a" "middleware_a" "middleware_a"
-        build_component "middleware_b" "middleware_b" "middleware_b"
-        build_component "middleware_c" "middleware_c" "middleware_c"
+        viz_composition "$OPT"
+        ;;
+    all)
+        build
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"
+        ;;
+    __testme)
+        run_tests
         ;;
     --help|-h)
         print_usage
