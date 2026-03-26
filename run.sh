@@ -63,11 +63,11 @@ print_usage() {
     echo -e "  --single    : Wrap the service call with a SINGLE middleware (a)"
     echo -e "  --multiple  : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
     echo -e "  --chain     : Perform service chaining on the services (a and b)"
+    echo -e "  --chain1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
+    echo -e "  --chainN   : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
     echo -e "  --nested    : Perform service chaining and create a chain where one of the nodes contains a chain"
-    echo -e "  --splice1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
-    echo -e "  --spliceN   : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
-    echo -e "  --splice1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
-    echo -e "  --spliceN   : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --nested1   : Splice the nested chain node in a chained composition with a SINGLE middleware (a)"
+#    echo -e "  --nestedN   : Splice the nested chain node in a chained composition with MULTIPLE middlewares (a, b, and c)"
     echo ""
 }
 
@@ -214,16 +214,20 @@ compose() {
         --chain)
             compose_chain
             ;;
+        --chain1)
+            compose --chain
+            compose_chain1
+            ;;
+        --chainN)
+            compose --chain
+            compose_chainN
+            ;;
         --nested)
             compose_nested
             ;;
-        --splice1)
-            compose --chain
-            compose_splice1
-            ;;
-        --spliceN)
-            compose --chain
-            compose_spliceN
+        --nested1)
+            compose --nested
+            compose_nested1
             ;;
         *)
             log_error "Unknown option: $1"
@@ -282,6 +286,22 @@ compose_chain() {
         "$PATH_WAC/chain.wac" \
         "$PATH_COMPOSED/chained.wasm"
 }
+compose_chain1() {
+    local wasm_file="$PATH_COMPOSED/chained.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/chain1.yaml" \
+        "$PATH_WAC/chain1.wac" \
+        "$PATH_COMPOSED/chain1.wasm"
+}
+compose_chainN() {
+    local wasm_file="$PATH_COMPOSED/chained.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/chainN.yaml" \
+        "$PATH_WAC/chainN.wac" \
+        "$PATH_COMPOSED/chainN.wasm"
+}
 compose_nested() {
     # Dependent on the chained.wasm being generated
     compose_chain
@@ -292,22 +312,13 @@ compose_nested() {
         "$PATH_WAC/nested.wac" \
         "$PATH_COMPOSED/nested.wasm"
 }
-compose_splice1() {
-    local wasm_file="$PATH_COMPOSED/chained.wasm"
+compose_nested1() {
+    local wasm_file="$PATH_COMPOSED/nested.wasm"
     run_splicer \
         "$wasm_file" \
-        "$PATH_RULES/splice1.yaml" \
-        "$PATH_WAC/splice1.wac" \
-        "$PATH_COMPOSED/spliced1.wasm"
-}
-
-compose_spliceN() {
-    local wasm_file="$PATH_COMPOSED/chained.wasm"
-    run_splicer \
-        "$wasm_file" \
-        "$PATH_RULES/spliceN.yaml" \
-        "$PATH_WAC/spliceN.wac" \
-        "$PATH_COMPOSED/splicedN.wasm"
+        "$PATH_RULES/nested1.yaml" \
+        "$PATH_WAC/nested1.wac" \
+        "$PATH_COMPOSED/nested1.wasm"
 }
 
 # -----------------------------------------------------------------------------
@@ -338,12 +349,14 @@ run_services() {
     PATH_SVC_C="$PATH_WASI_TARGET/service_c.comp.wasm"
     CHAINED="$PATH_COMPOSED/chained.wasm"
     NESTED="$PATH_COMPOSED/nested.wasm"
+    NESTED1="$PATH_COMPOSED/nested1.wasm"
 
     run $PATH_SVC_A
     run $PATH_SVC_B
     run $PATH_SVC_C
     run $CHAINED
     run $NESTED
+    run $NESTED1
 }
 run_composition() {
     case "$1" in
@@ -356,14 +369,17 @@ run_composition() {
         --chain)
             COMPOSED="$PATH_COMPOSED/chained.wasm"
             ;;
+        --chain1)
+            COMPOSED="$PATH_COMPOSED/chain1.wasm"
+            ;;
+        --chainN)
+            COMPOSED="$PATH_COMPOSED/chainN.wasm"
+            ;;
         --nested)
             COMPOSED="$PATH_COMPOSED/nested.wasm"
             ;;
-        --splice1)
-            COMPOSED="$PATH_COMPOSED/spliced1.wasm"
-            ;;
-        --spliceN)
-            COMPOSED="$PATH_COMPOSED/splicedN.wasm"
+        --nested1)
+            COMPOSED="$PATH_COMPOSED/nested1.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -397,14 +413,17 @@ viz_composition() {
         --chain)
             COMPOSED="$PATH_COMPOSED/chained.wasm"
             ;;
+        --chain1)
+            COMPOSED="$PATH_COMPOSED/chain1.wasm"
+            ;;
+        --chainN)
+            COMPOSED="$PATH_COMPOSED/chainN.wasm"
+            ;;
         --nested)
             COMPOSED="$PATH_COMPOSED/nested.wasm"
             ;;
-        --splice1)
-            COMPOSED="$PATH_COMPOSED/spliced1.wasm"
-            ;;
-        --spliceN)
-            COMPOSED="$PATH_COMPOSED/splicedN.wasm"
+        --nested1)
+            COMPOSED="$PATH_COMPOSED/nested1.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -433,7 +452,7 @@ build() {
 }
 
 run_tests() {
-    implemented_options=("--single" "--multiple" "--chain" "--nested" "--splice1" "--spliceN")
+    implemented_options=("--single" "--multiple" "--chain" "--chain1" "--chainN" "--nested" "--nested1")
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
