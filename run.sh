@@ -281,9 +281,9 @@ run_splicer() {
     shift 4
 
     log_info "Running splicer with rule set '$(basename "$rule_file")'..."
-    if ! wac_cmd=$(splicer "$wasm_file" "$rule_file" -o "$output_wac") ; then
+    if ! wac_cmd=$(splicer splice "$rule_file" "$wasm_file" -o "$output_wac") ; then
         log_error "Splice with '$(basename "$rule_file")' failed! Used the following command:"
-        echo splicer "$wasm_file" "$rule_file" -o "$output_wac"
+        echo splicer splice "$rule_file" "$wasm_file" -o "$output_wac"
         exit 1
     fi
     log_success "Splicer generated splits and a wac composition with '$(basename "$rule_file")' successfully!"
