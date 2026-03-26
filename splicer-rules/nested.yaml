@@ -1,7 +1,7 @@
 version: 1
 
-# This creates a composition that has an unfulfilled dependency (it's the nested
-# node of the chain)
+# This creates a composition that has a nested node in the service chain
+# (gets run with the chain.yaml composition)
 rules:
   - before:
       interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
