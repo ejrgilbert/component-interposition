@@ -71,6 +71,7 @@ print_usage() {
     echo -e "  --pre-nested1   : Splice the nested composition before the nested node in the chain with a SINGLE middleware (a)"
     echo -e "  --pre-nestedN   : Splice the nested composition before the nested node in the chain with MULTIPLE middlewares (a, b, and c)"
     echo -e "  --inner+pre-nested1 : Splice the nested composition BOTH before AND inside nested chain node with a SINGLE middleware (a)"
+#    echo -e "  --nested        : Perform service chaining and create a chain where one of the nodes contains a chain"
     echo ""
 }
 
@@ -555,7 +556,13 @@ build() {
 }
 
 run_tests() {
-    implemented_options=("--single" "--multiple" "--chain" "--chain1" "--chainN" "--nested" "--inner-nested1" "--inner-nestedN" "--pre-nested1" "--pre-nestedN" "--inner+pre-nested1" "--inner+pre-nestedN")
+    implemented_options=( \
+      "--single" "--multiple" \
+      "--chain" "--chain1" "--chainN" \
+      "--nested" "--inner-nested1" "--inner-nestedN" \
+      "--pre-nested1" "--pre-nestedN" \
+      "--inner+pre-nested1" "--inner+pre-nestedN" \
+    )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
