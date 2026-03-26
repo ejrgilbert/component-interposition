@@ -1,6 +1,6 @@
 version: 1
 
-# Search for the http handler of srv-a and insert a single middleware (mdl-a)
+# Search for the http handler of srv and insert multiple middlewares
 rules:
   - between:
       interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
