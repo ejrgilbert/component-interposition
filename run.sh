@@ -63,6 +63,9 @@ print_usage() {
     echo -e "  --single    : Wrap the service call with a SINGLE middleware (a)"
     echo -e "  --multiple  : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
     echo -e "  --chain     : Perform service chaining on the services (a and b)"
+    echo -e "  --nested    : Perform service chaining and create a chain where one of the nodes contains a chain"
+    echo -e "  --splice1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
+    echo -e "  --spliceN   : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
     echo -e "  --splice1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
     echo -e "  --spliceN   : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
     echo ""
@@ -211,6 +214,9 @@ compose() {
         --chain)
             compose_chain
             ;;
+        --nested)
+            compose_nested
+            ;;
         --splice1)
             compose --chain
             compose_splice1
@@ -276,6 +282,16 @@ compose_chain() {
         "$PATH_WAC/chain.wac" \
         "$PATH_COMPOSED/chained.wasm"
 }
+compose_nested() {
+    # Dependent on the chained.wasm being generated
+    compose_chain
+
+    run_splicer \
+        "$PATH_COMPOSED/chained.wasm" \
+        "$PATH_RULES/nested.yaml" \
+        "$PATH_WAC/nested.wac" \
+        "$PATH_COMPOSED/nested.wasm"
+}
 compose_splice1() {
     local wasm_file="$PATH_COMPOSED/chained.wasm"
     run_splicer \
@@ -321,11 +337,13 @@ run_services() {
     PATH_SVC_B="$PATH_WASI_TARGET/service_b.comp.wasm"
     PATH_SVC_C="$PATH_WASI_TARGET/service_c.comp.wasm"
     CHAINED="$PATH_COMPOSED/chained.wasm"
+    NESTED="$PATH_COMPOSED/nested.wasm"
 
     run $PATH_SVC_A
     run $PATH_SVC_B
     run $PATH_SVC_C
     run $CHAINED
+    run $NESTED
 }
 run_composition() {
     case "$1" in
@@ -337,6 +355,9 @@ run_composition() {
             ;;
         --chain)
             COMPOSED="$PATH_COMPOSED/chained.wasm"
+            ;;
+        --nested)
+            COMPOSED="$PATH_COMPOSED/nested.wasm"
             ;;
         --splice1)
             COMPOSED="$PATH_COMPOSED/spliced1.wasm"
@@ -376,6 +397,9 @@ viz_composition() {
         --chain)
             COMPOSED="$PATH_COMPOSED/chained.wasm"
             ;;
+        --nested)
+            COMPOSED="$PATH_COMPOSED/nested.wasm"
+            ;;
         --splice1)
             COMPOSED="$PATH_COMPOSED/spliced1.wasm"
             ;;
@@ -400,14 +424,16 @@ build() {
     check_env
     build_component "service_a" "service_a" "service_a"
     build_component "service_b" "service_b" "service_b"
+    build_component "service_c" "service_c" "service_c"
     build_component "middleware_a" "middleware_a" "middleware_a"
     build_component "middleware_b" "middleware_b" "middleware_b"
     build_component "middleware_c" "middleware_c" "middleware_c"
     compose --chain
+    compose --nested
 }
 
 run_tests() {
-    implemented_options=("--single" "--multiple" "--chain" "--splice1" "--spliceN")
+    implemented_options=("--single" "--multiple" "--chain" "--nested" "--splice1" "--spliceN")
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
