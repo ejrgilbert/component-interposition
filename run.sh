@@ -60,14 +60,16 @@ print_usage() {
     echo -e "  --help|-h   : Show this usage message"
     echo ""
     echo -e "${BLUE}Options:${NC}"
-    echo -e "  --single    : Wrap the service call with a SINGLE middleware (a)"
-    echo -e "  --multiple  : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
-    echo -e "  --chain     : Perform service chaining on the services (a and b)"
-    echo -e "  --chain1   : Splice a component with two services directly communicating with a SINGLE middleware (a)"
-    echo -e "  --chainN   : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
-    echo -e "  --nested    : Perform service chaining and create a chain where one of the nodes contains a chain"
-    echo -e "  --nested1   : Splice the nested chain node in a chained composition with a SINGLE middleware (a)"
-    echo -e "  --nestedN   : Splice the nested chain node in a chained composition with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --single      : Wrap the service call with a SINGLE middleware (a)"
+    echo -e "  --multiple    : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --chain       : Perform service chaining on the services (a and b)"
+    echo -e "  --chain1      : Splice a component with two services directly communicating with a SINGLE middleware (a)"
+    echo -e "  --chainN      : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --nested      : Perform service chaining and create a chain where one of the nodes contains a chain"
+    echo -e "  --nested1     : Splice the nested chain node in a chained composition with a SINGLE middleware (a)"
+    echo -e "  --nestedN     : Splice the nested chain node in a chained composition with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --pre-nested1 : Splice the nested composition before the nested node in the chain with a SINGLE middleware (a)"
+    echo -e "  --pre-nestedN : Splice the nested composition before the nested node in the chain with MULTIPLE middlewares (a, b, and c)"
     echo ""
 }
 
@@ -233,6 +235,14 @@ compose() {
             compose --nested
             compose_nestedN
             ;;
+        --pre-nested1)
+            compose --nested
+            compose_pre_nested1
+            ;;
+        --pre-nestedN)
+            compose --nested
+            compose_pre_nestedN
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -332,6 +342,22 @@ compose_nestedN() {
         "$PATH_WAC/nestedN.wac" \
         "$PATH_COMPOSED/nestedN.wasm"
 }
+compose_pre_nested1() {
+    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/pre-nested1.yaml" \
+        "$PATH_WAC/pre-nested1.wac" \
+        "$PATH_COMPOSED/pre-nested1.wasm"
+}
+compose_pre_nestedN() {
+    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/pre-nestedN.yaml" \
+        "$PATH_WAC/pre-nestedN.wac" \
+        "$PATH_COMPOSED/pre-nestedN.wasm"
+}
 
 # -----------------------------------------------------------------------------
 # Run the composed component
@@ -363,6 +389,8 @@ run_services() {
     NESTED="$PATH_COMPOSED/nested.wasm"
     NESTED1="$PATH_COMPOSED/nested1.wasm"
     NESTED_N="$PATH_COMPOSED/nestedN.wasm"
+    PRE_NESTED1="$PATH_COMPOSED/pre-nested1.wasm"
+    PRE_NESTED_N="$PATH_COMPOSED/pre-nestedN.wasm"
 
     run $PATH_SVC_A
     run $PATH_SVC_B
@@ -371,6 +399,8 @@ run_services() {
     run $NESTED
     run $NESTED1
     run $NESTED_N
+    run $PRE_NESTED1
+    run $PRE_NESTED_N
 }
 run_composition() {
     case "$1" in
@@ -397,6 +427,12 @@ run_composition() {
             ;;
         --nestedN)
             COMPOSED="$PATH_COMPOSED/nestedN.wasm"
+            ;;
+        --pre-nested1)
+            COMPOSED="$PATH_COMPOSED/pre-nested1.wasm"
+            ;;
+        --pre-nestedN)
+            COMPOSED="$PATH_COMPOSED/pre-nestedN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -445,6 +481,12 @@ viz_composition() {
         --nestedN)
             COMPOSED="$PATH_COMPOSED/nestedN.wasm"
             ;;
+        --pre-nested1)
+            COMPOSED="$PATH_COMPOSED/pre-nested1.wasm"
+            ;;
+        --pre-nestedN)
+            COMPOSED="$PATH_COMPOSED/pre-nestedN.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -472,7 +514,7 @@ build() {
 }
 
 run_tests() {
-    implemented_options=("--single" "--multiple" "--chain" "--chain1" "--chainN" "--nested" "--nested1" "--nestedN")
+    implemented_options=("--single" "--multiple" "--chain" "--chain1" "--chainN" "--nested" "--nested1" "--nestedN" "--pre-nested1" "--pre-nestedN")
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env

@@ -1,0 +1,11 @@
+version: 1
+
+# Search for the http handler of srv-a and insert a single middleware (mdl-a)
+rules:
+  - before:
+      interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
+      provider:
+        name: "srv-a"
+    inject:
+      - name: mdl-a
+        path: "./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
