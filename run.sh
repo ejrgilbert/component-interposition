@@ -71,7 +71,11 @@ print_usage() {
     echo -e "  --pre-nested1   : Splice the nested composition before the nested node in the chain with a SINGLE middleware (a)"
     echo -e "  --pre-nestedN   : Splice the nested composition before the nested node in the chain with MULTIPLE middlewares (a, b, and c)"
     echo -e "  --inner+pre-nested1 : Splice the nested composition BOTH before AND inside nested chain node with a SINGLE middleware (a)"
-#    echo -e "  --nested        : Perform service chaining and create a chain where one of the nodes contains a chain"
+    echo -e "  --fanin         : Perform service chaining and create a chain where multiple downstream dependencies are chained to a single service"
+    echo -e "  --fanin1        : Splice fanin topology composition with a SINGLE middleware between all downstream dependency calls"
+    echo -e "  --faninN        : Splice fanin topology composition with MULTIPLE middlewares between all downstream dependency calls"
+    echo -e "  --fanin-select1 : Splice fanin topology composition with a SINGLE middleware on a specific downstream dependency call"
+    echo -e "  --fanin-selectN : Splice fanin topology composition with MULTIPLE middlewares on a specific downstream dependency call"
     echo ""
 }
 
@@ -253,6 +257,9 @@ compose() {
             compose --nested
             compose_inner_pre_nestedN
             ;;
+        --fanin)
+            compose_fanin
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -384,6 +391,26 @@ compose_inner_pre_nestedN() {
         "$PATH_WAC/inner-pre-nestedN.wac" \
         "$PATH_COMPOSED/inner-pre-nestedN.wasm"
 }
+compose_fanin() {
+    log_error "TODO: We haven't supported the 'fanin' composition yet"
+    exit 1
+}
+compose_fanin1() {
+    log_error "TODO: We haven't supported the 'fanin1' composition yet"
+    exit 1
+}
+compose_faninN() {
+    log_error "TODO: We haven't supported the 'faninN' composition yet"
+    exit 1
+}
+compose_fanin_select1() {
+    log_error "TODO: We haven't supported the 'fanin-select1' composition yet"
+    exit 1
+}
+compose_fanin_selectN() {
+    log_error "TODO: We haven't supported the 'fanin-selectN' composition yet"
+    exit 1
+}
 
 # -----------------------------------------------------------------------------
 # Run the composed component
@@ -419,6 +446,11 @@ run_services() {
     PRE_NESTED_N="$PATH_COMPOSED/pre-nestedN.wasm"
     INNER_PRE_NESTED1="$PATH_COMPOSED/inner-pre-nested1.wasm"
     INNER_PRE_NESTED_N="$PATH_COMPOSED/inner-pre-nestedN.wasm"
+    FANIN="$PATH_COMPOSED/fanin.wasm"
+    FANIN1="$PATH_COMPOSED/fanin1.wasm"
+    FANIN_N="$PATH_COMPOSED/faninN.wasm"
+    FANIN_SELECT1="$PATH_COMPOSED/fanin-select1.wasm"
+    FANIN_SELECT_N="$PATH_COMPOSED/fanin-selectN.wasm"
 
     run $PATH_SVC_A
     run $PATH_SVC_B
@@ -431,6 +463,11 @@ run_services() {
     run $PRE_NESTED_N
     run $INNER_PRE_NESTED1
     run $INNER_PRE_NESTED_N
+    run $FANIN
+    run $FANIN1
+    run $FANIN_N
+    run $FANIN_SELECT1
+    run $FANIN_SELECT_N
 }
 run_composition() {
     case "$1" in
@@ -469,6 +506,21 @@ run_composition() {
             ;;
         --inner+pre-nestedN)
             COMPOSED="$PATH_COMPOSED/inner-pre-nestedN.wasm"
+            ;;
+        --fanin)
+            COMPOSED="$PATH_COMPOSED/fanin.wasm"
+            ;;
+        --fanin1)
+            COMPOSED="$PATH_COMPOSED/fanin1.wasm"
+            ;;
+        --faninN)
+            COMPOSED="$PATH_COMPOSED/faninN.wasm"
+            ;;
+        --fanin-select1)
+            COMPOSED="$PATH_COMPOSED/fanin-select1.wasm"
+            ;;
+        --fanin-selectN)
+            COMPOSED="$PATH_COMPOSED/fanin-selectN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -529,6 +581,21 @@ viz_composition() {
         --inner+pre-nestedN)
             COMPOSED="$PATH_COMPOSED/inner-pre-nestedN.wasm"
             ;;
+        --fanin)
+            COMPOSED="$PATH_COMPOSED/fanin.wasm"
+            ;;
+        --fanin1)
+            COMPOSED="$PATH_COMPOSED/fanin1.wasm"
+            ;;
+        --faninN)
+            COMPOSED="$PATH_COMPOSED/faninN.wasm"
+            ;;
+        --fanin-select1)
+            COMPOSED="$PATH_COMPOSED/fanin-select1.wasm"
+            ;;
+        --fanin-selectN)
+            COMPOSED="$PATH_COMPOSED/fanin-selectN.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -553,6 +620,7 @@ build() {
     build_component "middleware_c" "middleware_c" "middleware_c"
     compose --chain
     compose --nested
+    compose --fanin
 }
 
 run_tests() {
@@ -562,6 +630,7 @@ run_tests() {
       "--nested" "--inner-nested1" "--inner-nestedN" \
       "--pre-nested1" "--pre-nestedN" \
       "--inner+pre-nested1" "--inner+pre-nestedN" \
+      "fanin" "fanin1" "faninN" "fanin-select1" "fanin-selectN" \
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
