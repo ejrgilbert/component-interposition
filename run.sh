@@ -25,6 +25,7 @@ PATH_COMPOSED="./compositions"
 PATH_WAC="./generated-wac"
 PATH_RULES="./splicer-rules"
 PATH_HANDLERS="./handlers"
+PATH_FAN_IN="./fan-in"
 
 # -----------------------------------------------------------------------------
 # Color codes for logs
@@ -169,7 +170,7 @@ check_encoding() {
 # -----------------------------------------------------------------------------
 build_component() {
     local name=$1
-    local dir="$PATH_HANDLERS/$2"
+    local dir=$2
     local base=$3
 
     log_info "Building '$name' component..."
@@ -612,12 +613,18 @@ viz_composition() {
 
 build() {
     check_env
-    build_component "service_a" "service_a" "service_a"
-    build_component "service_b" "service_b" "service_b"
-    build_component "service_c" "service_c" "service_c"
-    build_component "middleware_a" "middleware_a" "middleware_a"
-    build_component "middleware_b" "middleware_b" "middleware_b"
-    build_component "middleware_c" "middleware_c" "middleware_c"
+    build_component "service_a"     "$PATH_HANDLERS/service_a"    "service_a"
+    build_component "service_b"     "$PATH_HANDLERS/service_b"    "service_b"
+    build_component "service_c"     "$PATH_HANDLERS/service_c"    "service_c"
+    build_component "middleware_a"  "$PATH_HANDLERS/middleware_a" "middleware_a"
+    build_component "middleware_b"  "$PATH_HANDLERS/middleware_b" "middleware_b"
+    build_component "middleware_c"  "$PATH_HANDLERS/middleware_c" "middleware_c"
+
+    build_component "adder"         "$PATH_FAN_IN/adder"          "adder"
+    build_component "printer1"      "$PATH_FAN_IN/printer1"       "printer1"
+    build_component "printer_n"     "$PATH_FAN_IN/printer_n"      "printer_n"
+    build_component "service"       "$PATH_FAN_IN/service"        "service"
+
     compose --chain
     compose --nested
     compose --fanin

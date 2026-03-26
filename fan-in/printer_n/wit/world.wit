@@ -1,0 +1,15 @@
+package my:service;
+
+interface adder {
+    add:    func(a: s32, b: s32) -> s32;
+}
+interface printer1 {
+    print1: func(msg: string);
+}
+interface printer-n {
+    print-n: func(msg: string, n: u32);
+}
+
+world service {
+    export printer-n;
+}
