@@ -1,6 +1,10 @@
 [workspace]
 resolver = "2"
-members = ["handlers/middleware_a", "handlers/middleware_b", "handlers/middleware_c", "handlers/service_a", "handlers/service_b", "handlers/service_c", "runner"]
+members = [
+    "handlers/middleware_a", "handlers/middleware_b", "handlers/middleware_c",
+    "handlers/service_a", "handlers/service_b", "handlers/service_c",
+    "fan-in/service", "fan-in/adder", "fan-in/printer1", "fan-in/printer_n",
+    "runner"]
 
 [workspace.dependencies]
 clap = { version = "4.5.58", features = ["derive"] }
