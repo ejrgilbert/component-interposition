@@ -296,6 +296,28 @@ run_splicer() {
     fi
     log_success "The 'wac compose' ran successfully '$(basename "$rule_file")'..."
 }
+run_splicer_solver() {
+      local output_wac="$1"
+      local output_wasm="$2"
+      shift 2
+      local -a wasm_files=("$@")
+
+    log_info "Running splicer composition solver..."
+    if ! wac_cmd=$(splicer compose "${wasm_files[@]}" -o "$output_wac") ; then
+        log_error "Splice composition solver failed! Used the following command:"
+        echo splicer compose "${wasm_files[@]}" -o "$output_wac"
+        exit 1
+    fi
+    log_success "Splicer successfully solved the composition!"
+
+    log_info "Running the wac composition generated..."
+    if ! eval "$wac_cmd  -o $output_wasm"; then
+        log_error "Failed to run wac command:"
+        echo "$wac_cmd"
+        exit 1
+    fi
+    log_success "The 'wac compose' ran successfully..."
+}
 
 compose_single() {
     run_splicer \
@@ -393,8 +415,13 @@ compose_inner_pre_nestedN() {
         "$PATH_COMPOSED/inner-pre-nestedN.wasm"
 }
 compose_fanin() {
-    log_error "TODO: We haven't supported the 'fanin' composition yet"
-    exit 1
+    run_splicer_solver \
+        "$PATH_WAC/fanin.wac" \
+        "$PATH_COMPOSED/fanin.wasm" \
+        "$PATH_WASI_TARGET/service.comp.wasm" \
+        "$PATH_WASI_TARGET/adder.comp.wasm" \
+        "$PATH_WASI_TARGET/printer1.comp.wasm" \
+        "$PATH_WASI_TARGET/printer_n.comp.wasm"
 }
 compose_fanin1() {
     log_error "TODO: We haven't supported the 'fanin1' composition yet"
