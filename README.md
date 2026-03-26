@@ -48,13 +48,69 @@ to arbitrary component compositions through:
 3. Generating the `wac` script and command that performs the splice plan
 4. Perform the `wac` operation to compose the service+middleware component.
 
-# Next Steps #
+# Interposition Works on Complex Compositions! #
 
-- [ ] **Enforce typing** validation at _splice_ plan time (does this Yaml configuration work with the type signatures?)
-- [ ] **More tests** with more compositions (demonstrate generality). This has been demonstrated to work with components
-      that contain single services and chained compositions. Should add:
-  - multiple chains for a single instance
-  - nested chain
+## Nested Chain
+
+The original topology (`./run.sh all --nested`):
+```
+[Service C] ──▶ [nested composition]
+                         │
+                         └──▶ [Service A] ──▶ [Service B]
+```
+
+After middleware injection (`./run.sh all --inner-nested1`):
+```
+[Service C] ──▶ [nested composition]
+                         │
+                         └──▶ [Service A] ── [Middleware a] ──▶ [Service B]
+```
+
+After middleware injection (`./run.sh all --pre-nested1`):
+```
+[Service C] ── [Middleware a] ──▶ [nested composition]
+                                           │
+                                           └──▶ [Service A] ──▶ [Service B]
+```
+
+After middleware injection (`./run.sh all --inner-pre-nested1`):
+```
+[Service C] ── [Middleware a] ──▶ [nested composition]
+                                           │
+                                           └──▶ [Service A] ── [Middleware b] ──▶ [Service B]
+```
+
+## "Fan In" Dependency ##
+
+The original topology (`./run.sh all --fanin`):
+```
+   [Service A] ──┐
+                 │
+   [Service B] ──┼──▶ [Target Service]
+                 │
+   [Service C] ──┘
+```
+
+After middleware injection (`./run.sh all --fanin1):
+```
+   [Service A] ──┐
+                 │
+   [Service B] ──┼──▶ [Middleware a] ─▶ [Target Service]
+                 │
+   [Service C] ──┘
+```
+
+After middleware injection (`./run.sh all --fanin-select1):
+```
+   [Service A] ──┐
+           [Middleware a]
+   [Service B] ──┼──▶ [Target Service]
+                 │
+   [Service C] ──┘
+```
+
+# Next Steps #
+- [ ] Generate proxy components to wrap middleware that only has host imports so it can port across function interface types
 - [ ] Build **standardized middleware** components that can port across compositions using the `splicer`
  
 # What is "middleware" in the realm of Wasi HTTP? #
