@@ -60,16 +60,17 @@ print_usage() {
     echo -e "  --help|-h   : Show this usage message"
     echo ""
     echo -e "${BLUE}Options:${NC}"
-    echo -e "  --single      : Wrap the service call with a SINGLE middleware (a)"
-    echo -e "  --multiple    : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
-    echo -e "  --chain       : Perform service chaining on the services (a and b)"
-    echo -e "  --chain1      : Splice a component with two services directly communicating with a SINGLE middleware (a)"
-    echo -e "  --chainN      : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
-    echo -e "  --nested      : Perform service chaining and create a chain where one of the nodes contains a chain"
-    echo -e "  --nested1     : Splice the nested chain node in a chained composition with a SINGLE middleware (a)"
-    echo -e "  --nestedN     : Splice the nested chain node in a chained composition with MULTIPLE middlewares (a, b, and c)"
-    echo -e "  --pre-nested1 : Splice the nested composition before the nested node in the chain with a SINGLE middleware (a)"
-    echo -e "  --pre-nestedN : Splice the nested composition before the nested node in the chain with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --single        : Wrap the service call with a SINGLE middleware (a)"
+    echo -e "  --multiple      : Wrap the service call with a MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --chain         : Perform service chaining on the services (a and b)"
+    echo -e "  --chain1        : Splice a component with two services directly communicating with a SINGLE middleware (a)"
+    echo -e "  --chainN        : Splice a component with N services directly communicating with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --nested        : Perform service chaining and create a chain where one of the nodes contains a chain"
+    echo -e "  --inner-nested1 : Splice the nested chain node in a chained composition with a SINGLE middleware (a)"
+    echo -e "  --inner-nestedN : Splice the nested chain node in a chained composition with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --pre-nested1   : Splice the nested composition before the nested node in the chain with a SINGLE middleware (a)"
+    echo -e "  --pre-nestedN   : Splice the nested composition before the nested node in the chain with MULTIPLE middlewares (a, b, and c)"
+    echo -e "  --inner+pre-nested1 : Splice the nested composition BOTH before AND inside nested chain node with a SINGLE middleware (a)"
     echo ""
 }
 
@@ -227,13 +228,13 @@ compose() {
         --nested)
             compose_nested
             ;;
-        --nested1)
+        --inner-nested1)
             compose --nested
-            compose_nested1
+            compose_inner_nested1
             ;;
-        --nestedN)
+        --inner-nestedN)
             compose --nested
-            compose_nestedN
+            compose_inner_nestedN
             ;;
         --pre-nested1)
             compose --nested
@@ -242,6 +243,14 @@ compose() {
         --pre-nestedN)
             compose --nested
             compose_pre_nestedN
+            ;;
+        --inner+pre-nested1)
+            compose --nested
+            compose_inner_pre_nested1
+            ;;
+        --inner+pre-nestedN)
+            compose --nested
+            compose_inner_pre_nestedN
             ;;
         *)
             log_error "Unknown option: $1"
@@ -326,21 +335,21 @@ compose_nested() {
         "$PATH_WAC/nested.wac" \
         "$PATH_COMPOSED/nested.wasm"
 }
-compose_nested1() {
+compose_inner_nested1() {
     local wasm_file="$PATH_COMPOSED/nested.wasm"
     run_splicer \
         "$wasm_file" \
-        "$PATH_RULES/nested1.yaml" \
-        "$PATH_WAC/nested1.wac" \
-        "$PATH_COMPOSED/nested1.wasm"
+        "$PATH_RULES/inner-nested1.yaml" \
+        "$PATH_WAC/inner-nested1.wac" \
+        "$PATH_COMPOSED/inner-nested1.wasm"
 }
-compose_nestedN() {
+compose_inner_nestedN() {
     local wasm_file="$PATH_COMPOSED/nested.wasm"
     run_splicer \
         "$wasm_file" \
-        "$PATH_RULES/nestedN.yaml" \
-        "$PATH_WAC/nestedN.wac" \
-        "$PATH_COMPOSED/nestedN.wasm"
+        "$PATH_RULES/inner-nestedN.yaml" \
+        "$PATH_WAC/inner-nestedN.wac" \
+        "$PATH_COMPOSED/inner-nestedN.wasm"
 }
 compose_pre_nested1() {
     local wasm_file="$PATH_COMPOSED/nested.wasm"
@@ -357,6 +366,22 @@ compose_pre_nestedN() {
         "$PATH_RULES/pre-nestedN.yaml" \
         "$PATH_WAC/pre-nestedN.wac" \
         "$PATH_COMPOSED/pre-nestedN.wasm"
+}
+compose_inner_pre_nested1() {
+    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/inner-pre-nested1.yaml" \
+        "$PATH_WAC/inner-pre-nested1.wac" \
+        "$PATH_COMPOSED/inner-pre-nested1.wasm"
+}
+compose_inner_pre_nestedN() {
+    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/inner-pre-nestedN.yaml" \
+        "$PATH_WAC/inner-pre-nestedN.wac" \
+        "$PATH_COMPOSED/inner-pre-nestedN.wasm"
 }
 
 # -----------------------------------------------------------------------------
@@ -387,20 +412,24 @@ run_services() {
     PATH_SVC_C="$PATH_WASI_TARGET/service_c.comp.wasm"
     CHAINED="$PATH_COMPOSED/chained.wasm"
     NESTED="$PATH_COMPOSED/nested.wasm"
-    NESTED1="$PATH_COMPOSED/nested1.wasm"
-    NESTED_N="$PATH_COMPOSED/nestedN.wasm"
+    INNER_NESTED1="$PATH_COMPOSED/inner-nested1.wasm"
+    INNER_NESTED_N="$PATH_COMPOSED/inner-nestedN.wasm"
     PRE_NESTED1="$PATH_COMPOSED/pre-nested1.wasm"
     PRE_NESTED_N="$PATH_COMPOSED/pre-nestedN.wasm"
+    INNER_PRE_NESTED1="$PATH_COMPOSED/inner-pre-nested1.wasm"
+    INNER_PRE_NESTED_N="$PATH_COMPOSED/inner-pre-nestedN.wasm"
 
     run $PATH_SVC_A
     run $PATH_SVC_B
     run $PATH_SVC_C
     run $CHAINED
     run $NESTED
-    run $NESTED1
-    run $NESTED_N
+    run $INNER_NESTED1
+    run $INNER_NESTED_N
     run $PRE_NESTED1
     run $PRE_NESTED_N
+    run $INNER_PRE_NESTED1
+    run $INNER_PRE_NESTED_N
 }
 run_composition() {
     case "$1" in
@@ -422,17 +451,23 @@ run_composition() {
         --nested)
             COMPOSED="$PATH_COMPOSED/nested.wasm"
             ;;
-        --nested1)
-            COMPOSED="$PATH_COMPOSED/nested1.wasm"
+        --inner-nested1)
+            COMPOSED="$PATH_COMPOSED/inner-nested1.wasm"
             ;;
-        --nestedN)
-            COMPOSED="$PATH_COMPOSED/nestedN.wasm"
+        --inner-nestedN)
+            COMPOSED="$PATH_COMPOSED/inner-nestedN.wasm"
             ;;
         --pre-nested1)
             COMPOSED="$PATH_COMPOSED/pre-nested1.wasm"
             ;;
         --pre-nestedN)
             COMPOSED="$PATH_COMPOSED/pre-nestedN.wasm"
+            ;;
+        --inner+pre-nested1)
+            COMPOSED="$PATH_COMPOSED/inner-pre-nested1.wasm"
+            ;;
+        --inner+pre-nestedN)
+            COMPOSED="$PATH_COMPOSED/inner-pre-nestedN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -475,17 +510,23 @@ viz_composition() {
         --nested)
             COMPOSED="$PATH_COMPOSED/nested.wasm"
             ;;
-        --nested1)
-            COMPOSED="$PATH_COMPOSED/nested1.wasm"
+        --inner-nested1)
+            COMPOSED="$PATH_COMPOSED/inner-nested1.wasm"
             ;;
-        --nestedN)
-            COMPOSED="$PATH_COMPOSED/nestedN.wasm"
+        --inner-nestedN)
+            COMPOSED="$PATH_COMPOSED/inner-nestedN.wasm"
             ;;
         --pre-nested1)
             COMPOSED="$PATH_COMPOSED/pre-nested1.wasm"
             ;;
         --pre-nestedN)
             COMPOSED="$PATH_COMPOSED/pre-nestedN.wasm"
+            ;;
+        --inner+pre-nested1)
+            COMPOSED="$PATH_COMPOSED/inner-pre-nested1.wasm"
+            ;;
+        --inner+pre-nestedN)
+            COMPOSED="$PATH_COMPOSED/inner-pre-nestedN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -514,7 +555,7 @@ build() {
 }
 
 run_tests() {
-    implemented_options=("--single" "--multiple" "--chain" "--chain1" "--chainN" "--nested" "--nested1" "--nestedN" "--pre-nested1" "--pre-nestedN")
+    implemented_options=("--single" "--multiple" "--chain" "--chain1" "--chainN" "--nested" "--inner-nested1" "--inner-nestedN" "--pre-nested1" "--pre-nestedN" "--inner+pre-nested1" "--inner+pre-nestedN")
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
