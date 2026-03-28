@@ -261,6 +261,12 @@ compose() {
         --fanin)
             compose_fanin
             ;;
+        --fanin-select1)
+            compose_fanin_select1
+            ;;
+        --fanin-selectN)
+            compose_fanin_selectN
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -424,7 +430,7 @@ compose_fanin() {
         "$PATH_WASI_TARGET/printer_n.comp.wasm"
 }
 compose_fanin1() {
-    log_error "TODO: We haven't supported the 'fanin1' composition yet"
+    log_error "TODO: We haven't supported the 'fanin-select1' composition yet"
     exit 1
 }
 compose_faninN() {
@@ -432,12 +438,20 @@ compose_faninN() {
     exit 1
 }
 compose_fanin_select1() {
-    log_error "TODO: We haven't supported the 'fanin-select1' composition yet"
-    exit 1
+    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/fanin-select1.yaml" \
+        "$PATH_WAC/fanin-select1.wac" \
+        "$PATH_COMPOSED/fanin-select1.wasm"
 }
 compose_fanin_selectN() {
-    log_error "TODO: We haven't supported the 'fanin-selectN' composition yet"
-    exit 1
+    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/fanin-selectN.yaml" \
+        "$PATH_WAC/fanin-selectN.wac" \
+        "$PATH_COMPOSED/fanin-selectN.wasm"
 }
 
 # -----------------------------------------------------------------------------
@@ -475,8 +489,8 @@ run_services() {
     INNER_PRE_NESTED1="$PATH_COMPOSED/inner-pre-nested1.wasm"
     INNER_PRE_NESTED_N="$PATH_COMPOSED/inner-pre-nestedN.wasm"
     FANIN="$PATH_COMPOSED/fanin.wasm"
-    FANIN1="$PATH_COMPOSED/fanin1.wasm"
-    FANIN_N="$PATH_COMPOSED/faninN.wasm"
+#    FANIN1="$PATH_COMPOSED/fanin1.wasm"
+#    FANIN_N="$PATH_COMPOSED/faninN.wasm"
     FANIN_SELECT1="$PATH_COMPOSED/fanin-select1.wasm"
     FANIN_SELECT_N="$PATH_COMPOSED/fanin-selectN.wasm"
 
@@ -492,8 +506,8 @@ run_services() {
     run $INNER_PRE_NESTED1
     run $INNER_PRE_NESTED_N
     run $FANIN
-    run $FANIN1
-    run $FANIN_N
+#    run $FANIN1
+#    run $FANIN_N
     run $FANIN_SELECT1
     run $FANIN_SELECT_N
 }
@@ -648,6 +662,9 @@ build() {
     build_component "middleware_c"  "$PATH_HANDLERS/middleware_c" "middleware_c"
 
     build_component "adder"         "$PATH_FAN_IN/adder"          "adder"
+    build_component "adder_mdl_a"   "$PATH_FAN_IN/adder_mdl_a"    "adder_mdl_a"
+    build_component "adder_mdl_b"   "$PATH_FAN_IN/adder_mdl_b"    "adder_mdl_b"
+    build_component "adder_mdl_c"   "$PATH_FAN_IN/adder_mdl_c"    "adder_mdl_c"
     build_component "printer1"      "$PATH_FAN_IN/printer1"       "printer1"
     build_component "printer_n"     "$PATH_FAN_IN/printer_n"      "printer_n"
     build_component "service"       "$PATH_FAN_IN/service"        "service"
@@ -664,7 +681,9 @@ run_tests() {
       "--nested" "--inner-nested1" "--inner-nestedN" \
       "--pre-nested1" "--pre-nestedN" \
       "--inner+pre-nested1" "--inner+pre-nestedN" \
-      "fanin" "fanin1" "faninN" "fanin-select1" "fanin-selectN" \
+      "--fanin" \
+      "--fanin-select1" "--fanin-selectN" \
+#      "--fanin1" "--faninN" "--fanin-select1" "--fanin-selectN" \
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 

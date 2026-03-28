@@ -1,6 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
-        world: "service",
+        world: "printer-n-svc",
         async: true,
         generate_all
     });
@@ -14,11 +14,11 @@ impl Guest for Service {
         msg: String,
         n: u32
     ) {
-        println!("    [printN] entered!");
+        println!("     [printN] entered!");
         for _ in 0..n {
-            println!("        {msg}");
+            println!("         {msg}");
         }
-        println!("    [printN] exit!");
+        println!("     [printN] exit!");
     }
 }
 

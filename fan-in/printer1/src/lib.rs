@@ -1,6 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
-        world: "service",
+        world: "printer1-svc",
         async: true,
         generate_all
     });
@@ -13,9 +13,9 @@ impl Guest for Service {
     async fn print1(
         msg: String
     ) {
-        println!("    [print1] entered!");
-        println!("        {msg}");
-        println!("    [print1] exit!");
+        println!("     [print1] entered!");
+        println!("         {msg}");
+        println!("     [print1] exit!");
     }
 }
 
