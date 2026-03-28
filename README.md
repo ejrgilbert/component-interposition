@@ -93,17 +93,17 @@ The original topology (`./run.sh all --fanin`):
 
 After middleware injection (`./run.sh all --fanin1):
 ```
-   [Service A] ──┐
-                 │
-   [Service B] ──┼──▶ [Middleware a] ─▶ [Target Service]
-                 │
-   [Service C] ──┘
+   [Service A] ────[mdl-a]────┐
+                              │
+   [Service B] ────[mdl-a]────┼───▶ [Target Service]
+                              │
+   [Service C] ────[mdl-a]────┘
 ```
 
 After middleware injection (`./run.sh all --fanin-select1):
 ```
    [Service A] ──┐
-           [Middleware a]
+              [mdl-a]
    [Service B] ──┼──▶ [Target Service]
                  │
    [Service C] ──┘
