@@ -1,0 +1,12 @@
+version: 1
+
+rules:
+  - between:
+      interface: "my:service/adder"
+      inner:
+        name: adder-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: adder-mdl-a
+        path: "./target/wasm32-wasip1/debug/adder_mdl_a.comp.wasm"

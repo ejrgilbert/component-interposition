@@ -1,0 +1,34 @@
+package example:composition;
+
+let adder-comp = new my:adder-comp {
+    ...
+};
+
+let printer1-comp = new my:printer1-comp {
+    ...
+};
+
+let printer-n-comp = new my:printer-n-comp {
+    ...
+};
+
+let adder-mdl-c = new my:adder-mdl-c {
+    "my:service/adder": adder-comp["my:service/adder"], ...
+};
+
+let adder-mdl-b = new my:adder-mdl-b {
+    "my:service/adder": adder-mdl-c["my:service/adder"], ...
+};
+
+let adder-mdl-a = new my:adder-mdl-a {
+    "my:service/adder": adder-mdl-b["my:service/adder"], ...
+};
+
+let service-comp = new my:service-comp {
+    "my:service/printer-n": printer-n-comp["my:service/printer-n"],
+    "my:service/printer1": printer1-comp["my:service/printer1"],
+    "my:service/adder": adder-mdl-a["my:service/adder"],
+    ...
+};
+
+export service-comp["wasi:http/handler@0.3.0-rc-2026-01-06"];

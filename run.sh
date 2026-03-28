@@ -73,10 +73,10 @@ print_usage() {
     echo -e "  --pre-nestedN   : Splice the nested composition before the nested node in the chain with MULTIPLE middlewares (a, b, and c)"
     echo -e "  --inner+pre-nested1 : Splice the nested composition BOTH before AND inside nested chain node with a SINGLE middleware (a)"
     echo -e "  --fanin         : Perform service chaining and create a chain where multiple downstream dependencies are chained to a single service"
-    echo -e "  --fanin1        : Splice fanin topology composition with a SINGLE middleware between all downstream dependency calls"
-    echo -e "  --faninN        : Splice fanin topology composition with MULTIPLE middlewares between all downstream dependency calls"
-    echo -e "  --fanin-select1 : Splice fanin topology composition with a SINGLE middleware on a specific downstream dependency call"
-    echo -e "  --fanin-selectN : Splice fanin topology composition with MULTIPLE middlewares on a specific downstream dependency call"
+    echo -e "  --fanin1        : Splice fan-in topology composition with a SINGLE middleware on a specific downstream dependency call"
+    echo -e "  --faninN        : Splice fan-in topology composition with MULTIPLE middlewares on a specific downstream dependency call"
+    echo -e "  --fanin-all1 : Splice fan-in topology composition with a SINGLE middleware between all downstream dependency calls"
+    echo -e "  --fanin-allN : Splice fan-in topology composition with MULTIPLE middlewares between all downstream dependency calls"
     echo ""
 }
 
@@ -261,11 +261,17 @@ compose() {
         --fanin)
             compose_fanin
             ;;
-        --fanin-select1)
-            compose_fanin_select1
+        --fanin1)
+            compose_fanin1
             ;;
-        --fanin-selectN)
-            compose_fanin_selectN
+        --faninN)
+            compose_faninN
+            ;;
+        --fanin-all1)
+            compose_fanin_all1
+            ;;
+        --fanin-allN)
+            compose_fanin_allN
             ;;
         *)
             log_error "Unknown option: $1"
@@ -430,28 +436,36 @@ compose_fanin() {
         "$PATH_WASI_TARGET/printer_n.comp.wasm"
 }
 compose_fanin1() {
-    log_error "TODO: We haven't supported the 'fanin-select1' composition yet"
-    exit 1
+    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/fanin1.yaml" \
+        "$PATH_WAC/fanin1.wac" \
+        "$PATH_COMPOSED/fanin1.wasm"
 }
 compose_faninN() {
-    log_error "TODO: We haven't supported the 'faninN' composition yet"
-    exit 1
-}
-compose_fanin_select1() {
     local wasm_file="$PATH_COMPOSED/fanin.wasm"
     run_splicer \
         "$wasm_file" \
-        "$PATH_RULES/fanin-select1.yaml" \
-        "$PATH_WAC/fanin-select1.wac" \
-        "$PATH_COMPOSED/fanin-select1.wasm"
+        "$PATH_RULES/faninN.yaml" \
+        "$PATH_WAC/faninN.wac" \
+        "$PATH_COMPOSED/faninN.wasm"
 }
-compose_fanin_selectN() {
+compose_fanin_all1() {
     local wasm_file="$PATH_COMPOSED/fanin.wasm"
     run_splicer \
         "$wasm_file" \
-        "$PATH_RULES/fanin-selectN.yaml" \
-        "$PATH_WAC/fanin-selectN.wac" \
-        "$PATH_COMPOSED/fanin-selectN.wasm"
+        "$PATH_RULES/fanin-all1.yaml" \
+        "$PATH_WAC/fanin-all1.wac" \
+        "$PATH_COMPOSED/fanin-all1.wasm"
+}
+compose_fanin_allN() {
+    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/fanin-allN.yaml" \
+        "$PATH_WAC/fanin-allN.wac" \
+        "$PATH_COMPOSED/fanin-allN.wasm"
 }
 
 # -----------------------------------------------------------------------------
@@ -489,10 +503,10 @@ run_services() {
     INNER_PRE_NESTED1="$PATH_COMPOSED/inner-pre-nested1.wasm"
     INNER_PRE_NESTED_N="$PATH_COMPOSED/inner-pre-nestedN.wasm"
     FANIN="$PATH_COMPOSED/fanin.wasm"
-#    FANIN1="$PATH_COMPOSED/fanin1.wasm"
-#    FANIN_N="$PATH_COMPOSED/faninN.wasm"
-    FANIN_SELECT1="$PATH_COMPOSED/fanin-select1.wasm"
-    FANIN_SELECT_N="$PATH_COMPOSED/fanin-selectN.wasm"
+    FANIN1="$PATH_COMPOSED/fanin1.wasm"
+    FANIN_N="$PATH_COMPOSED/faninN.wasm"
+    FANIN_ALL1="$PATH_COMPOSED/fanin-all1.wasm"
+    FANIN_ALL_N="$PATH_COMPOSED/fanin-allN.wasm"
 
     run $PATH_SVC_A
     run $PATH_SVC_B
@@ -506,10 +520,10 @@ run_services() {
     run $INNER_PRE_NESTED1
     run $INNER_PRE_NESTED_N
     run $FANIN
-#    run $FANIN1
-#    run $FANIN_N
-    run $FANIN_SELECT1
-    run $FANIN_SELECT_N
+    run $FANIN1
+    run $FANIN_N
+    run $FANIN_ALL1
+    run $FANIN_ALL_N
 }
 run_composition() {
     case "$1" in
@@ -558,11 +572,11 @@ run_composition() {
         --faninN)
             COMPOSED="$PATH_COMPOSED/faninN.wasm"
             ;;
-        --fanin-select1)
-            COMPOSED="$PATH_COMPOSED/fanin-select1.wasm"
+        --fanin-all1)
+            COMPOSED="$PATH_COMPOSED/fanin-all1.wasm"
             ;;
-        --fanin-selectN)
-            COMPOSED="$PATH_COMPOSED/fanin-selectN.wasm"
+        --fanin-allN)
+            COMPOSED="$PATH_COMPOSED/fanin-allN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -632,11 +646,11 @@ viz_composition() {
         --faninN)
             COMPOSED="$PATH_COMPOSED/faninN.wasm"
             ;;
-        --fanin-select1)
-            COMPOSED="$PATH_COMPOSED/fanin-select1.wasm"
+        --fanin-all1)
+            COMPOSED="$PATH_COMPOSED/fanin-all1.wasm"
             ;;
-        --fanin-selectN)
-            COMPOSED="$PATH_COMPOSED/fanin-selectN.wasm"
+        --fanin-allN)
+            COMPOSED="$PATH_COMPOSED/fanin-allN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -661,13 +675,19 @@ build() {
     build_component "middleware_b"  "$PATH_HANDLERS/middleware_b" "middleware_b"
     build_component "middleware_c"  "$PATH_HANDLERS/middleware_c" "middleware_c"
 
-    build_component "adder"         "$PATH_FAN_IN/adder"          "adder"
-    build_component "adder_mdl_a"   "$PATH_FAN_IN/adder_mdl_a"    "adder_mdl_a"
-    build_component "adder_mdl_b"   "$PATH_FAN_IN/adder_mdl_b"    "adder_mdl_b"
-    build_component "adder_mdl_c"   "$PATH_FAN_IN/adder_mdl_c"    "adder_mdl_c"
-    build_component "printer1"      "$PATH_FAN_IN/printer1"       "printer1"
-    build_component "printer_n"     "$PATH_FAN_IN/printer_n"      "printer_n"
-    build_component "service"       "$PATH_FAN_IN/service"        "service"
+    build_component "adder"           "$PATH_FAN_IN/adder"            "adder"
+    build_component "adder_mdl_a"     "$PATH_FAN_IN/adder_mdl_a"      "adder_mdl_a"
+    build_component "adder_mdl_b"     "$PATH_FAN_IN/adder_mdl_b"      "adder_mdl_b"
+    build_component "adder_mdl_c"     "$PATH_FAN_IN/adder_mdl_c"      "adder_mdl_c"
+    build_component "printer1"        "$PATH_FAN_IN/printer1"         "printer1"
+    build_component "printer1_mdl_a"  "$PATH_FAN_IN/printer1_mdl_a"   "printer1_mdl_a"
+    build_component "printer1_mdl_b"  "$PATH_FAN_IN/printer1_mdl_b"   "printer1_mdl_b"
+    build_component "printer1_mdl_c"  "$PATH_FAN_IN/printer1_mdl_c"   "printer1_mdl_c"
+    build_component "printer_n"       "$PATH_FAN_IN/printer_n"        "printer_n"
+    build_component "printer_n_mdl_a"  "$PATH_FAN_IN/printer_n_mdl_a"   "printer_n_mdl_a"
+    build_component "printer_n_mdl_b"  "$PATH_FAN_IN/printer_n_mdl_b"   "printer_n_mdl_b"
+    build_component "printer_n_mdl_c"  "$PATH_FAN_IN/printer_n_mdl_c"   "printer_n_mdl_c"
+    build_component "service"         "$PATH_FAN_IN/service"          "service"
 
     compose --chain
     compose --nested
@@ -682,8 +702,8 @@ run_tests() {
       "--pre-nested1" "--pre-nestedN" \
       "--inner+pre-nested1" "--inner+pre-nestedN" \
       "--fanin" \
-      "--fanin-select1" "--fanin-selectN" \
-#      "--fanin1" "--faninN" "--fanin-select1" "--fanin-selectN" \
+      "--fanin1" "--faninN" \
+      "--fanin-all1" "--fanin-allN" \
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
