@@ -19,3 +19,12 @@ rules:
     inject:
       - name: printer1-mdl-a
         path: "./target/wasm32-wasip1/debug/printer1_mdl_a.comp.wasm"
+  - between:
+      interface: "my:service/printer-n"
+      inner:
+        name: printer-n-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: printer-n-mdl-a
+        path: "./target/wasm32-wasip1/debug/printer_n_mdl_a.comp.wasm"

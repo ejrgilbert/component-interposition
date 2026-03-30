@@ -91,22 +91,22 @@ The original topology (`./run.sh all --fanin`):
    [Service C] ──┘
 ```
 
-After middleware injection (`./run.sh all --fanin1):
+After middleware injection on a single downstream interface (`./run.sh all --fanin1):
+```
+   [Service A] ────[mdl-a]────┐
+                              │
+   [Service B] ───────────────┼───▶ [Target Service]
+                              │
+   [Service C] ───────────────┘
+```
+
+After middleware injection on ALL downstream interfaces (`./run.sh all --fanin-all1):
 ```
    [Service A] ────[mdl-a]────┐
                               │
    [Service B] ────[mdl-a]────┼───▶ [Target Service]
                               │
    [Service C] ────[mdl-a]────┘
-```
-
-After middleware injection (`./run.sh all --fanin-select1):
-```
-   [Service A] ──┐
-              [mdl-a]
-   [Service B] ──┼──▶ [Target Service]
-                 │
-   [Service C] ──┘
 ```
 
 # Next Steps #
