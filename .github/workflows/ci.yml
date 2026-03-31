@@ -31,9 +31,9 @@ jobs:
       - name: Install wkg
         run: cargo install wkg@0.13.0
       - name: Install splicer
-        run: cargo install splicer@2.0.0-rc1
+        run: cargo install splicer@2.0.0-rc2
       - name: Install cviz
-        run: cargo install cviz@2.0.0-rc1
+        run: cargo install cviz@2.0.0-rc2
       - name: Install wac
         run: cargo install wac-cli@0.9.0
       - name: Add wasi target
