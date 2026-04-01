@@ -10,4 +10,4 @@ rules:
         alias: "srv"
     inject:
       - name: mdl-a
-        path: "./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
