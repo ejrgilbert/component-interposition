@@ -25,6 +25,7 @@ PATH_COMPOSED="./compositions"
 PATH_WAC="./generated-wac"
 PATH_RULES="./splicer-rules"
 PATH_HANDLERS="./handlers"
+PATH_PROXY_MDL="./middleware"
 PATH_FAN_IN="./fan-in"
 
 # -----------------------------------------------------------------------------
@@ -674,6 +675,8 @@ build() {
     build_component "middleware_a"  "$PATH_HANDLERS/middleware_a" "middleware_a"
     build_component "middleware_b"  "$PATH_HANDLERS/middleware_b" "middleware_b"
     build_component "middleware_c"  "$PATH_HANDLERS/middleware_c" "middleware_c"
+
+    build_component "printer_mdl"   "$PATH_PROXY_MDL/printer_mdl" "printer_mdl"
 
     build_component "adder"           "$PATH_FAN_IN/adder"            "adder"
     build_component "adder_mdl_a"     "$PATH_FAN_IN/adder_mdl_a"      "adder_mdl_a"

@@ -7,7 +7,7 @@ members = [
     "fan-in/adder_mdl_a", "fan-in/adder_mdl_b", "fan-in/adder_mdl_c",
     "fan-in/printer1_mdl_a", "fan-in/printer1_mdl_b", "fan-in/printer1_mdl_c",
     "fan-in/printer_n_mdl_a", "fan-in/printer_n_mdl_b", "fan-in/printer_n_mdl_c",
-    "runner"]
+    "runner", "middleware/printer_mdl"]
 
 [workspace.dependencies]
 clap = { version = "4.5.58", features = ["derive"] }
