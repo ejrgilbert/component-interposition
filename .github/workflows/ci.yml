@@ -31,7 +31,7 @@ jobs:
       - name: Install wkg
         run: cargo install wkg@0.13.0
       - name: Install splicer
-        run: cargo install splicer@2.0.0-rc2
+        run: cargo install splicer@2.0.0-rc3
       - name: Install cviz
         run: cargo install cviz@2.0.0-rc2
       - name: Install wac

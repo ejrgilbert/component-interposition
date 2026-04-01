@@ -4,17 +4,19 @@ mod bindings {
         generate_all
     });
 }
-use crate::bindings::exports::my::service::type_erased_middleware::Guest;
+
+use crate::bindings::exports::splicer::proxy::before::Guest as BeforeGuest;
+use crate::bindings::exports::splicer::proxy::after::Guest as AfterGuest;
 
 pub struct Service;
 
-impl Guest for Service {
+impl BeforeGuest for Service {
     fn before_call(name: String) {
         println!("  >> [mdl-{name}] before!");
     }
-    fn should_block_call(_name: String) -> bool {
-        false
-    }
+}
+
+impl AfterGuest for Service {
     fn after_call(name: String) -> () {
         println!("  >> [mdl-{name}] after!");
     }

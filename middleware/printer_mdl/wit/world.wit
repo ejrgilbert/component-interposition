@@ -1,11 +1,6 @@
-package my:service;
-
-interface type-erased-middleware {
-    before-call: func(name: string);
-    should-block-call: func(name: string) -> bool;  // true = block downstream
-    after-call: func(name: string);
-}
+package my:printing-middleware;
 
 world printer-mdl {
-    export type-erased-middleware;
+    export splicer:proxy/before;
+    export splicer:proxy/after;
 }
