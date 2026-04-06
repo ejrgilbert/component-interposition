@@ -1,0 +1,58 @@
+package example:composition;
+
+let adder-comp = new my:adder-comp {
+    ...
+};
+
+let adder-async-comp = new my:adder-async-comp {
+    ...
+};
+
+let printer1-comp = new my:printer1-comp {
+    ...
+};
+
+let printer1-async-comp = new my:printer1-async-comp {
+    ...
+};
+
+let printer-n-comp = new my:printer-n-comp {
+    ...
+};
+
+let printer1-mdl-c = new my:printer1-mdl-c { ... };
+
+let printer1-mdl-c-proxy = new my:printer1-mdl-c-proxy {
+    "my:service/printer1": printer1-comp["my:service/printer1"],
+    "splicer:proxy/before": printer1-mdl-c["splicer:proxy/before"],
+    "splicer:proxy/after": printer1-mdl-c["splicer:proxy/after"],
+    ...
+};
+
+let blocker-mdl = new my:blocker-mdl { ... };
+
+let blocker-mdl-proxy = new my:blocker-mdl-proxy {
+    "my:service/printer1": printer1-mdl-c-proxy["my:service/printer1"],
+    "splicer:proxy/blocking": blocker-mdl["splicer:proxy/blocking"],
+    ...
+};
+
+let printer1-mdl-a = new my:printer1-mdl-a { ... };
+
+let printer1-mdl-a-proxy = new my:printer1-mdl-a-proxy {
+    "my:service/printer1": blocker-mdl-proxy["my:service/printer1"],
+    "splicer:proxy/before": printer1-mdl-a["splicer:proxy/before"],
+    "splicer:proxy/after": printer1-mdl-a["splicer:proxy/after"],
+    ...
+};
+
+let service-comp = new my:service-comp {
+    "my:service/printer-n": printer-n-comp["my:service/printer-n"],
+    "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
+    "my:service/printer1": printer1-mdl-a-proxy["my:service/printer1"],
+    "my:service/adder-async": adder-async-comp["my:service/adder-async"],
+    "my:service/adder": adder-comp["my:service/adder"],
+    ...
+};
+
+export service-comp["wasi:http/handler@0.3.0-rc-2026-01-06"];

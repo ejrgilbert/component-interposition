@@ -250,6 +250,8 @@ impl WasiHttpCtx for TestHttpCtx {
     }
 }
 
+const SHOULD_BLOCK: &str = "SHOULD_BLOCK";
+
 struct Ctx {
     table: ResourceTable,
     wasi: WasiCtx,
@@ -260,11 +262,20 @@ impl Ctx {
     fn new(request_body_tx: Sender<UnsyncBoxBody<Bytes, ErrorCode>>) -> Self {
         Self {
             table: ResourceTable::default(),
-            wasi: WasiCtxBuilder::new().inherit_stdio().build(),
+            wasi: WasiCtxBuilder::new()
+                .env(SHOULD_BLOCK, Self::get_should_block()).inherit_stdio().build(),
             http: TestHttpCtx {
                 request_body_tx: Some(request_body_tx),
             },
         }
+    }
+    fn get_should_block() -> String {
+        let res = env::var(SHOULD_BLOCK)
+            .unwrap_or_else(|_| "false".to_string());
+        
+        println!("I got {res}");
+        
+        res
     }
 }
 

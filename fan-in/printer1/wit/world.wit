@@ -10,7 +10,7 @@ interface printer1 {
     print1:     func();
 }
 interface printer1-async {
-    print1:     async func();
+    print1-async:     async func();
 }
 interface printer-n {
     print-n:    async func(msg: string, n: u32);
@@ -39,6 +39,7 @@ world service {
     import adder;
     import adder-async;
     import printer1;
+    import printer1-async;
     import printer-n;
 
     include wasi:http/service@0.3.0-rc-2026-01-06;

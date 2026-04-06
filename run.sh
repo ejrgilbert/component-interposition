@@ -78,8 +78,10 @@ print_usage() {
     echo -e "  --faninN        : Splice fan-in topology composition with MULTIPLE middlewares on a specific downstream dependency call"
     echo -e "  --fanin-all1 : Splice fan-in topology composition with a SINGLE middleware between all downstream dependency calls"
     echo -e "  --fanin-allN : Splice fan-in topology composition with MULTIPLE middlewares between all downstream dependency calls"
-    echo -e "  --block1        : Splice middleware that blocks the downstream call"
-    echo -e "  --blockN        : Splice multiple middlewares where the middle-most one blocks any further calls (the last middleware and the original dependency)"
+    echo -e "  --block1        : Splice middleware that chooses to block the downstream call"
+    echo -e "  --blockN        : Splice multiple middlewares where the middle-most one chooses to block any further calls (the last middleware and the original dependency)"
+    echo -e "  --noblock1      : Splice middleware that chooses to NOT block the downstream call"
+    echo -e "  --noblockN      : Splice multiple middlewares where the middle-most one chooses to NOT block any further calls (the last middleware and the original dependency)"
     echo ""
 }
 
@@ -280,6 +282,12 @@ compose() {
             compose_block1
             ;;
         --blockN)
+            compose_blockN
+            ;;
+        --nonblock1)
+            compose_block1
+            ;;
+        --nonblockN)
             compose_blockN
             ;;
         *)
@@ -488,8 +496,11 @@ compose_block1() {
 }
 compose_blockN() {
     local wasm_file="$PATH_COMPOSED/fanin.wasm"
-    log_error "we don't support the blockN target yet"
-    exit 1
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/blockN.yaml" \
+        "$PATH_WAC/blockN.wac" \
+        "$PATH_COMPOSED/blockN.wasm"
 }
 
 # -----------------------------------------------------------------------------
@@ -497,6 +508,7 @@ compose_blockN() {
 # -----------------------------------------------------------------------------
 run() {
     local component=$1
+    local env_vars=$2
 
     if [[ ! -f "$component" ]]; then
         log_error "Component not found at '$component'! Please run the 'build' and 'compose' steps first."
@@ -506,7 +518,7 @@ run() {
     log_info "Running component at $component..."
     pushd runner > /dev/null
 
-    if ! cargo run -- "../$component"; then
+    if ! eval "$env_vars cargo run -- \"../$component\""; then
         log_error "Failed to run the component at $component."
         exit 1
     fi
@@ -550,8 +562,12 @@ run_services() {
     run $FANIN_N
     run $FANIN_ALL1
     run $FANIN_ALL_N
-    run $BLOCK1
-    run $BLOCK_N
+
+    run $BLOCK1 "SHOULD_BLOCK=true"
+    run $BLOCK_N "SHOULD_BLOCK=true"
+
+    run $BLOCK1 "SHOULD_BLOCK=false"
+    run $BLOCK_N "SHOULD_BLOCK=false"
 }
 run_composition() {
     case "$1" in
@@ -608,9 +624,19 @@ run_composition() {
             ;;
         --block1)
             COMPOSED="$PATH_COMPOSED/block1.wasm"
+            ENV_VARS="SHOULD_BLOCK=true"
             ;;
         --blockN)
             COMPOSED="$PATH_COMPOSED/blockN.wasm"
+            ENV_VARS="SHOULD_BLOCK=true"
+            ;;
+        --nonblock1)
+            COMPOSED="$PATH_COMPOSED/block1.wasm"
+            ENV_VARS="SHOULD_BLOCK=false"
+            ;;
+        --nonblockN)
+            COMPOSED="$PATH_COMPOSED/blockN.wasm"
+            ENV_VARS="SHOULD_BLOCK=false"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -623,7 +649,7 @@ run_composition() {
     viz "$COMPOSED"
     echo
 
-    run "$COMPOSED"
+    run "$COMPOSED" "$ENV_VARS"
 }
 
 # -----------------------------------------------------------------------------
@@ -692,6 +718,12 @@ viz_composition() {
         --blockN)
             COMPOSED="$PATH_COMPOSED/blockN.wasm"
             ;;
+        --nonblock1)
+            COMPOSED="$PATH_COMPOSED/block1.wasm"
+            ;;
+        --nonblockN)
+            COMPOSED="$PATH_COMPOSED/blockN.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -749,7 +781,7 @@ run_tests() {
       "--fanin" \
       "--fanin1" "--faninN" \
       "--fanin-all1" "--fanin-allN" \
-      "--block1" "--blockN" \
+      "--block1" "--blockN" "--nonblock1" "--nonblockN" \
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
