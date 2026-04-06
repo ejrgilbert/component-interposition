@@ -14,11 +14,11 @@ impl Guest for Service {
         a: i32, b: i32
     ) -> i32 {
 
-        println!("     [adder] entered!");
+        println!("     [adder-async] entered!");
 
         let res = a + b;
 
-        println!("     [adder] exit!");
+        println!("     [adder-async] exit!");
 
         res
     }

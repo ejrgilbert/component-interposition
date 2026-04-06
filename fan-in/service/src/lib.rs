@@ -8,6 +8,7 @@ mod bindings {
 
 use bindings::my::service::adder::add;
 use bindings::my::service::adder_async::add_async;
+use bindings::my::service::printer1_async::print1_async;
 use bindings::my::service::printer1::print1;
 use bindings::my::service::printer_n::print_n;
 
@@ -36,8 +37,10 @@ impl Guest for Service {
         println!("[svc] adder-async says '{a} + {b} = {result_async}'");
 
         let str = "it's dangerous to go alone! take this 🗡️";
-        print1();
+        print1().await;
         println!("[svc] printer1 completed!");
+        print1_async().await;
+        println!("[svc] printer1-async completed!");
 
         print_n(str.to_string(), 4).await;
         println!("[svc] printer-n completed!");

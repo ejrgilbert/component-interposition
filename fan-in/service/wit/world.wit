@@ -10,7 +10,7 @@ interface printer1 {
     print1:     func();
 }
 interface printer1-async {
-    print1:     async func();
+    print1-async:     async func();
 }
 interface printer-n {
     print-n:    async func(msg: string, n: u32);
