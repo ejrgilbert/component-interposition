@@ -1,0 +1,2 @@
+[overrides]
+"splicer:proxy" = { path = "wit/splicer.proxy" }

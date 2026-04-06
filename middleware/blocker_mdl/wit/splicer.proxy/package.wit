@@ -1,0 +1,19 @@
+package splicer:proxy;
+
+interface before {
+    before-call: async func(name: string);
+}
+
+interface after {
+    after-call: async func(name: string);
+}
+
+interface blocking {
+    should-block-call: async func(name: string) -> bool;
+}
+
+world type-erased-middleware {
+    export before;
+    export blocking;
+    export after;
+}

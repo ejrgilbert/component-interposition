@@ -1,7 +1,7 @@
 package my:service;
 
 interface adder {
-    add:        async func(a: s32, b: s32) -> s32;
+    add:        func(a: s32, b: s32) -> s32;
 }
 interface printer1 {
     print1:     async func(msg: string);

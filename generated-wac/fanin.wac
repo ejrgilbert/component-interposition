@@ -4,7 +4,15 @@ let adder-comp = new my:adder-comp {
     ...
 };
 
+let adder-async-comp = new my:adder-async-comp {
+    ...
+};
+
 let printer1-comp = new my:printer1-comp {
+    ...
+};
+
+let printer1-async-comp = new my:printer1-async-comp {
     ...
 };
 
@@ -14,9 +22,13 @@ let printer-n-comp = new my:printer-n-comp {
 
 let service-comp = new my:service-comp {
     "my:service/adder": adder-comp["my:service/adder"],
-    "my:service/printer1": printer1-comp["my:service/printer1"],
+    "my:service/adder-async": adder-async-comp["my:service/adder-async"],
     "my:service/printer-n": printer-n-comp["my:service/printer-n"],
     ...
 };
+
+export printer1-comp["my:service/printer1"];
+
+export printer1-async-comp["my:service/printer1-async"];
 
 export service-comp["wasi:http/handler@0.3.0-rc-2026-01-06"];

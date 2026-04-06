@@ -1,6 +1,7 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "printer-mdl",
+        async: true,
         generate_all
     });
 }
@@ -11,13 +12,13 @@ use crate::bindings::exports::splicer::proxy::after::Guest as AfterGuest;
 pub struct Service;
 
 impl BeforeGuest for Service {
-    fn before_call(name: String) {
+    async fn before_call(name: String) {
         println!("  >> [mdl-{name}] before!");
     }
 }
 
 impl AfterGuest for Service {
-    fn after_call(name: String) -> () {
+    async fn after_call(name: String) -> () {
         println!("  >> [mdl-{name}] after!");
     }
 }

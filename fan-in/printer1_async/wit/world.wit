@@ -1,0 +1,45 @@
+package my:service;
+
+interface adder {
+    add:        func(a: s32, b: s32) -> s32;
+}
+interface adder-async {
+    add-async:  async func(a: s32, b: s32) -> s32;
+}
+interface printer1 {
+    print1:     func();
+}
+interface printer1-async {
+    print1:     async func();
+}
+interface printer-n {
+    print-n:    async func(msg: string, n: u32);
+}
+
+world adder-svc {
+    export adder;
+}
+
+world adder-async-svc {
+    export adder-async;
+}
+
+world printer1-svc {
+    export printer1;
+}
+world printer1-async-svc {
+    export printer1-async;
+}
+
+world printer-n-svc {
+    export printer-n;
+}
+
+world service {
+    import adder;
+    import adder-async;
+    import printer1;
+    import printer-n;
+
+    include wasi:http/service@0.3.0-rc-2026-01-06;
+}
