@@ -78,6 +78,8 @@ print_usage() {
     echo -e "  --faninN        : Splice fan-in topology composition with MULTIPLE middlewares on a specific downstream dependency call"
     echo -e "  --fanin-all1 : Splice fan-in topology composition with a SINGLE middleware between all downstream dependency calls"
     echo -e "  --fanin-allN : Splice fan-in topology composition with MULTIPLE middlewares between all downstream dependency calls"
+    echo -e "  --block1        : Splice middleware that blocks the downstream call"
+    echo -e "  --blockN        : Splice multiple middlewares where the middle-most one blocks any further calls (the last middleware and the original dependency)"
     echo ""
 }
 
@@ -274,6 +276,12 @@ compose() {
         --fanin-allN)
             compose_fanin_allN
             ;;
+        --block1)
+            compose_block1
+            ;;
+        --blockN)
+            compose_blockN
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -433,7 +441,9 @@ compose_fanin() {
         "$PATH_COMPOSED/fanin.wasm" \
         "$PATH_WASI_TARGET/service.comp.wasm" \
         "$PATH_WASI_TARGET/adder.comp.wasm" \
+        "$PATH_WASI_TARGET/adder_async.comp.wasm" \
         "$PATH_WASI_TARGET/printer1.comp.wasm" \
+        "$PATH_WASI_TARGET/printer1_async.comp.wasm" \
         "$PATH_WASI_TARGET/printer_n.comp.wasm"
 }
 compose_fanin1() {
@@ -467,6 +477,19 @@ compose_fanin_allN() {
         "$PATH_RULES/fanin-allN.yaml" \
         "$PATH_WAC/fanin-allN.wac" \
         "$PATH_COMPOSED/fanin-allN.wasm"
+}
+compose_block1() {
+    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/block1.yaml" \
+        "$PATH_WAC/block1.wac" \
+        "$PATH_COMPOSED/block1.wasm"
+}
+compose_blockN() {
+    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    log_error "we don't support the blockN target yet"
+    exit 1
 }
 
 # -----------------------------------------------------------------------------
@@ -508,6 +531,8 @@ run_services() {
     FANIN_N="$PATH_COMPOSED/faninN.wasm"
     FANIN_ALL1="$PATH_COMPOSED/fanin-all1.wasm"
     FANIN_ALL_N="$PATH_COMPOSED/fanin-allN.wasm"
+    BLOCK1="$PATH_COMPOSED/block1.wasm"
+    BLOCK_N="$PATH_COMPOSED/blockN.wasm"
 
     run $PATH_SVC_A
     run $PATH_SVC_B
@@ -525,6 +550,8 @@ run_services() {
     run $FANIN_N
     run $FANIN_ALL1
     run $FANIN_ALL_N
+    run $BLOCK1
+    run $BLOCK_N
 }
 run_composition() {
     case "$1" in
@@ -578,6 +605,12 @@ run_composition() {
             ;;
         --fanin-allN)
             COMPOSED="$PATH_COMPOSED/fanin-allN.wasm"
+            ;;
+        --block1)
+            COMPOSED="$PATH_COMPOSED/block1.wasm"
+            ;;
+        --blockN)
+            COMPOSED="$PATH_COMPOSED/blockN.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -653,6 +686,12 @@ viz_composition() {
         --fanin-allN)
             COMPOSED="$PATH_COMPOSED/fanin-allN.wasm"
             ;;
+        --block1)
+            COMPOSED="$PATH_COMPOSED/block1.wasm"
+            ;;
+        --blockN)
+            COMPOSED="$PATH_COMPOSED/blockN.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -677,12 +716,15 @@ build() {
     build_component "middleware_c"  "$PATH_HANDLERS/middleware_c" "middleware_c"
 
     build_component "printer_mdl"   "$PATH_PROXY_MDL/printer_mdl" "printer_mdl"
+    build_component "blocker_mdl"   "$PATH_PROXY_MDL/blocker_mdl" "blocker_mdl"
 
     build_component "adder"           "$PATH_FAN_IN/adder"            "adder"
+    build_component "adder_async"     "$PATH_FAN_IN/adder_async"      "adder_async"
     build_component "adder_mdl_a"     "$PATH_FAN_IN/adder_mdl_a"      "adder_mdl_a"
     build_component "adder_mdl_b"     "$PATH_FAN_IN/adder_mdl_b"      "adder_mdl_b"
     build_component "adder_mdl_c"     "$PATH_FAN_IN/adder_mdl_c"      "adder_mdl_c"
     build_component "printer1"        "$PATH_FAN_IN/printer1"         "printer1"
+    build_component "printer1_async"  "$PATH_FAN_IN/printer1_async"   "printer1_async"
     build_component "printer1_mdl_a"  "$PATH_FAN_IN/printer1_mdl_a"   "printer1_mdl_a"
     build_component "printer1_mdl_b"  "$PATH_FAN_IN/printer1_mdl_b"   "printer1_mdl_b"
     build_component "printer1_mdl_c"  "$PATH_FAN_IN/printer1_mdl_c"   "printer1_mdl_c"
@@ -707,6 +749,7 @@ run_tests() {
       "--fanin" \
       "--fanin1" "--faninN" \
       "--fanin-all1" "--fanin-allN" \
+      "--block1" "--blockN" \
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 

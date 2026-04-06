@@ -9,8 +9,21 @@ rules:
         name: service-comp
     inject:
       - name: adder-mdl-a
-        path: "./target/wasm32-wasip1/debug/adder_mdl_a.comp.wasm"
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
       - name: adder-mdl-b
-        path: "./target/wasm32-wasip1/debug/adder_mdl_b.comp.wasm"
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
       - name: adder-mdl-c
-        path: "./target/wasm32-wasip1/debug/adder_mdl_c.comp.wasm"
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+  - between:
+      interface: "my:service/adder-async"
+      inner:
+        name: adder-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: adder-async-mdl-a
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+      - name: adder-async-mdl-b
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+      - name: adder-async-mdl-c
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"

@@ -149,6 +149,7 @@ async fn run_http<E: Into<ErrorCode> + 'static>(
     let engine = engine(|config| {
         config.async_support(true);
         config.wasm_component_model_async(true);
+        config.wasm_component_model_async_stackful(true);
         config.wasm_backtrace_details(WasmBacktraceDetails::Enable);
     });
     let component = Component::from_file(&engine, component_filename)?;

@@ -1,0 +1,21 @@
+version: 1
+
+rules:
+#  - between:
+#      interface: "my:service/printer1"
+#      inner:
+#        name: printer1-comp
+#      outer:
+#        name: service-comp
+#    inject:
+#      - name: printer1-mdl-a
+#        path: "./target/wasm32-wasip1/debug/blocker_mdl.comp.wasm"
+  - between:
+      interface: "my:service/printer1-async"
+      inner:
+        name: printer1-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: printer1-async-mdl-a
+        path: "./target/wasm32-wasip1/debug/blocker_mdl.comp.wasm"

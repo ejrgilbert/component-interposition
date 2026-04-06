@@ -1,15 +1,15 @@
 package splicer:proxy;
 
 interface before {
-    before-call: func(name: string);
+    before-call: async func(name: string);
 }
 
 interface after {
-    after-call: func(name: string);
+    after-call: async func(name: string);
 }
 
 interface blocking {
-    should-block-call: func(name: string) -> bool;
+    should-block-call: async func(name: string) -> bool;
 }
 
 world type-erased-middleware {
