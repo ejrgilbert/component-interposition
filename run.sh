@@ -831,7 +831,7 @@ case "$CMD" in
         viz_composition "$OPT"
         ;;
     all)
-        build
+#        build
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"

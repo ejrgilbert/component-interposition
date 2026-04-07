@@ -7,10 +7,10 @@ interface adder-async {
     add-async:  async func(a: s32, b: s32) -> s32;
 }
 interface printer1 {
-    print1:     func();
+    print1:     func(msg: string);
 }
 interface printer1-async {
-    print1-async:     async func();
+    print1-async:     async func(msg: string);
 }
 interface printer-n {
     print-n:    async func(msg: string, n: u32);
