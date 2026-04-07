@@ -9,9 +9,9 @@ use crate::bindings::exports::my::service::printer1::Guest;
 pub struct Service;
 
 impl Guest for Service {
-    fn print1() {
+    fn print1(msg: String) {
         println!("     [print1] entered!");
-        println!("         it's dangerous to go alone! take this 🗡️");
+        println!("         {msg}");
         println!("     [print1] exit!");
     }
 }

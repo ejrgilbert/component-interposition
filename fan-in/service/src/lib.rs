@@ -37,9 +37,9 @@ impl Guest for Service {
         println!("[svc] adder-async says '{a} + {b} = {result_async}'");
 
         let str = "it's dangerous to go alone! take this 🗡️";
-        print1().await;
+        print1(str.to_string()).await;
         println!("[svc] printer1 completed!");
-        print1_async().await;
+        print1_async(str.to_string()).await;
         println!("[svc] printer1-async completed!");
 
         print_n(str.to_string(), 4).await;

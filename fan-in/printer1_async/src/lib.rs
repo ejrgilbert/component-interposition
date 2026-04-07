@@ -10,9 +10,9 @@ use crate::bindings::exports::my::service::printer1_async::Guest;
 pub struct Service;
 
 impl Guest for Service {
-    async fn print1_async() {
+    async fn print1_async(msg: String) {
         println!("     [print1-async] entered!");
-        println!("         it's dangerous to go alone! take this 🗡️");
+        println!("         {msg}");
         println!("     [print1-async] exit!");
     }
 }
