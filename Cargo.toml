@@ -3,7 +3,9 @@ resolver = "2"
 members = [
     "handlers/middleware_a", "handlers/middleware_b", "handlers/middleware_c",
     "handlers/service_a", "handlers/service_b", "handlers/service_c",
-    "fan-in/service", "fan-in/adder", "fan-in/adder_async", "fan-in/printer1", "fan-in/printer1_async", "fan-in/printer_n",
+    "fan-in/service", "fan-in/adder", "fan-in/adder_async",
+    "fan-in/messenger", "fan-in/messenger_async",
+    "fan-in/printer1", "fan-in/printer1_async", "fan-in/printer_n",
     "runner", "middleware/printer_mdl", "middleware/blocker_mdl"]
 
 [workspace.dependencies]

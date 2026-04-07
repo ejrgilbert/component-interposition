@@ -6,6 +6,12 @@ interface adder {
 interface adder-async {
     add-async:  async func(a: s32, b: s32) -> s32;
 }
+interface messenger {
+    get-msg:        func() -> string;
+}
+interface messenger-async {
+    get-msg-async:  async func() -> string;
+}
 interface printer1 {
     print1:     func(msg: string);
 }
@@ -19,9 +25,15 @@ interface printer-n {
 world adder-svc {
     export adder;
 }
-
 world adder-async-svc {
     export adder-async;
+}
+
+world messenger-svc {
+    export messenger;
+}
+world messenger-async-svc {
+    export messenger-async;
 }
 
 world printer1-svc {
@@ -38,6 +50,8 @@ world printer-n-svc {
 world service {
     import adder;
     import adder-async;
+    import messenger;
+    import messenger-async;
     import printer1;
     import printer1-async;
     import printer-n;

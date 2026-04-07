@@ -19,6 +19,24 @@ rules:
     inject:
       - name: adder-async-mdl-a
         path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+#  - between:
+#      interface: "my:service/messenger"
+#      inner:
+#        name: messenger-comp
+#      outer:
+#        name: service-comp
+#    inject:
+#      - name: messenger-mdl-a
+#        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+#  - between:
+#      interface: "my:service/messenger-async"
+#      inner:
+#        name: messenger-async-comp
+#      outer:
+#        name: service-comp
+#    inject:
+#      - name: messenger-async-mdl-a
+#        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
   - between:
       interface: "my:service/printer1"
       inner:

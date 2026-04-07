@@ -1,6 +1,7 @@
 version: 1
 
 rules:
+  # Demonstration of sync interface interposition
   - between:
       interface: "my:service/adder"
       inner:
@@ -14,6 +15,7 @@ rules:
         path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
       - name: adder-mdl-c
         path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+  # Demonstration of async interface interposition
   - between:
       interface: "my:service/adder-async"
       inner:
