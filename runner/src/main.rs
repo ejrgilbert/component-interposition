@@ -270,12 +270,8 @@ impl Ctx {
         }
     }
     fn get_should_block() -> String {
-        let res = env::var(SHOULD_BLOCK)
-            .unwrap_or_else(|_| "false".to_string());
-        
-        println!("I got {res}");
-        
-        res
+        env::var(SHOULD_BLOCK)
+            .unwrap_or_else(|_| "false".to_string())
     }
 }
 

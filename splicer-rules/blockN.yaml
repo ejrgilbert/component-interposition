@@ -16,16 +16,16 @@ rules:
       - name: printer1-mdl-c
         path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
   # Demonstration of async interface interposition
-#  - between:
-#      interface: "my:service/printer1-async"
-#      inner:
-#        name: printer1-async-comp
-#      outer:
-#        name: service-comp
-#    inject:
-#      - name: printer1-async-mdl-a
-#        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
-#      - name: blocker-async-mdl
-#        path: "./target/wasm32-wasip1/debug/blocker_mdl.comp.wasm"
-#      - name: printer1-async-mdl-c
-#        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+  - between:
+      interface: "my:service/printer1-async"
+      inner:
+        name: printer1-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: printer1-async-mdl-a
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+      - name: blocker-async-mdl
+        path: "./target/wasm32-wasip1/debug/blocker_mdl.comp.wasm"
+      - name: printer1-async-mdl-c
+        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"

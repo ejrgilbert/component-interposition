@@ -76,13 +76,11 @@ let adder-mdl-a-proxy = new my:adder-mdl-a-proxy {
 
 let service-comp = new my:service-comp {
     "my:service/printer-n": printer-n-comp["my:service/printer-n"],
+    "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
+    "my:service/printer1": printer1-comp["my:service/printer1"],
     "my:service/adder-async": adder-async-mdl-a-proxy["my:service/adder-async"],
     "my:service/adder": adder-mdl-a-proxy["my:service/adder"],
     ...
 };
-
-export printer1-comp["my:service/printer1"];
-
-export printer1-async-comp["my:service/printer1-async"];
 
 export service-comp["wasi:http/handler@0.3.0-rc-2026-01-06"];
