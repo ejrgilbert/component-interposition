@@ -570,6 +570,7 @@ run_services() {
     run $BLOCK_N "SHOULD_BLOCK=false"
 }
 run_composition() {
+    ENV_VARS=""
     case "$1" in
         --single)
             COMPOSED="$PATH_COMPOSED/single.wasm"
