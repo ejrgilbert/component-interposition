@@ -452,6 +452,8 @@ compose_fanin() {
         "$PATH_WASI_TARGET/service.comp.wasm" \
         "$PATH_WASI_TARGET/adder.comp.wasm" \
         "$PATH_WASI_TARGET/adder_async.comp.wasm" \
+        "$PATH_WASI_TARGET/messenger.comp.wasm" \
+        "$PATH_WASI_TARGET/messenger_async.comp.wasm" \
         "$PATH_WASI_TARGET/printer1.comp.wasm" \
         "$PATH_WASI_TARGET/printer1_async.comp.wasm" \
         "$PATH_WASI_TARGET/printer_n.comp.wasm"
@@ -755,6 +757,8 @@ build() {
 
     build_component "adder"           "$PATH_FAN_IN/adder"            "adder"
     build_component "adder_async"     "$PATH_FAN_IN/adder_async"      "adder_async"
+    build_component "messenger"       "$PATH_FAN_IN/messenger"       "messenger"
+    build_component "messenger_async" "$PATH_FAN_IN/messenger_async" "messenger_async"
     build_component "printer1"        "$PATH_FAN_IN/printer1"         "printer1"
     build_component "printer1_async"  "$PATH_FAN_IN/printer1_async"   "printer1_async"
     build_component "printer_n"       "$PATH_FAN_IN/printer_n"        "printer_n"

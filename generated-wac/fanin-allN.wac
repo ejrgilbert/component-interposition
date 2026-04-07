@@ -8,6 +8,14 @@ let adder-async-comp = new my:adder-async-comp {
     ...
 };
 
+let messenger-comp = new my:messenger-comp {
+    ...
+};
+
+let messenger-async-comp = new my:messenger-async-comp {
+    ...
+};
+
 let printer1-comp = new my:printer1-comp {
     ...
 };
@@ -159,6 +167,8 @@ let service-comp = new my:service-comp {
     "my:service/printer-n": printer-n-mdl-a-proxy["my:service/printer-n"],
     "my:service/printer1-async": printer1-async-mdl-a-proxy["my:service/printer1-async"],
     "my:service/printer1": printer1-mdl-a-proxy["my:service/printer1"],
+    "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
+    "my:service/messenger": messenger-comp["my:service/messenger"],
     "my:service/adder-async": adder-async-mdl-a-proxy["my:service/adder-async"],
     "my:service/adder": adder-mdl-a-proxy["my:service/adder"],
     ...
