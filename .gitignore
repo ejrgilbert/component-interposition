@@ -1,5 +1,7 @@
 # Generated splits
 splits/
+# Generated compositions
+compositions/
 
 # Wasm things
 *.wat
