@@ -28,6 +28,8 @@ PATH_HANDLERS="./handlers"
 PATH_PROXY_MDL="./middleware"
 PATH_FAN_IN="./fan-in"
 
+mkdir -p $PATH_COMPOSED
+
 # -----------------------------------------------------------------------------
 # Color codes for logs
 # -----------------------------------------------------------------------------
@@ -753,18 +755,9 @@ build() {
 
     build_component "adder"           "$PATH_FAN_IN/adder"            "adder"
     build_component "adder_async"     "$PATH_FAN_IN/adder_async"      "adder_async"
-    build_component "adder_mdl_a"     "$PATH_FAN_IN/adder_mdl_a"      "adder_mdl_a"
-    build_component "adder_mdl_b"     "$PATH_FAN_IN/adder_mdl_b"      "adder_mdl_b"
-    build_component "adder_mdl_c"     "$PATH_FAN_IN/adder_mdl_c"      "adder_mdl_c"
     build_component "printer1"        "$PATH_FAN_IN/printer1"         "printer1"
     build_component "printer1_async"  "$PATH_FAN_IN/printer1_async"   "printer1_async"
-    build_component "printer1_mdl_a"  "$PATH_FAN_IN/printer1_mdl_a"   "printer1_mdl_a"
-    build_component "printer1_mdl_b"  "$PATH_FAN_IN/printer1_mdl_b"   "printer1_mdl_b"
-    build_component "printer1_mdl_c"  "$PATH_FAN_IN/printer1_mdl_c"   "printer1_mdl_c"
     build_component "printer_n"       "$PATH_FAN_IN/printer_n"        "printer_n"
-    build_component "printer_n_mdl_a"  "$PATH_FAN_IN/printer_n_mdl_a"   "printer_n_mdl_a"
-    build_component "printer_n_mdl_b"  "$PATH_FAN_IN/printer_n_mdl_b"   "printer_n_mdl_b"
-    build_component "printer_n_mdl_c"  "$PATH_FAN_IN/printer_n_mdl_c"   "printer_n_mdl_c"
     build_component "service"         "$PATH_FAN_IN/service"          "service"
 
     compose --chain
@@ -831,7 +824,7 @@ case "$CMD" in
         viz_composition "$OPT"
         ;;
     all)
-#        build
+        build
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"

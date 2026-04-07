@@ -4,9 +4,6 @@ members = [
     "handlers/middleware_a", "handlers/middleware_b", "handlers/middleware_c",
     "handlers/service_a", "handlers/service_b", "handlers/service_c",
     "fan-in/service", "fan-in/adder", "fan-in/adder_async", "fan-in/printer1", "fan-in/printer1_async", "fan-in/printer_n",
-    "fan-in/adder_mdl_a", "fan-in/adder_mdl_b", "fan-in/adder_mdl_c",
-    "fan-in/printer1_mdl_a", "fan-in/printer1_mdl_b", "fan-in/printer1_mdl_c",
-    "fan-in/printer_n_mdl_a", "fan-in/printer_n_mdl_b", "fan-in/printer_n_mdl_c",
     "runner", "middleware/printer_mdl", "middleware/blocker_mdl"]
 
 [workspace.dependencies]
