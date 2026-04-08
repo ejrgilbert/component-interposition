@@ -30,24 +30,24 @@ let printer-n-comp = new my:printer-n-comp {
 
 let printer1-async-mdl-a = new my:printer1-async-mdl-a { ... };
 
-let printer1-async-mdl-a-proxy = new my:printer1-async-mdl-a-proxy {
+let printer1-async-mdl-a-adapter = new my:printer1-async-mdl-a-adapter {
     "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
-    "splicer:proxy/blocking": printer1-async-mdl-a["splicer:proxy/blocking"],
+    "splicer:adapter/blocking": printer1-async-mdl-a["splicer:adapter/blocking"],
     ...
 };
 
 let printer1-mdl-a = new my:printer1-mdl-a { ... };
 
-let printer1-mdl-a-proxy = new my:printer1-mdl-a-proxy {
+let printer1-mdl-a-adapter = new my:printer1-mdl-a-adapter {
     "my:service/printer1": printer1-comp["my:service/printer1"],
-    "splicer:proxy/blocking": printer1-mdl-a["splicer:proxy/blocking"],
+    "splicer:adapter/blocking": printer1-mdl-a["splicer:adapter/blocking"],
     ...
 };
 
 let service-comp = new my:service-comp {
     "my:service/printer-n": printer-n-comp["my:service/printer-n"],
-    "my:service/printer1-async": printer1-async-mdl-a-proxy["my:service/printer1-async"],
-    "my:service/printer1": printer1-mdl-a-proxy["my:service/printer1"],
+    "my:service/printer1-async": printer1-async-mdl-a-adapter["my:service/printer1-async"],
+    "my:service/printer1": printer1-mdl-a-adapter["my:service/printer1"],
     "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
     "my:service/messenger": messenger-comp["my:service/messenger"],
     "my:service/adder-async": adder-async-comp["my:service/adder-async"],

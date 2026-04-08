@@ -1,5 +1,5 @@
 package my:printing-middleware;
 
 world blocker-mdl {
-    export splicer:proxy/blocking;
+    export splicer:adapter/blocking;
 }
