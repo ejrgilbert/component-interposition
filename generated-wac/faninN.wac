@@ -30,55 +30,55 @@ let printer-n-comp = new my:printer-n-comp {
 
 let adder-async-mdl-c = new my:adder-async-mdl-c { ... };
 
-let adder-async-mdl-c-proxy = new my:adder-async-mdl-c-proxy {
+let adder-async-mdl-c-adapter = new my:adder-async-mdl-c-adapter {
     "my:service/adder-async": adder-async-comp["my:service/adder-async"],
-    "splicer:proxy/before": adder-async-mdl-c["splicer:proxy/before"],
-    "splicer:proxy/after": adder-async-mdl-c["splicer:proxy/after"],
+    "splicer:adapter/before": adder-async-mdl-c["splicer:adapter/before"],
+    "splicer:adapter/after": adder-async-mdl-c["splicer:adapter/after"],
     ...
 };
 
 let adder-async-mdl-b = new my:adder-async-mdl-b { ... };
 
-let adder-async-mdl-b-proxy = new my:adder-async-mdl-b-proxy {
-    "my:service/adder-async": adder-async-mdl-c-proxy["my:service/adder-async"],
-    "splicer:proxy/before": adder-async-mdl-b["splicer:proxy/before"],
-    "splicer:proxy/after": adder-async-mdl-b["splicer:proxy/after"],
+let adder-async-mdl-b-adapter = new my:adder-async-mdl-b-adapter {
+    "my:service/adder-async": adder-async-mdl-c-adapter["my:service/adder-async"],
+    "splicer:adapter/before": adder-async-mdl-b["splicer:adapter/before"],
+    "splicer:adapter/after": adder-async-mdl-b["splicer:adapter/after"],
     ...
 };
 
 let adder-async-mdl-a = new my:adder-async-mdl-a { ... };
 
-let adder-async-mdl-a-proxy = new my:adder-async-mdl-a-proxy {
-    "my:service/adder-async": adder-async-mdl-b-proxy["my:service/adder-async"],
-    "splicer:proxy/before": adder-async-mdl-a["splicer:proxy/before"],
-    "splicer:proxy/after": adder-async-mdl-a["splicer:proxy/after"],
+let adder-async-mdl-a-adapter = new my:adder-async-mdl-a-adapter {
+    "my:service/adder-async": adder-async-mdl-b-adapter["my:service/adder-async"],
+    "splicer:adapter/before": adder-async-mdl-a["splicer:adapter/before"],
+    "splicer:adapter/after": adder-async-mdl-a["splicer:adapter/after"],
     ...
 };
 
 let adder-mdl-c = new my:adder-mdl-c { ... };
 
-let adder-mdl-c-proxy = new my:adder-mdl-c-proxy {
+let adder-mdl-c-adapter = new my:adder-mdl-c-adapter {
     "my:service/adder": adder-comp["my:service/adder"],
-    "splicer:proxy/before": adder-mdl-c["splicer:proxy/before"],
-    "splicer:proxy/after": adder-mdl-c["splicer:proxy/after"],
+    "splicer:adapter/before": adder-mdl-c["splicer:adapter/before"],
+    "splicer:adapter/after": adder-mdl-c["splicer:adapter/after"],
     ...
 };
 
 let adder-mdl-b = new my:adder-mdl-b { ... };
 
-let adder-mdl-b-proxy = new my:adder-mdl-b-proxy {
-    "my:service/adder": adder-mdl-c-proxy["my:service/adder"],
-    "splicer:proxy/before": adder-mdl-b["splicer:proxy/before"],
-    "splicer:proxy/after": adder-mdl-b["splicer:proxy/after"],
+let adder-mdl-b-adapter = new my:adder-mdl-b-adapter {
+    "my:service/adder": adder-mdl-c-adapter["my:service/adder"],
+    "splicer:adapter/before": adder-mdl-b["splicer:adapter/before"],
+    "splicer:adapter/after": adder-mdl-b["splicer:adapter/after"],
     ...
 };
 
 let adder-mdl-a = new my:adder-mdl-a { ... };
 
-let adder-mdl-a-proxy = new my:adder-mdl-a-proxy {
-    "my:service/adder": adder-mdl-b-proxy["my:service/adder"],
-    "splicer:proxy/before": adder-mdl-a["splicer:proxy/before"],
-    "splicer:proxy/after": adder-mdl-a["splicer:proxy/after"],
+let adder-mdl-a-adapter = new my:adder-mdl-a-adapter {
+    "my:service/adder": adder-mdl-b-adapter["my:service/adder"],
+    "splicer:adapter/before": adder-mdl-a["splicer:adapter/before"],
+    "splicer:adapter/after": adder-mdl-a["splicer:adapter/after"],
     ...
 };
 
@@ -88,8 +88,8 @@ let service-comp = new my:service-comp {
     "my:service/printer1": printer1-comp["my:service/printer1"],
     "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
     "my:service/messenger": messenger-comp["my:service/messenger"],
-    "my:service/adder-async": adder-async-mdl-a-proxy["my:service/adder-async"],
-    "my:service/adder": adder-mdl-a-proxy["my:service/adder"],
+    "my:service/adder-async": adder-async-mdl-a-adapter["my:service/adder-async"],
+    "my:service/adder": adder-mdl-a-adapter["my:service/adder"],
     ...
 };
 

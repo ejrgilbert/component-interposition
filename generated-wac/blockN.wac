@@ -30,60 +30,60 @@ let printer-n-comp = new my:printer-n-comp {
 
 let printer1-async-mdl-c = new my:printer1-async-mdl-c { ... };
 
-let printer1-async-mdl-c-proxy = new my:printer1-async-mdl-c-proxy {
+let printer1-async-mdl-c-adapter = new my:printer1-async-mdl-c-adapter {
     "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
-    "splicer:proxy/before": printer1-async-mdl-c["splicer:proxy/before"],
-    "splicer:proxy/after": printer1-async-mdl-c["splicer:proxy/after"],
+    "splicer:adapter/before": printer1-async-mdl-c["splicer:adapter/before"],
+    "splicer:adapter/after": printer1-async-mdl-c["splicer:adapter/after"],
     ...
 };
 
 let blocker-async-mdl = new my:blocker-async-mdl { ... };
 
-let blocker-async-mdl-proxy = new my:blocker-async-mdl-proxy {
-    "my:service/printer1-async": printer1-async-mdl-c-proxy["my:service/printer1-async"],
-    "splicer:proxy/blocking": blocker-async-mdl["splicer:proxy/blocking"],
+let blocker-async-mdl-adapter = new my:blocker-async-mdl-adapter {
+    "my:service/printer1-async": printer1-async-mdl-c-adapter["my:service/printer1-async"],
+    "splicer:adapter/blocking": blocker-async-mdl["splicer:adapter/blocking"],
     ...
 };
 
 let printer1-async-mdl-a = new my:printer1-async-mdl-a { ... };
 
-let printer1-async-mdl-a-proxy = new my:printer1-async-mdl-a-proxy {
-    "my:service/printer1-async": blocker-async-mdl-proxy["my:service/printer1-async"],
-    "splicer:proxy/before": printer1-async-mdl-a["splicer:proxy/before"],
-    "splicer:proxy/after": printer1-async-mdl-a["splicer:proxy/after"],
+let printer1-async-mdl-a-adapter = new my:printer1-async-mdl-a-adapter {
+    "my:service/printer1-async": blocker-async-mdl-adapter["my:service/printer1-async"],
+    "splicer:adapter/before": printer1-async-mdl-a["splicer:adapter/before"],
+    "splicer:adapter/after": printer1-async-mdl-a["splicer:adapter/after"],
     ...
 };
 
 let printer1-mdl-c = new my:printer1-mdl-c { ... };
 
-let printer1-mdl-c-proxy = new my:printer1-mdl-c-proxy {
+let printer1-mdl-c-adapter = new my:printer1-mdl-c-adapter {
     "my:service/printer1": printer1-comp["my:service/printer1"],
-    "splicer:proxy/before": printer1-mdl-c["splicer:proxy/before"],
-    "splicer:proxy/after": printer1-mdl-c["splicer:proxy/after"],
+    "splicer:adapter/before": printer1-mdl-c["splicer:adapter/before"],
+    "splicer:adapter/after": printer1-mdl-c["splicer:adapter/after"],
     ...
 };
 
 let blocker-mdl = new my:blocker-mdl { ... };
 
-let blocker-mdl-proxy = new my:blocker-mdl-proxy {
-    "my:service/printer1": printer1-mdl-c-proxy["my:service/printer1"],
-    "splicer:proxy/blocking": blocker-mdl["splicer:proxy/blocking"],
+let blocker-mdl-adapter = new my:blocker-mdl-adapter {
+    "my:service/printer1": printer1-mdl-c-adapter["my:service/printer1"],
+    "splicer:adapter/blocking": blocker-mdl["splicer:adapter/blocking"],
     ...
 };
 
 let printer1-mdl-a = new my:printer1-mdl-a { ... };
 
-let printer1-mdl-a-proxy = new my:printer1-mdl-a-proxy {
-    "my:service/printer1": blocker-mdl-proxy["my:service/printer1"],
-    "splicer:proxy/before": printer1-mdl-a["splicer:proxy/before"],
-    "splicer:proxy/after": printer1-mdl-a["splicer:proxy/after"],
+let printer1-mdl-a-adapter = new my:printer1-mdl-a-adapter {
+    "my:service/printer1": blocker-mdl-adapter["my:service/printer1"],
+    "splicer:adapter/before": printer1-mdl-a["splicer:adapter/before"],
+    "splicer:adapter/after": printer1-mdl-a["splicer:adapter/after"],
     ...
 };
 
 let service-comp = new my:service-comp {
     "my:service/printer-n": printer-n-comp["my:service/printer-n"],
-    "my:service/printer1-async": printer1-async-mdl-a-proxy["my:service/printer1-async"],
-    "my:service/printer1": printer1-mdl-a-proxy["my:service/printer1"],
+    "my:service/printer1-async": printer1-async-mdl-a-adapter["my:service/printer1-async"],
+    "my:service/printer1": printer1-mdl-a-adapter["my:service/printer1"],
     "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
     "my:service/messenger": messenger-comp["my:service/messenger"],
     "my:service/adder-async": adder-async-comp["my:service/adder-async"],

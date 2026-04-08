@@ -7,7 +7,7 @@ mod bindings {
 }
 
 use std::env;
-use crate::bindings::exports::splicer::proxy::blocking::Guest;
+use crate::bindings::exports::splicer::adapter::blocking::Guest;
 
 pub struct Service;
 

@@ -1,2 +1,2 @@
 [overrides]
-"splicer:proxy" = { path = "wit/splicer.proxy" }
+"splicer:adapter" = { path = "wit/splicer.adapter" }
