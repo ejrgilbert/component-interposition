@@ -1,0 +1,38 @@
+Running the echo test with host-to-host disabled
+[svc] entered!
+  >> [mdl-add] before!
+  >> [mdl-add] before!
+  >> [mdl-add] before!
+     [adder] entered!
+     [adder] exit!
+  >> [mdl-add] after!
+  >> [mdl-add] after!
+  >> [mdl-add] after!
+[svc] adder says '1 + 2 = 0'
+  >> [mdl-add-async] before!
+  >> [mdl-add-async] before!
+  >> [mdl-add-async] before!
+     [adder-async] entered!
+     [adder-async] exit!
+  >> [mdl-add-async] after!
+  >> [mdl-add-async] after!
+  >> [mdl-add-async] after!
+[svc] adder-async says '1 + 2 = 3'
+[svc] get-msg:       'You made me swallow my gum!'
+[svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
+     [print1] entered!
+         it's dangerous to go alone! take this 🗡️
+     [print1] exit!
+[svc] printer1 completed!
+     [print1-async] entered!
+         it's dangerous to go alone! take this 🗡️
+     [print1-async] exit!
+[svc] printer1-async completed!
+     [printN] entered!
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+     [printN] exit!
+[svc] printer-n completed!
+[svc] exit!

@@ -9,4 +9,4 @@ rules:
         name: "srv-a"
     inject:
       - name: srv-c
-        path: "./target/wasm32-wasip1/debug/service_c.comp.wasm"
+        path: "./fixtures/service_c.comp.wasm"

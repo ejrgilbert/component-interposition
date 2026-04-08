@@ -10,4 +10,4 @@ rules:
         name: srv-a
     inject:
       - name: mdl-a
-        path: "./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
+        path: "./fixtures/middleware_a.comp.wasm"

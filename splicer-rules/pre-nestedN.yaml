@@ -8,8 +8,8 @@ rules:
         name: "srv-a"
     inject:
       - name: mdl-a
-        path: "./target/wasm32-wasip1/debug/middleware_a.comp.wasm"
+        path: "./fixtures/middleware_a.comp.wasm"
       - name: mdl-b
-        path: "./target/wasm32-wasip1/debug/middleware_b.comp.wasm"
+        path: "./fixtures/middleware_b.comp.wasm"
       - name: mdl-c
-        path: "./target/wasm32-wasip1/debug/middleware_c.comp.wasm"
+        path: "./fixtures/middleware_c.comp.wasm"

@@ -4,8 +4,13 @@ let srv = new my:srv {
     ...
 };
 
-let mdl-a = new my:mdl-a {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": srv["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+let mdl-a = new my:mdl-a { ... };
+
+let mdl-a-proxy = new my:mdl-a-proxy {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:proxy/before": mdl-a["splicer:proxy/before"],
+    "splicer:proxy/after": mdl-a["splicer:proxy/after"],
+    ...
 };
 
-export mdl-a["wasi:http/handler@0.3.0-rc-2026-01-06"];
+export mdl-a-proxy["wasi:http/handler@0.3.0-rc-2026-01-06"];

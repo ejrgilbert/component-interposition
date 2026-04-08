@@ -9,37 +9,37 @@ rules:
         name: service-comp
     inject:
       - name: adder-mdl-a
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: adder-mdl-b
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: adder-mdl-c
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
-  #  - between:
-  #      interface: "my:service/messenger"
-  #      inner:
-  #        name: messenger-comp
-  #      outer:
-  #        name: service-comp
-  #    inject:
-  #      - name: messenger-mdl-a
-  #        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
-  #      - name: messenger-mdl-b
-  #        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
-  #      - name: messenger-mdl-c
-  #        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
-  #  - between:
-  #      interface: "my:service/messenger-async"
-  #      inner:
-  #        name: messenger-async-comp
-  #      outer:
-  #        name: service-comp
-  #    inject:
-  #      - name: messenger-async-mdl-a
-  #        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
-  #      - name: messenger-async-mdl-b
-  #        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
-  #      - name: messenger-async-mdl-c
-  #        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
+#  - between:
+#      interface: "my:service/messenger"
+#      inner:
+#        name: messenger-comp
+#      outer:
+#        name: service-comp
+#    inject:
+#      - name: messenger-mdl-a
+#        path: "./fixtures/printer_mdl.comp.wasm"
+#      - name: messenger-mdl-b
+#        path: "./fixtures/printer_mdl.comp.wasm"
+#      - name: messenger-mdl-c
+#        path: "./fixtures/printer_mdl.comp.wasm"
+#  - between:
+#      interface: "my:service/messenger-async"
+#      inner:
+#        name: messenger-async-comp
+#      outer:
+#        name: service-comp
+#    inject:
+#      - name: messenger-async-mdl-a
+#        path: "./fixtures/printer_mdl.comp.wasm"
+#      - name: messenger-async-mdl-b
+#        path: "./fixtures/printer_mdl.comp.wasm"
+#      - name: messenger-async-mdl-c
+#        path: "./fixtures/printer_mdl.comp.wasm"
   - between:
       interface: "my:service/adder-async"
       inner:
@@ -48,11 +48,11 @@ rules:
         name: service-comp
     inject:
       - name: adder-async-mdl-a
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: adder-async-mdl-b
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: adder-async-mdl-c
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
   - between:
       interface: "my:service/printer1"
       inner:
@@ -61,11 +61,11 @@ rules:
         name: service-comp
     inject:
       - name: printer1-mdl-a
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: printer1-mdl-b
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: printer1-mdl-c
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
   - between:
       interface: "my:service/printer1-async"
       inner:
@@ -74,11 +74,11 @@ rules:
         name: service-comp
     inject:
       - name: printer1-async-mdl-a
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: printer1-async-mdl-b
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: printer1-async-mdl-c
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
   - between:
       interface: "my:service/printer-n"
       inner:
@@ -87,8 +87,8 @@ rules:
         name: service-comp
     inject:
       - name: printer-n-mdl-a
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: printer-n-mdl-b
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: printer-n-mdl-c
-        path: "./target/wasm32-wasip1/debug/printer_mdl.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"

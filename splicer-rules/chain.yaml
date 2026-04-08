@@ -10,4 +10,4 @@ rules:
         alias: "srv-b"
     inject:
       - name: srv-a
-        path: "./target/wasm32-wasip1/debug/service_a.comp.wasm"
+        path: "./fixtures/service_a.comp.wasm"
