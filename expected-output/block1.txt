@@ -1,0 +1,22 @@
+Running the echo test with host-to-host disabled
+[svc] entered!
+     [adder] entered!
+     [adder] exit!
+[svc] adder says '1 + 2 = 3'
+     [adder-async] entered!
+     [adder-async] exit!
+[svc] adder-async says '1 + 2 = 3'
+[svc] get-msg:       'You made me swallow my gum!'
+[svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
+  >> [mdl-block] i WILL block call to print1...
+[svc] printer1 completed!
+  >> [mdl-block] i WILL block call to print1-async...
+[svc] printer1-async completed!
+     [printN] entered!
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+     [printN] exit!
+[svc] printer-n completed!
+[svc] exit!

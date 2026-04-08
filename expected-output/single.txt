@@ -1,0 +1,4 @@
+Running the echo test with host-to-host disabled
+  >> [mdl-handle] before!
+    [svcB] entered!
+  >> [mdl-handle] after!

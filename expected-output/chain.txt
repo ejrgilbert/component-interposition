@@ -1,0 +1,4 @@
+Running the echo test with host-to-host disabled
+    [svcA] entered!
+    [svcB] entered!
+    [svcA] received response from svcB!

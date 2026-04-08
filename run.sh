@@ -24,6 +24,7 @@ PATH_WASI_TARGET="./target/wasm32-wasip1/debug"
 PATH_COMPOSED="./compositions"
 PATH_WAC="./generated-wac"
 PATH_RULES="./splicer-rules"
+PATH_FIXTURES="./fixtures"
 PATH_HANDLERS="./handlers"
 PATH_PROXY_MDL="./middleware"
 PATH_FAN_IN="./fan-in"
@@ -352,21 +353,21 @@ run_splicer_solver() {
 
 compose_single() {
     run_splicer \
-        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/single.yaml" \
         "$PATH_WAC/single.wac" \
         "$PATH_COMPOSED/single.wasm"
 }
 compose_multiple() {
     run_splicer \
-        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/multiple.yaml" \
         "$PATH_WAC/multiple.wac" \
         "$PATH_COMPOSED/multiple.wasm"
 }
 compose_chain() {
     run_splicer \
-        "$PATH_WASI_TARGET/service_b.comp.wasm" \
+        "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/chain.yaml" \
         "$PATH_WAC/chain.wac" \
         "$PATH_COMPOSED/chained.wasm"
@@ -449,14 +450,14 @@ compose_fanin() {
     run_splicer_solver \
         "$PATH_WAC/fanin.wac" \
         "$PATH_COMPOSED/fanin.wasm" \
-        "$PATH_WASI_TARGET/service.comp.wasm" \
-        "$PATH_WASI_TARGET/adder.comp.wasm" \
-        "$PATH_WASI_TARGET/adder_async.comp.wasm" \
-        "$PATH_WASI_TARGET/messenger.comp.wasm" \
-        "$PATH_WASI_TARGET/messenger_async.comp.wasm" \
-        "$PATH_WASI_TARGET/printer1.comp.wasm" \
-        "$PATH_WASI_TARGET/printer1_async.comp.wasm" \
-        "$PATH_WASI_TARGET/printer_n.comp.wasm"
+        "$PATH_FIXTURES/service.comp.wasm" \
+        "$PATH_FIXTURES/adder.comp.wasm" \
+        "$PATH_FIXTURES/adder_async.comp.wasm" \
+        "$PATH_FIXTURES/messenger.comp.wasm" \
+        "$PATH_FIXTURES/messenger_async.comp.wasm" \
+        "$PATH_FIXTURES/printer1.comp.wasm" \
+        "$PATH_FIXTURES/printer1_async.comp.wasm" \
+        "$PATH_FIXTURES/printer_n.comp.wasm"
 }
 compose_fanin1() {
     local wasm_file="$PATH_COMPOSED/fanin.wasm"
@@ -513,6 +514,7 @@ compose_blockN() {
 run() {
     local component=$1
     local env_vars=$2
+    local expected_file=$3  # optional: path to expected output file
 
     if [[ ! -f "$component" ]]; then
         log_error "Component not found at '$component'! Please run the 'build' and 'compose' steps first."
@@ -522,18 +524,47 @@ run() {
     log_info "Running component at $component..."
     pushd runner > /dev/null
 
-    if ! eval "$env_vars cargo run -- \"../$component\""; then
+    local output
+    if ! output=$(eval "$env_vars cargo run -- \"../$component\"" 2>&1); then
         log_error "Failed to run the component at $component."
+        echo "$output"
         exit 1
     fi
+    echo "$output"
 
     popd > /dev/null
+
+    # Validate output against expected file if provided
+    if [[ -n "$expected_file" && -f "$expected_file" ]]; then
+        # Filter runner output the same way expected files were captured:
+        # strip ANSI codes, blank lines, cargo build noise
+        local filtered
+        filtered=$(echo "$output" \
+            | sed 's/\x1b\[[0-9;]*m//g' \
+            | grep -v "^$\|Compiling\|Finished\|Running.*target/debug/runner\|Downloading\|Downloaded" \
+            | sed -e :a -e '/^$/d;N;ba' \
+        )
+        local expected
+        expected=$(cat "$expected_file" | sed -e :a -e '/^$/d;N;ba')
+        if [[ "$filtered" != "$expected" ]]; then
+            log_error "Output mismatch for $component!"
+            echo "--- Expected (from $expected_file) ---"
+            echo "$expected"
+            echo "--- Actual ---"
+            echo "$filtered"
+            echo "--- Diff ---"
+            diff <(echo "$expected") <(echo "$filtered") || true
+            exit 1
+        fi
+        log_success "Output matches expected for $(basename "$expected_file" .txt)"
+    fi
+
     log_success "Component at $component ran successfully!"
 }
 run_services() {
-    PATH_SVC_A="$PATH_WASI_TARGET/service_a.comp.wasm"
-    PATH_SVC_B="$PATH_WASI_TARGET/service_b.comp.wasm"
-    PATH_SVC_C="$PATH_WASI_TARGET/service_c.comp.wasm"
+    PATH_SVC_A="$PATH_FIXTURES/service_a.comp.wasm"
+    PATH_SVC_B="$PATH_FIXTURES/service_b.comp.wasm"
+    PATH_SVC_C="$PATH_FIXTURES/service_c.comp.wasm"
     CHAINED="$PATH_COMPOSED/chained.wasm"
     NESTED="$PATH_COMPOSED/nested.wasm"
     INNER_NESTED1="$PATH_COMPOSED/inner-nested1.wasm"
@@ -650,11 +681,15 @@ run_composition() {
             ;;
     esac
 
+    # Derive the expected output file name from the option (strip leading --)
+    local opt_name="${1#--}"
+    local expected_file="./expected-output/${opt_name}.txt"
+
     log_info "Visualization of the component at $COMPOSED:"
     viz "$COMPOSED"
     echo
 
-    run "$COMPOSED" "$ENV_VARS"
+    run "$COMPOSED" "$ENV_VARS" "$expected_file"
 }
 
 # -----------------------------------------------------------------------------
@@ -764,9 +799,24 @@ build() {
     build_component "printer_n"       "$PATH_FAN_IN/printer_n"        "printer_n"
     build_component "service"         "$PATH_FAN_IN/service"          "service"
 
+    # Copy built components to fixtures/ for checked-in test data
+    update_fixtures
+
     compose --chain
     compose --nested
     compose --fanin
+}
+
+# Copy all built .comp.wasm files to the fixtures/ directory.
+# This directory is checked into git so that downstream projects (e.g. splicer
+# via git submodule) can run integration tests without rebuilding from source.
+update_fixtures() {
+    log_info "Copying built components to $PATH_FIXTURES/..."
+    mkdir -p "$PATH_FIXTURES"
+    for f in "$PATH_WASI_TARGET"/*.comp.wasm; do
+        cp "$f" "$PATH_FIXTURES/"
+    done
+    log_success "Fixtures updated in $PATH_FIXTURES/"
 }
 
 run_tests() {
@@ -784,7 +834,7 @@ run_tests() {
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
-    build
+#    build
 
     # Iterate and build a command for each item
     for opt in "${implemented_options[@]}"; do
@@ -828,7 +878,7 @@ case "$CMD" in
         viz_composition "$OPT"
         ;;
     all)
-        build
+#        build
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"
