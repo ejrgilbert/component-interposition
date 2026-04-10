@@ -541,11 +541,11 @@ run() {
         local filtered
         filtered=$(echo "$output" \
             | sed 's/\x1b\[[0-9;]*m//g' \
-            | grep -v "^$\|Compiling\|Finished\|Running.*target/debug/runner\|Downloading\|Downloaded" \
-            | sed -e :a -e '/^$/d;N;ba' \
+            | grep -v "Compiling\|Finished\|Running.*target/debug/runner\|Downloading\|Downloaded" \
+            | sed '/^[[:space:]]*$/d' \
         )
         local expected
-        expected=$(cat "$expected_file" | sed -e :a -e '/^$/d;N;ba')
+        expected=$(sed '/^[[:space:]]*$/d' "$expected_file")
         if [[ "$filtered" != "$expected" ]]; then
             log_error "Output mismatch for $component!"
             echo "--- Expected (from $expected_file) ---"
@@ -783,9 +783,6 @@ build() {
     build_component "service_a"     "$PATH_HANDLERS/service_a"    "service_a"
     build_component "service_b"     "$PATH_HANDLERS/service_b"    "service_b"
     build_component "service_c"     "$PATH_HANDLERS/service_c"    "service_c"
-    build_component "middleware_a"  "$PATH_HANDLERS/middleware_a" "middleware_a"
-    build_component "middleware_b"  "$PATH_HANDLERS/middleware_b" "middleware_b"
-    build_component "middleware_c"  "$PATH_HANDLERS/middleware_c" "middleware_c"
 
     build_component "printer_mdl"   "$PATH_PROXY_MDL/printer_mdl" "printer_mdl"
     build_component "blocker_mdl"   "$PATH_PROXY_MDL/blocker_mdl" "blocker_mdl"

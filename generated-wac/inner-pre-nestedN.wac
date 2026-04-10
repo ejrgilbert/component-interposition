@@ -4,37 +4,67 @@ let srv-b = new my:srv-b {
     ...
 };
 
-let inner-mdl-c = new my:inner-mdl-c {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": srv-b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
-};
+let inner-mdl-c = new my:inner-mdl-c { ... };
 
-let inner-mdl-b = new my:inner-mdl-b {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": inner-mdl-c["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
-};
-
-let inner-mdl-a = new my:inner-mdl-a {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": inner-mdl-b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
-};
-
-let srv-a = new my:srv-a {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": inner-mdl-a["wasi:http/handler@0.3.0-rc-2026-01-06"],
+let inner-mdl-c-adapter = new my:inner-mdl-c-adapter {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv-b["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:adapter/before": inner-mdl-c["splicer:adapter/before"],
+    "splicer:adapter/after": inner-mdl-c["splicer:adapter/after"],
     ...
 };
 
-let mdl-c = new my:mdl-c {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": srv-a["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+let inner-mdl-b = new my:inner-mdl-b { ... };
+
+let inner-mdl-b-adapter = new my:inner-mdl-b-adapter {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": inner-mdl-c-adapter["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:adapter/before": inner-mdl-b["splicer:adapter/before"],
+    "splicer:adapter/after": inner-mdl-b["splicer:adapter/after"],
+    ...
 };
 
-let mdl-b = new my:mdl-b {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-c["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+let inner-mdl-a = new my:inner-mdl-a { ... };
+
+let inner-mdl-a-adapter = new my:inner-mdl-a-adapter {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": inner-mdl-b-adapter["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:adapter/before": inner-mdl-a["splicer:adapter/before"],
+    "splicer:adapter/after": inner-mdl-a["splicer:adapter/after"],
+    ...
 };
 
-let mdl-a = new my:mdl-a {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-b["wasi:http/handler@0.3.0-rc-2026-01-06"], ...
+let srv-a = new my:srv-a {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": inner-mdl-a-adapter["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    ...
+};
+
+let mdl-c = new my:mdl-c { ... };
+
+let mdl-c-adapter = new my:mdl-c-adapter {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": srv-a["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:adapter/before": mdl-c["splicer:adapter/before"],
+    "splicer:adapter/after": mdl-c["splicer:adapter/after"],
+    ...
+};
+
+let mdl-b = new my:mdl-b { ... };
+
+let mdl-b-adapter = new my:mdl-b-adapter {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-c-adapter["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:adapter/before": mdl-b["splicer:adapter/before"],
+    "splicer:adapter/after": mdl-b["splicer:adapter/after"],
+    ...
+};
+
+let mdl-a = new my:mdl-a { ... };
+
+let mdl-a-adapter = new my:mdl-a-adapter {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-b-adapter["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:adapter/before": mdl-a["splicer:adapter/before"],
+    "splicer:adapter/after": mdl-a["splicer:adapter/after"],
+    ...
 };
 
 let srv-c = new my:srv-c {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-a["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-a-adapter["wasi:http/handler@0.3.0-rc-2026-01-06"],
     ...
 };
 

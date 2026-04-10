@@ -8,7 +8,7 @@ rules:
         name: "srv-a"
     inject:
       - name: mdl-a
-        path: "./fixtures/middleware_a.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
   # Inject INSIDE the nested node on the chain
   - between:
       interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
@@ -18,4 +18,4 @@ rules:
         name: srv-a
     inject:
       - name: mdl-b
-        path: "./fixtures/middleware_b.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"

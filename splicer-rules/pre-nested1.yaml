@@ -8,4 +8,4 @@ rules:
         name: "srv-a"
     inject:
       - name: mdl-a
-        path: "./fixtures/middleware_a.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
