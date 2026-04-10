@@ -8,8 +8,8 @@ rules:
         name: "srv-a"
     inject:
       - name: mdl-a
-        path: "./fixtures/middleware_a.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: mdl-b
-        path: "./fixtures/middleware_b.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"
       - name: mdl-c
-        path: "./fixtures/middleware_c.comp.wasm"
+        path: "./fixtures/printer_mdl.comp.wasm"

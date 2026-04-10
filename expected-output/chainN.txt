@@ -1,10 +1,10 @@
 Running the echo test with host-to-host disabled
     [svcA] entered!
->>> [mdlA] enter
->>> [mdlB] enter
->>> [mdlC] enter
+  >> [mdl-handle] before!
+  >> [mdl-handle] before!
+  >> [mdl-handle] before!
     [svcB] entered!
-<<< [mdlC] exit
-<<< [mdlB] exit
-<<< [mdlA] exit
+  >> [mdl-handle] after!
+  >> [mdl-handle] after!
+  >> [mdl-handle] after!
     [svcA] received response from svcB!
