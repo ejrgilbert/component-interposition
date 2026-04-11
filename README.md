@@ -110,8 +110,12 @@ After middleware injection on ALL downstream interfaces (`./run.sh all --fanin-a
 ```
 
 # Next Steps #
-- [ ] Generate proxy components to wrap middleware that only has host imports so it can port across function interface types
 - [ ] Build **standardized middleware** components that can port across compositions using the `splicer`
+
+Generate adapter components to wrap middleware that only has host imports so it can port across function interface types:
+- [x] tier-1: passthrough handler invocation (no reflection on types or dataflow)
+- [ ] tier-2: reflection on types and dataflow, no data mutation
+- [ ] tier-3: reflection on types and dataflow, WITH data mutation
  
 # What is "middleware" in the realm of Wasi HTTP? #
 
