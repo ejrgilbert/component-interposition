@@ -1,2 +1,2 @@
 [overrides]
-"splicer:adapter" = { path = "wit/splicer.adapter" }
+"splicer:tier1" = { path = "wit/splicer.tier1" }

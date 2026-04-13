@@ -32,8 +32,8 @@ let printer-n-mdl-c = new my:printer-n-mdl-c { ... };
 
 let printer-n-mdl-c-adapter = new my:printer-n-mdl-c-adapter {
     "my:service/printer-n": printer-n-comp["my:service/printer-n"],
-    "splicer:adapter/before": printer-n-mdl-c["splicer:adapter/before"],
-    "splicer:adapter/after": printer-n-mdl-c["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer-n-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer-n-mdl-c["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -41,8 +41,8 @@ let printer-n-mdl-b = new my:printer-n-mdl-b { ... };
 
 let printer-n-mdl-b-adapter = new my:printer-n-mdl-b-adapter {
     "my:service/printer-n": printer-n-mdl-c-adapter["my:service/printer-n"],
-    "splicer:adapter/before": printer-n-mdl-b["splicer:adapter/before"],
-    "splicer:adapter/after": printer-n-mdl-b["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer-n-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer-n-mdl-b["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -50,8 +50,8 @@ let printer-n-mdl-a = new my:printer-n-mdl-a { ... };
 
 let printer-n-mdl-a-adapter = new my:printer-n-mdl-a-adapter {
     "my:service/printer-n": printer-n-mdl-b-adapter["my:service/printer-n"],
-    "splicer:adapter/before": printer-n-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": printer-n-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer-n-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer-n-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -59,8 +59,8 @@ let printer1-async-mdl-c = new my:printer1-async-mdl-c { ... };
 
 let printer1-async-mdl-c-adapter = new my:printer1-async-mdl-c-adapter {
     "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
-    "splicer:adapter/before": printer1-async-mdl-c["splicer:adapter/before"],
-    "splicer:adapter/after": printer1-async-mdl-c["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer1-async-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer1-async-mdl-c["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -68,8 +68,8 @@ let printer1-async-mdl-b = new my:printer1-async-mdl-b { ... };
 
 let printer1-async-mdl-b-adapter = new my:printer1-async-mdl-b-adapter {
     "my:service/printer1-async": printer1-async-mdl-c-adapter["my:service/printer1-async"],
-    "splicer:adapter/before": printer1-async-mdl-b["splicer:adapter/before"],
-    "splicer:adapter/after": printer1-async-mdl-b["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer1-async-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer1-async-mdl-b["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -77,8 +77,8 @@ let printer1-async-mdl-a = new my:printer1-async-mdl-a { ... };
 
 let printer1-async-mdl-a-adapter = new my:printer1-async-mdl-a-adapter {
     "my:service/printer1-async": printer1-async-mdl-b-adapter["my:service/printer1-async"],
-    "splicer:adapter/before": printer1-async-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": printer1-async-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer1-async-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer1-async-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -86,8 +86,8 @@ let printer1-mdl-c = new my:printer1-mdl-c { ... };
 
 let printer1-mdl-c-adapter = new my:printer1-mdl-c-adapter {
     "my:service/printer1": printer1-comp["my:service/printer1"],
-    "splicer:adapter/before": printer1-mdl-c["splicer:adapter/before"],
-    "splicer:adapter/after": printer1-mdl-c["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer1-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer1-mdl-c["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -95,8 +95,8 @@ let printer1-mdl-b = new my:printer1-mdl-b { ... };
 
 let printer1-mdl-b-adapter = new my:printer1-mdl-b-adapter {
     "my:service/printer1": printer1-mdl-c-adapter["my:service/printer1"],
-    "splicer:adapter/before": printer1-mdl-b["splicer:adapter/before"],
-    "splicer:adapter/after": printer1-mdl-b["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer1-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer1-mdl-b["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -104,8 +104,62 @@ let printer1-mdl-a = new my:printer1-mdl-a { ... };
 
 let printer1-mdl-a-adapter = new my:printer1-mdl-a-adapter {
     "my:service/printer1": printer1-mdl-b-adapter["my:service/printer1"],
-    "splicer:adapter/before": printer1-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": printer1-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer1-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer1-mdl-a["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let messenger-async-mdl-c = new my:messenger-async-mdl-c { ... };
+
+let messenger-async-mdl-c-adapter = new my:messenger-async-mdl-c-adapter {
+    "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
+    "splicer:tier1/before@0.1.0": messenger-async-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": messenger-async-mdl-c["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let messenger-async-mdl-b = new my:messenger-async-mdl-b { ... };
+
+let messenger-async-mdl-b-adapter = new my:messenger-async-mdl-b-adapter {
+    "my:service/messenger-async": messenger-async-mdl-c-adapter["my:service/messenger-async"],
+    "splicer:tier1/before@0.1.0": messenger-async-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": messenger-async-mdl-b["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let messenger-async-mdl-a = new my:messenger-async-mdl-a { ... };
+
+let messenger-async-mdl-a-adapter = new my:messenger-async-mdl-a-adapter {
+    "my:service/messenger-async": messenger-async-mdl-b-adapter["my:service/messenger-async"],
+    "splicer:tier1/before@0.1.0": messenger-async-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": messenger-async-mdl-a["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let messenger-mdl-c = new my:messenger-mdl-c { ... };
+
+let messenger-mdl-c-adapter = new my:messenger-mdl-c-adapter {
+    "my:service/messenger": messenger-comp["my:service/messenger"],
+    "splicer:tier1/before@0.1.0": messenger-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": messenger-mdl-c["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let messenger-mdl-b = new my:messenger-mdl-b { ... };
+
+let messenger-mdl-b-adapter = new my:messenger-mdl-b-adapter {
+    "my:service/messenger": messenger-mdl-c-adapter["my:service/messenger"],
+    "splicer:tier1/before@0.1.0": messenger-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": messenger-mdl-b["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let messenger-mdl-a = new my:messenger-mdl-a { ... };
+
+let messenger-mdl-a-adapter = new my:messenger-mdl-a-adapter {
+    "my:service/messenger": messenger-mdl-b-adapter["my:service/messenger"],
+    "splicer:tier1/before@0.1.0": messenger-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": messenger-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -113,8 +167,8 @@ let adder-async-mdl-c = new my:adder-async-mdl-c { ... };
 
 let adder-async-mdl-c-adapter = new my:adder-async-mdl-c-adapter {
     "my:service/adder-async": adder-async-comp["my:service/adder-async"],
-    "splicer:adapter/before": adder-async-mdl-c["splicer:adapter/before"],
-    "splicer:adapter/after": adder-async-mdl-c["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-async-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-async-mdl-c["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -122,8 +176,8 @@ let adder-async-mdl-b = new my:adder-async-mdl-b { ... };
 
 let adder-async-mdl-b-adapter = new my:adder-async-mdl-b-adapter {
     "my:service/adder-async": adder-async-mdl-c-adapter["my:service/adder-async"],
-    "splicer:adapter/before": adder-async-mdl-b["splicer:adapter/before"],
-    "splicer:adapter/after": adder-async-mdl-b["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-async-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-async-mdl-b["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -131,8 +185,8 @@ let adder-async-mdl-a = new my:adder-async-mdl-a { ... };
 
 let adder-async-mdl-a-adapter = new my:adder-async-mdl-a-adapter {
     "my:service/adder-async": adder-async-mdl-b-adapter["my:service/adder-async"],
-    "splicer:adapter/before": adder-async-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": adder-async-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-async-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-async-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -140,8 +194,8 @@ let adder-mdl-c = new my:adder-mdl-c { ... };
 
 let adder-mdl-c-adapter = new my:adder-mdl-c-adapter {
     "my:service/adder": adder-comp["my:service/adder"],
-    "splicer:adapter/before": adder-mdl-c["splicer:adapter/before"],
-    "splicer:adapter/after": adder-mdl-c["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-mdl-c["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -149,8 +203,8 @@ let adder-mdl-b = new my:adder-mdl-b { ... };
 
 let adder-mdl-b-adapter = new my:adder-mdl-b-adapter {
     "my:service/adder": adder-mdl-c-adapter["my:service/adder"],
-    "splicer:adapter/before": adder-mdl-b["splicer:adapter/before"],
-    "splicer:adapter/after": adder-mdl-b["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-mdl-b["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -158,8 +212,8 @@ let adder-mdl-a = new my:adder-mdl-a { ... };
 
 let adder-mdl-a-adapter = new my:adder-mdl-a-adapter {
     "my:service/adder": adder-mdl-b-adapter["my:service/adder"],
-    "splicer:adapter/before": adder-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": adder-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -167,8 +221,8 @@ let service-comp = new my:service-comp {
     "my:service/printer-n": printer-n-mdl-a-adapter["my:service/printer-n"],
     "my:service/printer1-async": printer1-async-mdl-a-adapter["my:service/printer1-async"],
     "my:service/printer1": printer1-mdl-a-adapter["my:service/printer1"],
-    "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
-    "my:service/messenger": messenger-comp["my:service/messenger"],
+    "my:service/messenger-async": messenger-async-mdl-a-adapter["my:service/messenger-async"],
+    "my:service/messenger": messenger-mdl-a-adapter["my:service/messenger"],
     "my:service/adder-async": adder-async-mdl-a-adapter["my:service/adder-async"],
     "my:service/adder": adder-mdl-a-adapter["my:service/adder"],
     ...

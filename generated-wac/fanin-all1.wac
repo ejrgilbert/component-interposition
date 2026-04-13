@@ -32,8 +32,8 @@ let printer-n-mdl-a = new my:printer-n-mdl-a { ... };
 
 let printer-n-mdl-a-adapter = new my:printer-n-mdl-a-adapter {
     "my:service/printer-n": printer-n-comp["my:service/printer-n"],
-    "splicer:adapter/before": printer-n-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": printer-n-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer-n-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer-n-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -41,8 +41,8 @@ let printer1-async-mdl-a = new my:printer1-async-mdl-a { ... };
 
 let printer1-async-mdl-a-adapter = new my:printer1-async-mdl-a-adapter {
     "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
-    "splicer:adapter/before": printer1-async-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": printer1-async-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer1-async-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer1-async-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -50,8 +50,26 @@ let printer1-mdl-a = new my:printer1-mdl-a { ... };
 
 let printer1-mdl-a-adapter = new my:printer1-mdl-a-adapter {
     "my:service/printer1": printer1-comp["my:service/printer1"],
-    "splicer:adapter/before": printer1-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": printer1-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": printer1-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": printer1-mdl-a["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let messenger-async-mdl-a = new my:messenger-async-mdl-a { ... };
+
+let messenger-async-mdl-a-adapter = new my:messenger-async-mdl-a-adapter {
+    "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
+    "splicer:tier1/before@0.1.0": messenger-async-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": messenger-async-mdl-a["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let messenger-mdl-a = new my:messenger-mdl-a { ... };
+
+let messenger-mdl-a-adapter = new my:messenger-mdl-a-adapter {
+    "my:service/messenger": messenger-comp["my:service/messenger"],
+    "splicer:tier1/before@0.1.0": messenger-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": messenger-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -59,8 +77,8 @@ let adder-async-mdl-a = new my:adder-async-mdl-a { ... };
 
 let adder-async-mdl-a-adapter = new my:adder-async-mdl-a-adapter {
     "my:service/adder-async": adder-async-comp["my:service/adder-async"],
-    "splicer:adapter/before": adder-async-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": adder-async-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-async-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-async-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -68,8 +86,8 @@ let adder-mdl-a = new my:adder-mdl-a { ... };
 
 let adder-mdl-a-adapter = new my:adder-mdl-a-adapter {
     "my:service/adder": adder-comp["my:service/adder"],
-    "splicer:adapter/before": adder-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": adder-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -77,8 +95,8 @@ let service-comp = new my:service-comp {
     "my:service/printer-n": printer-n-mdl-a-adapter["my:service/printer-n"],
     "my:service/printer1-async": printer1-async-mdl-a-adapter["my:service/printer1-async"],
     "my:service/printer1": printer1-mdl-a-adapter["my:service/printer1"],
-    "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
-    "my:service/messenger": messenger-comp["my:service/messenger"],
+    "my:service/messenger-async": messenger-async-mdl-a-adapter["my:service/messenger-async"],
+    "my:service/messenger": messenger-mdl-a-adapter["my:service/messenger"],
     "my:service/adder-async": adder-async-mdl-a-adapter["my:service/adder-async"],
     "my:service/adder": adder-mdl-a-adapter["my:service/adder"],
     ...

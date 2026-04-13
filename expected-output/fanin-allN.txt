@@ -18,7 +18,19 @@ Running the echo test with host-to-host disabled
   >> [mdl-add-async] after!
   >> [mdl-add-async] after!
 [svc] adder-async says '1 + 2 = 3'
+  >> [mdl-get-msg] before!
+  >> [mdl-get-msg] before!
+  >> [mdl-get-msg] before!
+  >> [mdl-get-msg] after!
+  >> [mdl-get-msg] after!
+  >> [mdl-get-msg] after!
 [svc] get-msg:       'You made me swallow my gum!'
+  >> [mdl-get-msg-async] before!
+  >> [mdl-get-msg-async] before!
+  >> [mdl-get-msg-async] before!
+  >> [mdl-get-msg-async] after!
+  >> [mdl-get-msg-async] after!
+  >> [mdl-get-msg-async] after!
 [svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
   >> [mdl-print1] before!
   >> [mdl-print1] before!

@@ -1,6 +1,6 @@
 package my:printing-middleware;
 
 world printer-mdl {
-    export splicer:adapter/before;
-    export splicer:adapter/after;
+    export splicer:tier1/before@0.1.0;
+    export splicer:tier1/after@0.1.0;
 }

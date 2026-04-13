@@ -14,32 +14,32 @@ rules:
         path: "./fixtures/printer_mdl.comp.wasm"
       - name: adder-mdl-c
         path: "./fixtures/printer_mdl.comp.wasm"
-#  - between:
-#      interface: "my:service/messenger"
-#      inner:
-#        name: messenger-comp
-#      outer:
-#        name: service-comp
-#    inject:
-#      - name: messenger-mdl-a
-#        path: "./fixtures/printer_mdl.comp.wasm"
-#      - name: messenger-mdl-b
-#        path: "./fixtures/printer_mdl.comp.wasm"
-#      - name: messenger-mdl-c
-#        path: "./fixtures/printer_mdl.comp.wasm"
-#  - between:
-#      interface: "my:service/messenger-async"
-#      inner:
-#        name: messenger-async-comp
-#      outer:
-#        name: service-comp
-#    inject:
-#      - name: messenger-async-mdl-a
-#        path: "./fixtures/printer_mdl.comp.wasm"
-#      - name: messenger-async-mdl-b
-#        path: "./fixtures/printer_mdl.comp.wasm"
-#      - name: messenger-async-mdl-c
-#        path: "./fixtures/printer_mdl.comp.wasm"
+  - between:
+      interface: "my:service/messenger"
+      inner:
+        name: messenger-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: messenger-mdl-a
+        path: "./fixtures/printer_mdl.comp.wasm"
+      - name: messenger-mdl-b
+        path: "./fixtures/printer_mdl.comp.wasm"
+      - name: messenger-mdl-c
+        path: "./fixtures/printer_mdl.comp.wasm"
+  - between:
+      interface: "my:service/messenger-async"
+      inner:
+        name: messenger-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: messenger-async-mdl-a
+        path: "./fixtures/printer_mdl.comp.wasm"
+      - name: messenger-async-mdl-b
+        path: "./fixtures/printer_mdl.comp.wasm"
+      - name: messenger-async-mdl-c
+        path: "./fixtures/printer_mdl.comp.wasm"
   - between:
       interface: "my:service/adder-async"
       inner:
