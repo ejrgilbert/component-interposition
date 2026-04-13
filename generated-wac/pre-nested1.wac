@@ -13,8 +13,8 @@ let mdl-a = new my:mdl-a { ... };
 
 let mdl-a-adapter = new my:mdl-a-adapter {
     "wasi:http/handler@0.3.0-rc-2026-01-06": srv-a["wasi:http/handler@0.3.0-rc-2026-01-06"],
-    "splicer:adapter/before": mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 

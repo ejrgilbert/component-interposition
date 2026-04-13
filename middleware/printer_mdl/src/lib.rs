@@ -6,8 +6,8 @@ mod bindings {
     });
 }
 
-use crate::bindings::exports::splicer::adapter::before::Guest as BeforeGuest;
-use crate::bindings::exports::splicer::adapter::after::Guest as AfterGuest;
+use crate::bindings::exports::splicer::tier1::before::Guest as BeforeGuest;
+use crate::bindings::exports::splicer::tier1::after::Guest as AfterGuest;
 
 pub struct Service;
 

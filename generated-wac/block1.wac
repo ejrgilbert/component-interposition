@@ -32,7 +32,7 @@ let printer1-async-mdl-a = new my:printer1-async-mdl-a { ... };
 
 let printer1-async-mdl-a-adapter = new my:printer1-async-mdl-a-adapter {
     "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
-    "splicer:adapter/blocking": printer1-async-mdl-a["splicer:adapter/blocking"],
+    "splicer:tier1/blocking@0.1.0": printer1-async-mdl-a["splicer:tier1/blocking@0.1.0"],
     ...
 };
 
@@ -40,7 +40,7 @@ let printer1-mdl-a = new my:printer1-mdl-a { ... };
 
 let printer1-mdl-a-adapter = new my:printer1-mdl-a-adapter {
     "my:service/printer1": printer1-comp["my:service/printer1"],
-    "splicer:adapter/blocking": printer1-mdl-a["splicer:adapter/blocking"],
+    "splicer:tier1/blocking@0.1.0": printer1-mdl-a["splicer:tier1/blocking@0.1.0"],
     ...
 };
 

@@ -1,4 +1,4 @@
-package splicer:adapter;
+package splicer:tier1@0.1.0;
 
 interface before {
     before-call: async func(name: string);

@@ -32,8 +32,8 @@ let adder-async-mdl-c = new my:adder-async-mdl-c { ... };
 
 let adder-async-mdl-c-adapter = new my:adder-async-mdl-c-adapter {
     "my:service/adder-async": adder-async-comp["my:service/adder-async"],
-    "splicer:adapter/before": adder-async-mdl-c["splicer:adapter/before"],
-    "splicer:adapter/after": adder-async-mdl-c["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-async-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-async-mdl-c["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -41,8 +41,8 @@ let adder-async-mdl-b = new my:adder-async-mdl-b { ... };
 
 let adder-async-mdl-b-adapter = new my:adder-async-mdl-b-adapter {
     "my:service/adder-async": adder-async-mdl-c-adapter["my:service/adder-async"],
-    "splicer:adapter/before": adder-async-mdl-b["splicer:adapter/before"],
-    "splicer:adapter/after": adder-async-mdl-b["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-async-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-async-mdl-b["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -50,8 +50,8 @@ let adder-async-mdl-a = new my:adder-async-mdl-a { ... };
 
 let adder-async-mdl-a-adapter = new my:adder-async-mdl-a-adapter {
     "my:service/adder-async": adder-async-mdl-b-adapter["my:service/adder-async"],
-    "splicer:adapter/before": adder-async-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": adder-async-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-async-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-async-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -59,8 +59,8 @@ let adder-mdl-c = new my:adder-mdl-c { ... };
 
 let adder-mdl-c-adapter = new my:adder-mdl-c-adapter {
     "my:service/adder": adder-comp["my:service/adder"],
-    "splicer:adapter/before": adder-mdl-c["splicer:adapter/before"],
-    "splicer:adapter/after": adder-mdl-c["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-mdl-c["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -68,8 +68,8 @@ let adder-mdl-b = new my:adder-mdl-b { ... };
 
 let adder-mdl-b-adapter = new my:adder-mdl-b-adapter {
     "my:service/adder": adder-mdl-c-adapter["my:service/adder"],
-    "splicer:adapter/before": adder-mdl-b["splicer:adapter/before"],
-    "splicer:adapter/after": adder-mdl-b["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-mdl-b["splicer:tier1/after@0.1.0"],
     ...
 };
 
@@ -77,8 +77,8 @@ let adder-mdl-a = new my:adder-mdl-a { ... };
 
 let adder-mdl-a-adapter = new my:adder-mdl-a-adapter {
     "my:service/adder": adder-mdl-b-adapter["my:service/adder"],
-    "splicer:adapter/before": adder-mdl-a["splicer:adapter/before"],
-    "splicer:adapter/after": adder-mdl-a["splicer:adapter/after"],
+    "splicer:tier1/before@0.1.0": adder-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": adder-mdl-a["splicer:tier1/after@0.1.0"],
     ...
 };
 
