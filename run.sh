@@ -117,7 +117,7 @@ check_env() {
         "wasm-tools:1.244.0:$CARGO_INST"
         "wkg:0.13.0:$CARGO_INST"
         "splicer:2.0.0-rc3:$CARGO_INST"
-        "cviz-cli:2.0.0-rc2:$CARGO_INST"
+        "cviz-cli:2.0.0-rc3:$CARGO_INST"
         "wac:0.9.0:$CARGO_INST"
     )
 
@@ -831,7 +831,7 @@ run_tests() {
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
-    build
+#    build
 
     # Iterate and build a command for each item
     for opt in "${implemented_options[@]}"; do
@@ -875,7 +875,7 @@ case "$CMD" in
         viz_composition "$OPT"
         ;;
     all)
-        build
+#        build
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"
