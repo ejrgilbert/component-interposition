@@ -20,6 +20,10 @@ set -euo pipefail
 # Resolve repo root from script location so `wkg wit fetch` finds the registry
 # config regardless of which component subdir we pushd into.
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Anchor cwd so relative paths emitted by external tools (splicer, wac) resolve
+# correctly regardless of where the script was invoked from. Safe in an
+# executed script: only affects this subshell, not the caller's shell.
+cd "$REPO_ROOT"
 export WKG_CONFIG_FILE="$REPO_ROOT/wkg-registries.toml"
 
 # -----------------------------------------------------------------------------
