@@ -94,6 +94,7 @@ print_usage() {
     echo -e "  --blockN        : Splice multiple middlewares where the middle-most one chooses to block any further calls (the last middleware and the original dependency)"
     echo -e "  --noblock1      : Splice middleware that chooses to NOT block the downstream call"
     echo -e "  --noblockN      : Splice multiple middlewares where the middle-most one chooses to NOT block any further calls (the last middleware and the original dependency)"
+    echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
 
@@ -840,7 +841,9 @@ run_tests() {
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
-    build
+    if [ "$SKIP_BUILD" -eq 0 ]; then
+        build
+    fi
 
     # Iterate and build a command for each item
     for opt in "${implemented_options[@]}"; do
@@ -857,6 +860,19 @@ run_tests() {
 # -----------------------------------------------------------------------------
 # Parse command line argument
 # -----------------------------------------------------------------------------
+# Strip --skip-build from "$@" before positional parsing so callers can pass it
+# in any position without shifting CMD/OPT.
+SKIP_BUILD=0
+FILTERED_ARGS=()
+for arg in "$@"; do
+    if [ "$arg" = "--skip-build" ]; then
+        SKIP_BUILD=1
+    else
+        FILTERED_ARGS+=("$arg")
+    fi
+done
+set -- "${FILTERED_ARGS[@]}"
+
 CMD="${1:-all}"
 OPT="${2:---single}"
 
@@ -884,7 +900,9 @@ case "$CMD" in
         viz_composition "$OPT"
         ;;
     all)
-        build
+        if [ "$SKIP_BUILD" -eq 0 ]; then
+            build
+        fi
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"
