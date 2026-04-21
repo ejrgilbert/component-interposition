@@ -17,6 +17,11 @@
 
 set -euo pipefail
 
+# Resolve repo root from script location so `wkg wit fetch` finds the registry
+# config regardless of which component subdir we pushd into.
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+export WKG_CONFIG_FILE="$REPO_ROOT/wkg-registries.toml"
+
 # -----------------------------------------------------------------------------
 # Some helpful globals
 # -----------------------------------------------------------------------------
