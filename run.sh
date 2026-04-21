@@ -831,7 +831,7 @@ run_tests() {
     log_info "Running all different configurations, these should all execute successfully!\n"
 
     check_env
-#    build
+    build
 
     # Iterate and build a command for each item
     for opt in "${implemented_options[@]}"; do
@@ -875,7 +875,7 @@ case "$CMD" in
         viz_composition "$OPT"
         ;;
     all)
-#        build
+        build
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"
