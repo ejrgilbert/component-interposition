@@ -1,0 +1,2 @@
+[overrides]
+"my:service" = { path = "../shared-wit/my.service" }
