@@ -383,7 +383,7 @@ compose_chain() {
         "$PATH_COMPOSED/chained.wasm"
 }
 compose_chain1() {
-    local wasm_file="$PATH_COMPOSED/chained.wasm"
+    local wasm_file="$PATH_FIXTURES/chained.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/chain1.yaml" \
@@ -391,7 +391,7 @@ compose_chain1() {
         "$PATH_COMPOSED/chain1.wasm"
 }
 compose_chainN() {
-    local wasm_file="$PATH_COMPOSED/chained.wasm"
+    local wasm_file="$PATH_FIXTURES/chained.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/chainN.yaml" \
@@ -399,17 +399,14 @@ compose_chainN() {
         "$PATH_COMPOSED/chainN.wasm"
 }
 compose_nested() {
-    # Dependent on the chained.wasm being generated
-    compose_chain
-
     run_splicer \
-        "$PATH_COMPOSED/chained.wasm" \
+        "$PATH_FIXTURES/chained.wasm" \
         "$PATH_RULES/nested.yaml" \
         "$PATH_WAC/nested.wac" \
         "$PATH_COMPOSED/nested.wasm"
 }
 compose_inner_nested1() {
-    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    local wasm_file="$PATH_FIXTURES/nested.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/inner-nested1.yaml" \
@@ -417,7 +414,7 @@ compose_inner_nested1() {
         "$PATH_COMPOSED/inner-nested1.wasm"
 }
 compose_inner_nestedN() {
-    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    local wasm_file="$PATH_FIXTURES/nested.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/inner-nestedN.yaml" \
@@ -425,7 +422,7 @@ compose_inner_nestedN() {
         "$PATH_COMPOSED/inner-nestedN.wasm"
 }
 compose_pre_nested1() {
-    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    local wasm_file="$PATH_FIXTURES/nested.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/pre-nested1.yaml" \
@@ -433,7 +430,7 @@ compose_pre_nested1() {
         "$PATH_COMPOSED/pre-nested1.wasm"
 }
 compose_pre_nestedN() {
-    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    local wasm_file="$PATH_FIXTURES/nested.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/pre-nestedN.yaml" \
@@ -441,7 +438,7 @@ compose_pre_nestedN() {
         "$PATH_COMPOSED/pre-nestedN.wasm"
 }
 compose_inner_pre_nested1() {
-    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    local wasm_file="$PATH_FIXTURES/nested.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/inner-pre-nested1.yaml" \
@@ -449,7 +446,7 @@ compose_inner_pre_nested1() {
         "$PATH_COMPOSED/inner-pre-nested1.wasm"
 }
 compose_inner_pre_nestedN() {
-    local wasm_file="$PATH_COMPOSED/nested.wasm"
+    local wasm_file="$PATH_FIXTURES/nested.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/inner-pre-nestedN.yaml" \
@@ -470,7 +467,7 @@ compose_fanin() {
         "$PATH_FIXTURES/printer_n.comp.wasm"
 }
 compose_fanin1() {
-    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/fanin1.yaml" \
@@ -478,7 +475,7 @@ compose_fanin1() {
         "$PATH_COMPOSED/fanin1.wasm"
 }
 compose_faninN() {
-    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/faninN.yaml" \
@@ -486,7 +483,7 @@ compose_faninN() {
         "$PATH_COMPOSED/faninN.wasm"
 }
 compose_fanin_all1() {
-    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/fanin-all1.yaml" \
@@ -494,7 +491,7 @@ compose_fanin_all1() {
         "$PATH_COMPOSED/fanin-all1.wasm"
 }
 compose_fanin_allN() {
-    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/fanin-allN.yaml" \
@@ -502,7 +499,7 @@ compose_fanin_allN() {
         "$PATH_COMPOSED/fanin-allN.wasm"
 }
 compose_block1() {
-    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/block1.yaml" \
@@ -510,7 +507,7 @@ compose_block1() {
         "$PATH_COMPOSED/block1.wasm"
 }
 compose_blockN() {
-    local wasm_file="$PATH_COMPOSED/fanin.wasm"
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/blockN.yaml" \
@@ -624,7 +621,7 @@ run_composition() {
             COMPOSED="$PATH_COMPOSED/multiple.wasm"
             ;;
         --chain)
-            COMPOSED="$PATH_COMPOSED/chained.wasm"
+            COMPOSED="$PATH_FIXTURES/chained.wasm"
             ;;
         --chain1)
             COMPOSED="$PATH_COMPOSED/chain1.wasm"
@@ -633,7 +630,7 @@ run_composition() {
             COMPOSED="$PATH_COMPOSED/chainN.wasm"
             ;;
         --nested)
-            COMPOSED="$PATH_COMPOSED/nested.wasm"
+            COMPOSED="$PATH_FIXTURES/nested.wasm"
             ;;
         --inner-nested1)
             COMPOSED="$PATH_COMPOSED/inner-nested1.wasm"
@@ -654,7 +651,7 @@ run_composition() {
             COMPOSED="$PATH_COMPOSED/inner-pre-nestedN.wasm"
             ;;
         --fanin)
-            COMPOSED="$PATH_COMPOSED/fanin.wasm"
+            COMPOSED="$PATH_FIXTURES/fanin.wasm"
             ;;
         --fanin1)
             COMPOSED="$PATH_COMPOSED/fanin1.wasm"
@@ -718,7 +715,7 @@ viz_composition() {
             COMPOSED="$PATH_COMPOSED/multiple.wasm"
             ;;
         --chain)
-            COMPOSED="$PATH_COMPOSED/chained.wasm"
+            COMPOSED="$PATH_FIXTURES/chained.wasm"
             ;;
         --chain1)
             COMPOSED="$PATH_COMPOSED/chain1.wasm"
@@ -727,7 +724,7 @@ viz_composition() {
             COMPOSED="$PATH_COMPOSED/chainN.wasm"
             ;;
         --nested)
-            COMPOSED="$PATH_COMPOSED/nested.wasm"
+            COMPOSED="$PATH_FIXTURES/nested.wasm"
             ;;
         --inner-nested1)
             COMPOSED="$PATH_COMPOSED/inner-nested1.wasm"
@@ -748,7 +745,7 @@ viz_composition() {
             COMPOSED="$PATH_COMPOSED/inner-pre-nestedN.wasm"
             ;;
         --fanin)
-            COMPOSED="$PATH_COMPOSED/fanin.wasm"
+            COMPOSED="$PATH_FIXTURES/fanin.wasm"
             ;;
         --fanin1)
             COMPOSED="$PATH_COMPOSED/fanin1.wasm"
@@ -809,9 +806,15 @@ build() {
     # Copy built components to fixtures/ for checked-in test data
     update_fixtures
 
-    compose --chain
-    compose --nested
-    compose --fanin
+    # Generate base compositions and copy them to fixtures/ so that downstream
+    # configs (e.g. --blockN, --fanin1, --inner-nested1) can run from the
+    # committed fixtures without rebuilding (see --skip-build).
+    compose_chain
+    compose_nested
+    compose_fanin
+    cp "$PATH_COMPOSED/chained.wasm" "$PATH_FIXTURES/chained.wasm"
+    cp "$PATH_COMPOSED/nested.wasm"  "$PATH_FIXTURES/nested.wasm"
+    cp "$PATH_COMPOSED/fanin.wasm"   "$PATH_FIXTURES/fanin.wasm"
 }
 
 # Copy all built .comp.wasm files to the fixtures/ directory.
