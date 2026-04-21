@@ -548,7 +548,7 @@ run() {
         local filtered
         filtered=$(echo "$output" \
             | sed 's/\x1b\[[0-9;]*m//g' \
-            | grep -v "Compiling\|Finished\|Running.*target/debug/runner\|Downloading\|Downloaded" \
+            | grep -v "Compiling\|Finished\|Running.*target/debug/runner\|Downloading\|Downloaded\|Updating\|Locking\|Adding\|available:" \
             | sed '/^[[:space:]]*$/d' \
         )
         local expected
