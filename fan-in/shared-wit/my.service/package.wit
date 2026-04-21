@@ -1,0 +1,23 @@
+package my:service;
+
+interface adder {
+    add:            func(a: s32, b: s32) -> s32;
+}
+interface adder-async {
+    add-async:      async func(a: s32, b: s32) -> s32;
+}
+interface messenger {
+    get-msg:        func() -> string;
+}
+interface messenger-async {
+    get-msg-async:  async func() -> string;
+}
+interface printer1 {
+    print1:         func(msg: string);
+}
+interface printer1-async {
+    print1-async:   async func(msg: string);
+}
+interface printer-n {
+    print-n:        async func(msg: string, n: u32);
+}
