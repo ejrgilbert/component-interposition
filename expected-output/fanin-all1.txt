@@ -4,7 +4,7 @@ Running the echo test with host-to-host disabled
      [adder] entered!
      [adder] exit!
   >> [mdl-add] after!
-[svc] adder says '1 + 2 = 0'
+[svc] adder says '1 + 2 = 3'
   >> [mdl-add-async] before!
      [adder-async] entered!
      [adder-async] exit!

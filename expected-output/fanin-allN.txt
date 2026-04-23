@@ -8,7 +8,7 @@ Running the echo test with host-to-host disabled
   >> [mdl-add] after!
   >> [mdl-add] after!
   >> [mdl-add] after!
-[svc] adder says '1 + 2 = 0'
+[svc] adder says '1 + 2 = 3'
   >> [mdl-add-async] before!
   >> [mdl-add-async] before!
   >> [mdl-add-async] before!

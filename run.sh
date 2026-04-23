@@ -38,7 +38,7 @@ PATH_HANDLERS="./handlers"
 PATH_PROXY_MDL="./middleware"
 PATH_FAN_IN="./fan-in"
 
-mkdir -p $PATH_COMPOSED
+mkdir -p $PATH_COMPOSED $PATH_WAC $PATH_FIXTURES
 
 # -----------------------------------------------------------------------------
 # Color codes for logs
@@ -124,11 +124,11 @@ check_env() {
 
     REQUIRED_TOOLS=(
         "cargo:1.93.0:brew"
-        "wasm-tools:1.244.0:$CARGO_INST"
+        "wasm-tools:1.247.0:$CARGO_INST"
         "wkg:0.13.0:$CARGO_INST"
-        "splicer:2.0.0-rc3:$CARGO_INST"
-        "cviz-cli:2.0.0-rc3:$CARGO_INST"
-        "wac:0.9.0:$CARGO_INST"
+        "splicer:2.0.1:$CARGO_INST"
+        "cviz-cli:2.0.2:$CARGO_INST"
+        "wac:0.10.0:$CARGO_INST"
     )
 
     for tool_version in "${REQUIRED_TOOLS[@]}"; do
@@ -548,7 +548,7 @@ run() {
         local filtered
         filtered=$(echo "$output" \
             | sed 's/\x1b\[[0-9;]*m//g' \
-            | grep -v "Compiling\|Finished\|Running.*target/debug/runner\|Downloading\|Downloaded\|Updating\|Locking\|Adding\|available:" \
+            | grep -v "Compiling\|Finished\|Running.*target/debug/runner\|Downloading\|Downloaded\|Updating\|Locking\|Adding\|available:\|cache" \
             | sed '/^[[:space:]]*$/d' \
         )
         local expected
@@ -808,12 +808,16 @@ build() {
 
     # Generate base compositions and copy them to fixtures/ so that downstream
     # configs (e.g. --blockN, --fanin1, --inner-nested1) can run from the
-    # committed fixtures without rebuilding (see --skip-build).
+    # fixtures without rebuilding (see --skip-build).
+    #
+    # Order matters: `compose_nested` reads `$PATH_FIXTURES/chained.wasm`,
+    # so chain must be composed AND copied into fixtures before the
+    # nested compose runs.
     compose_chain
-    compose_nested
-    compose_fanin
     cp "$PATH_COMPOSED/chained.wasm" "$PATH_FIXTURES/chained.wasm"
+    compose_nested
     cp "$PATH_COMPOSED/nested.wasm"  "$PATH_FIXTURES/nested.wasm"
+    compose_fanin
     cp "$PATH_COMPOSED/fanin.wasm"   "$PATH_FIXTURES/fanin.wasm"
 }
 

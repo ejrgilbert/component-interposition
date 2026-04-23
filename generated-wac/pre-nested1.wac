@@ -11,7 +11,7 @@ let srv-a = new my:srv-a {
 
 let mdl-a = new my:mdl-a { ... };
 
-let mdl-a-adapter = new my:mdl-a-adapter {
+let mdl-a-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 = new my:mdl-a-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 {
     "wasi:http/handler@0.3.0-rc-2026-01-06": srv-a["wasi:http/handler@0.3.0-rc-2026-01-06"],
     "splicer:tier1/before@0.1.0": mdl-a["splicer:tier1/before@0.1.0"],
     "splicer:tier1/after@0.1.0": mdl-a["splicer:tier1/after@0.1.0"],
@@ -19,7 +19,7 @@ let mdl-a-adapter = new my:mdl-a-adapter {
 };
 
 let srv-c = new my:srv-c {
-    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-a-adapter["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-a-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06["wasi:http/handler@0.3.0-rc-2026-01-06"],
     ...
 };
 
