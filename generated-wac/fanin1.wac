@@ -30,7 +30,7 @@ let printer-n-comp = new my:printer-n-comp {
 
 let adder-async-mdl-a = new my:adder-async-mdl-a { ... };
 
-let adder-async-mdl-a-adapter = new my:adder-async-mdl-a-adapter {
+let adder-async-mdl-a-adapter-service-adder-async = new my:adder-async-mdl-a-adapter-service-adder-async {
     "my:service/adder-async": adder-async-comp["my:service/adder-async"],
     "splicer:tier1/before@0.1.0": adder-async-mdl-a["splicer:tier1/before@0.1.0"],
     "splicer:tier1/after@0.1.0": adder-async-mdl-a["splicer:tier1/after@0.1.0"],
@@ -39,7 +39,7 @@ let adder-async-mdl-a-adapter = new my:adder-async-mdl-a-adapter {
 
 let adder-mdl-a = new my:adder-mdl-a { ... };
 
-let adder-mdl-a-adapter = new my:adder-mdl-a-adapter {
+let adder-mdl-a-adapter-service-adder = new my:adder-mdl-a-adapter-service-adder {
     "my:service/adder": adder-comp["my:service/adder"],
     "splicer:tier1/before@0.1.0": adder-mdl-a["splicer:tier1/before@0.1.0"],
     "splicer:tier1/after@0.1.0": adder-mdl-a["splicer:tier1/after@0.1.0"],
@@ -52,8 +52,8 @@ let service-comp = new my:service-comp {
     "my:service/printer1": printer1-comp["my:service/printer1"],
     "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
     "my:service/messenger": messenger-comp["my:service/messenger"],
-    "my:service/adder-async": adder-async-mdl-a-adapter["my:service/adder-async"],
-    "my:service/adder": adder-mdl-a-adapter["my:service/adder"],
+    "my:service/adder-async": adder-async-mdl-a-adapter-service-adder-async["my:service/adder-async"],
+    "my:service/adder": adder-mdl-a-adapter-service-adder["my:service/adder"],
     ...
 };
 
