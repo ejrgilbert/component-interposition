@@ -8,13 +8,13 @@ Running the echo test with host-to-host disabled
 [svc] adder-async says '1 + 2 = 3'
 [svc] get-msg:       'You made me swallow my gum!'
 [svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
-  >> [mdl-print1] before!
-  >> [mdl-block] i WILL block call to print1...
-  >> [mdl-print1] after!
+  >> [mdl-my:service/printer1#print1] before!
+  >> [mdl-block] i WILL block call to my:service/printer1#print1...
+  >> [mdl-my:service/printer1#print1] after!
 [svc] printer1 completed!
-  >> [mdl-print1-async] before!
-  >> [mdl-block] i WILL block call to print1-async...
-  >> [mdl-print1-async] after!
+  >> [mdl-my:service/printer1-async#print1-async] before!
+  >> [mdl-block] i WILL block call to my:service/printer1-async#print1-async...
+  >> [mdl-my:service/printer1-async#print1-async] after!
 [svc] printer1-async completed!
      [printN] entered!
          it's dangerous to go alone! take this 🗡️

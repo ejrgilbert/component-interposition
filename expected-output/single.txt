@@ -1,4 +1,4 @@
 Running the echo test with host-to-host disabled
-  >> [mdl-handle] before!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
     [svcB] entered!
-  >> [mdl-handle] after!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!

@@ -1,74 +1,74 @@
 Running the echo test with host-to-host disabled
-  >> [mdl-handle] before!
-  >> [mdl-handle] before!
-  >> [mdl-handle] before!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
 [svc] entered!
-  >> [mdl-add] before!
-  >> [mdl-add] before!
-  >> [mdl-add] before!
+  >> [mdl-my:service/adder#add] before!
+  >> [mdl-my:service/adder#add] before!
+  >> [mdl-my:service/adder#add] before!
      [adder] entered!
      [adder] exit!
-  >> [mdl-add] after!
-  >> [mdl-add] after!
-  >> [mdl-add] after!
+  >> [mdl-my:service/adder#add] after!
+  >> [mdl-my:service/adder#add] after!
+  >> [mdl-my:service/adder#add] after!
 [svc] adder says '1 + 2 = 3'
-  >> [mdl-add-async] before!
-  >> [mdl-add-async] before!
-  >> [mdl-add-async] before!
+  >> [mdl-my:service/adder-async#add-async] before!
+  >> [mdl-my:service/adder-async#add-async] before!
+  >> [mdl-my:service/adder-async#add-async] before!
      [adder-async] entered!
      [adder-async] exit!
-  >> [mdl-add-async] after!
-  >> [mdl-add-async] after!
-  >> [mdl-add-async] after!
+  >> [mdl-my:service/adder-async#add-async] after!
+  >> [mdl-my:service/adder-async#add-async] after!
+  >> [mdl-my:service/adder-async#add-async] after!
 [svc] adder-async says '1 + 2 = 3'
-  >> [mdl-get-msg] before!
-  >> [mdl-get-msg] before!
-  >> [mdl-get-msg] before!
-  >> [mdl-get-msg] after!
-  >> [mdl-get-msg] after!
-  >> [mdl-get-msg] after!
+  >> [mdl-my:service/messenger#get-msg] before!
+  >> [mdl-my:service/messenger#get-msg] before!
+  >> [mdl-my:service/messenger#get-msg] before!
+  >> [mdl-my:service/messenger#get-msg] after!
+  >> [mdl-my:service/messenger#get-msg] after!
+  >> [mdl-my:service/messenger#get-msg] after!
 [svc] get-msg:       'You made me swallow my gum!'
-  >> [mdl-get-msg-async] before!
-  >> [mdl-get-msg-async] before!
-  >> [mdl-get-msg-async] before!
-  >> [mdl-get-msg-async] after!
-  >> [mdl-get-msg-async] after!
-  >> [mdl-get-msg-async] after!
+  >> [mdl-my:service/messenger-async#get-msg-async] before!
+  >> [mdl-my:service/messenger-async#get-msg-async] before!
+  >> [mdl-my:service/messenger-async#get-msg-async] before!
+  >> [mdl-my:service/messenger-async#get-msg-async] after!
+  >> [mdl-my:service/messenger-async#get-msg-async] after!
+  >> [mdl-my:service/messenger-async#get-msg-async] after!
 [svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
-  >> [mdl-print1] before!
-  >> [mdl-print1] before!
-  >> [mdl-print1] before!
+  >> [mdl-my:service/printer1#print1] before!
+  >> [mdl-my:service/printer1#print1] before!
+  >> [mdl-my:service/printer1#print1] before!
      [print1] entered!
          it's dangerous to go alone! take this 🗡️
      [print1] exit!
-  >> [mdl-print1] after!
-  >> [mdl-print1] after!
-  >> [mdl-print1] after!
+  >> [mdl-my:service/printer1#print1] after!
+  >> [mdl-my:service/printer1#print1] after!
+  >> [mdl-my:service/printer1#print1] after!
 [svc] printer1 completed!
-  >> [mdl-print1-async] before!
-  >> [mdl-print1-async] before!
-  >> [mdl-print1-async] before!
+  >> [mdl-my:service/printer1-async#print1-async] before!
+  >> [mdl-my:service/printer1-async#print1-async] before!
+  >> [mdl-my:service/printer1-async#print1-async] before!
      [print1-async] entered!
          it's dangerous to go alone! take this 🗡️
      [print1-async] exit!
-  >> [mdl-print1-async] after!
-  >> [mdl-print1-async] after!
-  >> [mdl-print1-async] after!
+  >> [mdl-my:service/printer1-async#print1-async] after!
+  >> [mdl-my:service/printer1-async#print1-async] after!
+  >> [mdl-my:service/printer1-async#print1-async] after!
 [svc] printer1-async completed!
-  >> [mdl-print-n] before!
-  >> [mdl-print-n] before!
-  >> [mdl-print-n] before!
+  >> [mdl-my:service/printer-n#print-n] before!
+  >> [mdl-my:service/printer-n#print-n] before!
+  >> [mdl-my:service/printer-n#print-n] before!
      [printN] entered!
          it's dangerous to go alone! take this 🗡️
          it's dangerous to go alone! take this 🗡️
          it's dangerous to go alone! take this 🗡️
          it's dangerous to go alone! take this 🗡️
      [printN] exit!
-  >> [mdl-print-n] after!
-  >> [mdl-print-n] after!
-  >> [mdl-print-n] after!
+  >> [mdl-my:service/printer-n#print-n] after!
+  >> [mdl-my:service/printer-n#print-n] after!
+  >> [mdl-my:service/printer-n#print-n] after!
 [svc] printer-n completed!
 [svc] exit!
-  >> [mdl-handle] after!
-  >> [mdl-handle] after!
-  >> [mdl-handle] after!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
