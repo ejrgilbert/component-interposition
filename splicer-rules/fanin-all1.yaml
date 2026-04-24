@@ -1,6 +1,14 @@
 version: 1
 
 rules:
+  # Instrument the top-level http handler export of the composition.
+  - before:
+      interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
+      provider:
+        name: service-comp
+    inject:
+      - name: handler-mdl-a
+        path: "./fixtures/printer_mdl.comp.wasm"
   - between:
       interface: "my:service/adder"
       inner:
