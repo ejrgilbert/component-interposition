@@ -228,4 +228,31 @@ let service-comp = new my:service-comp {
     ...
 };
 
-export service-comp["wasi:http/handler@0.3.0-rc-2026-01-06"];
+let handler-mdl-c = new my:handler-mdl-c { ... };
+
+let handler-mdl-c-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 = new my:handler-mdl-c-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": service-comp["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:tier1/before@0.1.0": handler-mdl-c["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": handler-mdl-c["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let handler-mdl-b = new my:handler-mdl-b { ... };
+
+let handler-mdl-b-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 = new my:handler-mdl-b-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": handler-mdl-c-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:tier1/before@0.1.0": handler-mdl-b["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": handler-mdl-b["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+let handler-mdl-a = new my:handler-mdl-a { ... };
+
+let handler-mdl-a-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 = new my:handler-mdl-a-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 {
+    "wasi:http/handler@0.3.0-rc-2026-01-06": handler-mdl-b-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06["wasi:http/handler@0.3.0-rc-2026-01-06"],
+    "splicer:tier1/before@0.1.0": handler-mdl-a["splicer:tier1/before@0.1.0"],
+    "splicer:tier1/after@0.1.0": handler-mdl-a["splicer:tier1/after@0.1.0"],
+    ...
+};
+
+export handler-mdl-a-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06["wasi:http/handler@0.3.0-rc-2026-01-06"];
