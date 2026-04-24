@@ -1,7 +1,4 @@
 Running the echo test with host-to-host disabled
-  >> [mdl-handle] before!
-  >> [mdl-handle] before!
-  >> [mdl-handle] before!
 [svc] entered!
   >> [mdl-add] before!
   >> [mdl-add] before!
@@ -69,6 +66,3 @@ Running the echo test with host-to-host disabled
   >> [mdl-print-n] after!
 [svc] printer-n completed!
 [svc] exit!
-  >> [mdl-handle] after!
-  >> [mdl-handle] after!
-  >> [mdl-handle] after!
