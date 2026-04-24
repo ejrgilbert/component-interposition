@@ -38,7 +38,7 @@ jobs:
         # `cargo binstall` downloads prebuilt release binaries from
         # GitHub when the crate ships them (wac-cli, wasm-tools, cviz
         # all do), falling back to `cargo install` from source on miss.
-        run: cargo binstall --no-confirm wac-cli@${{ env.WAC_VERSION }} wasm-tools@${{ env.WASM_TOOLS_VERSION }} cviz@${{ env.CVIZ_VERSION }} wkg@${{ env.WKG_VERSION }} splicer@{{ env.SPLICER_VERSION }}
+        run: cargo binstall --no-confirm wac-cli@${{ env.WAC_VERSION }} wasm-tools@${{ env.WASM_TOOLS_VERSION }} cviz@${{ env.CVIZ_VERSION }} wkg@${{ env.WKG_VERSION }} splicer@${{ env.SPLICER_VERSION }}
 
       - name: Build + Test
         run: ./run.sh __testme
