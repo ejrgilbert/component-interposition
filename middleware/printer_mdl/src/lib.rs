@@ -8,18 +8,19 @@ mod bindings {
 
 use crate::bindings::exports::splicer::tier1::before::Guest as BeforeGuest;
 use crate::bindings::exports::splicer::tier1::after::Guest as AfterGuest;
+use crate::bindings::splicer::common::types::CallId;
 
 pub struct Service;
 
 impl BeforeGuest for Service {
-    async fn before_call(name: String) {
-        println!("  >> [mdl-{name}] before!");
+    async fn on_call(call: CallId) {
+        println!("  >> [mdl-{}#{}] before!", call.interface_name, call.function_name);
     }
 }
 
 impl AfterGuest for Service {
-    async fn after_call(name: String) -> () {
-        println!("  >> [mdl-{name}] after!");
+    async fn on_return(call: CallId) -> () {
+        println!("  >> [mdl-{}#{}] after!", call.interface_name, call.function_name);
     }
 }
 
