@@ -13,8 +13,8 @@ let mdl-c = new my:mdl-c { ... };
 
 let mdl-c-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 = new my:mdl-c-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 {
     "wasi:http/handler@0.3.0-rc-2026-01-06": srv-a["wasi:http/handler@0.3.0-rc-2026-01-06"],
-    "splicer:tier1/before@0.1.0": mdl-c["splicer:tier1/before@0.1.0"],
-    "splicer:tier1/after@0.1.0": mdl-c["splicer:tier1/after@0.1.0"],
+    "splicer:tier1/before@0.2.0": mdl-c["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": mdl-c["splicer:tier1/after@0.2.0"],
     ...
 };
 
@@ -22,8 +22,8 @@ let mdl-b = new my:mdl-b { ... };
 
 let mdl-b-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 = new my:mdl-b-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 {
     "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-c-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06["wasi:http/handler@0.3.0-rc-2026-01-06"],
-    "splicer:tier1/before@0.1.0": mdl-b["splicer:tier1/before@0.1.0"],
-    "splicer:tier1/after@0.1.0": mdl-b["splicer:tier1/after@0.1.0"],
+    "splicer:tier1/before@0.2.0": mdl-b["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": mdl-b["splicer:tier1/after@0.2.0"],
     ...
 };
 
@@ -31,8 +31,8 @@ let mdl-a = new my:mdl-a { ... };
 
 let mdl-a-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 = new my:mdl-a-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06 {
     "wasi:http/handler@0.3.0-rc-2026-01-06": mdl-b-adapter-wasi-http-handler-v0-v3-v0-rc-v2026-v01-v06["wasi:http/handler@0.3.0-rc-2026-01-06"],
-    "splicer:tier1/before@0.1.0": mdl-a["splicer:tier1/before@0.1.0"],
-    "splicer:tier1/after@0.1.0": mdl-a["splicer:tier1/after@0.1.0"],
+    "splicer:tier1/before@0.2.0": mdl-a["splicer:tier1/before@0.2.0"],
+    "splicer:tier1/after@0.2.0": mdl-a["splicer:tier1/after@0.2.0"],
     ...
 };
 
