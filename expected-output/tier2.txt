@@ -1,0 +1,29 @@
+Running the echo test with host-to-host disabled
+[svc] entered!
+  >> [mdl-my:service/adder#add] before! -- (a: int = 1, b: int = 2)
+     [adder] entered!
+     [adder] exit!
+[svc] adder says '1 + 2 = 3'
+     [adder-async] entered!
+     [adder-async] exit!
+[svc] adder-async says '1 + 2 = 3'
+  >> [mdl-my:service/messenger#get-msg] before! -- ()
+[svc] get-msg:       'You made me swallow my gum!'
+[svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
+  >> [mdl-my:service/printer1#print1] before! -- (msg: text = "it's dangerous to go alone! take this 🗡\u{fe0f}")
+     [print1] entered!
+         it's dangerous to go alone! take this 🗡️
+     [print1] exit!
+[svc] printer1 completed!
+     [print1-async] entered!
+         it's dangerous to go alone! take this 🗡️
+     [print1-async] exit!
+[svc] printer1-async completed!
+     [printN] entered!
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+     [printN] exit!
+[svc] printer-n completed!
+[svc] exit!

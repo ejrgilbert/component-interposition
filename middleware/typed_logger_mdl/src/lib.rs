@@ -14,11 +14,14 @@ pub struct Service;
 impl BeforeGuest for Service {
     async fn on_call(call: CallId, args: Vec<Field>) {
         let rendered: Vec<String> = args.iter().map(fmt_arg).collect();
+        let suffix = if rendered.is_empty() {
+            " -- ()".to_string()
+        } else {
+            format!(" -- ({})", rendered.join(", "))
+        };
         println!(
-            "  >> [mdl-{}#{}] before! {}",
-            call.interface_name,
-            call.function_name,
-            rendered.join(", ")
+            "  >> [mdl-{}#{}] before!{}",
+            call.interface_name, call.function_name, suffix,
         );
     }
 }
