@@ -95,6 +95,7 @@ print_usage() {
     echo -e "  --noblock1      : Splice middleware that chooses to NOT block the downstream call"
     echo -e "  --noblockN      : Splice multiple middlewares where the middle-most one chooses to NOT block any further calls (the last middleware and the original dependency)"
     echo -e "  --tier2         : Splice the tier-2 typed-logger middleware on the fan-in adder interface (logs lifted arg values via on-call)"
+    echo -e "  --tier2-all     : Splice the typed-logger middleware on every supported fan-in interface — coverage grows as splicer's lift codegen extends"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
@@ -310,6 +311,9 @@ compose() {
             ;;
         --tier2)
             compose_tier2
+            ;;
+        --tier2-all)
+            compose_tier2_all
             ;;
         *)
             log_error "Unknown option: $1"
@@ -532,6 +536,14 @@ compose_tier2() {
         "$PATH_WAC/tier2.wac" \
         "$PATH_COMPOSED/tier2.wasm"
 }
+compose_tier2_all() {
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/tier2-all.yaml" \
+        "$PATH_WAC/tier2-all.wac" \
+        "$PATH_COMPOSED/tier2-all.wasm"
+}
 
 # -----------------------------------------------------------------------------
 # Run the composed component
@@ -702,6 +714,9 @@ run_composition() {
         --tier2)
             COMPOSED="$PATH_COMPOSED/tier2.wasm"
             ;;
+        --tier2-all)
+            COMPOSED="$PATH_COMPOSED/tier2-all.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -731,7 +746,7 @@ viz() {
     # reports "No service chains found". Switch to --detail full for fan-in
     # and its descendants so the connections are visible.
     case "$opt" in
-        --fanin*|--block*|--nonblock*|--tier2)
+        --fanin*|--block*|--nonblock*|--tier2|--tier2-all)
             cviz-cli --detail full "$component"
             ;;
         *)
@@ -806,6 +821,9 @@ viz_composition() {
             ;;
         --tier2)
             COMPOSED="$PATH_COMPOSED/tier2.wasm"
+            ;;
+        --tier2-all)
+            COMPOSED="$PATH_COMPOSED/tier2-all.wasm"
             ;;
         *)
             log_error "Unknown option: $1"

@@ -1,0 +1,87 @@
+version: 1
+
+# Splice the typed-logger middleware on every supported fan-in
+# interface. Uncomment a blocked block once its types are spliceable.
+
+rules:
+  - between:
+      interface: "my:service/adder"
+      inner: { name: adder-comp }
+      outer: { name: service-comp }
+    inject:
+      - name: typed-logger-adder
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
+      interface: "my:service/adder-async"
+      inner: { name: adder-async-comp }
+      outer: { name: service-comp }
+    inject:
+      - name: typed-logger-adder-async
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
+      interface: "my:service/messenger"
+      inner: { name: messenger-comp }
+      outer: { name: service-comp }
+    inject:
+      - name: typed-logger-messenger
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
+      interface: "my:service/messenger-async"
+      inner: { name: messenger-async-comp }
+      outer: { name: service-comp }
+    inject:
+      - name: typed-logger-messenger-async
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
+      interface: "my:service/printer1"
+      inner: { name: printer1-comp }
+      outer: { name: service-comp }
+    inject:
+      - name: typed-logger-printer1
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
+      interface: "my:service/printer1-async"
+      inner: { name: printer1-async-comp }
+      outer: { name: service-comp }
+    inject:
+      - name: typed-logger-printer1-async
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
+      interface: "my:service/printer-n"
+      inner: { name: printer-n-comp }
+      outer: { name: service-comp }
+    inject:
+      - name: typed-logger-printer-n
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  # blocked on cell::resource-handle lift (Phase 2-4):
+  # - before:
+  #     interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
+  #     provider: { name: service-comp }
+  #   inject:
+  #     - name: typed-logger-handler
+  #       path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  # blocked on compound-type lift (Phase 2-2b):
+  # - between:
+  #     interface: "my:service/shapes"
+  #     inner: { name: shapes-comp }
+  #     outer: { name: service-comp }
+  #   inject:
+  #     - name: typed-logger-shapes
+  #       path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  # blocked on resource/future/stream handle lift (Phase 2-4):
+  # - between:
+  #     interface: "my:service/shapes-handles"
+  #     inner: { name: shapes-handles-comp }
+  #     outer: { name: service-comp }
+  #   inject:
+  #     - name: typed-logger-shapes-handles
+  #       path: "./fixtures/typed_logger_mdl.comp.wasm"
