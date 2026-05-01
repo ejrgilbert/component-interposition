@@ -21,3 +21,56 @@ interface printer1-async {
 interface printer-n {
     print-n:        func(msg: string, n: u32);
 }
+
+/// Type-shape demo: one function per non-primitive shape.
+interface shapes {
+    enum priority { low, medium, high }
+    enum color    { red, green, blue }
+    pick-color:     func(p: priority) -> color;
+
+    flags access-perms { read, write, execute }
+    check-perms:    func(p: access-perms) -> bool;
+
+    record person { name: string, age: u32 }
+    greet:          func(p: person) -> string;
+
+    variant event {
+        click(s32),
+        keypress(string),
+        idle,
+    }
+    describe-event: func(e: event) -> string;
+
+    swap-pair:      func(pair: tuple<s32, string>) -> tuple<string, s32>;
+    maybe-double:   func(x: option<s32>) -> option<s32>;
+    divide:         func(a: s32, b: s32) -> result<s32, string>;
+    sum:            func(xs: list<s32>) -> s32;
+    to-string:      func(c: char) -> string;
+
+    /// Combo: record + option in args, result-of-list as return.
+    /// Demonstrates that a single function can mix multiple shapes.
+    aggregate:      func(p: person, scale: option<u32>) -> result<list<s32>, string>;
+}
+
+/// Resource, future, and stream shapes.
+interface shapes-handles {
+    /// Stateful resource with constructor + methods.
+    resource counter {
+        constructor(start: s32);
+        increment: func();
+        current: func() -> s32;
+    }
+
+    /// Returns a freshly-owned counter.
+    make-counter:     func(start: s32) -> counter;
+    /// Reads the current value through a borrowed handle.
+    counter-current:  func(c: borrow<counter>) -> s32;
+    /// Consumes the handle, returning its current value.
+    consume-counter:  func(c: counter) -> s32;
+
+    /// Returns a future that resolves to the sum.
+    delayed-add:      func(a: s32, b: s32) -> future<s32>;
+
+    /// Returns a stream that produces a countdown of integers.
+    countdown:        func(start: s32) -> stream<s32>;
+}

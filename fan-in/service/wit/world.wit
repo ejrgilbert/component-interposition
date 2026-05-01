@@ -8,6 +8,8 @@ world service {
     import my:service/printer1;
     import my:service/printer1-async;
     import my:service/printer-n;
+    import my:service/shapes;
+    import my:service/shapes-handles;
 
     include wasi:http/service@0.3.0-rc-2026-01-06;
 }

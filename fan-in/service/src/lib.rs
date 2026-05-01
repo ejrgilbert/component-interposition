@@ -13,6 +13,10 @@ use bindings::my::service::messenger_async::get_msg_async;
 use bindings::my::service::printer1_async::print1_async;
 use bindings::my::service::printer1::print1;
 use bindings::my::service::printer_n::print_n;
+use bindings::my::service::shapes::{
+    self, AccessPerms, Event, Person, Priority,
+};
+use bindings::my::service::shapes_handles::{self, Counter};
 
 use bindings::exports::wasi::http::handler::Guest;
 use bindings::exports::wasi::http::handler;
@@ -30,7 +34,7 @@ impl Guest for Service {
 
         let (a, b) = (1, 2);
         let result = add(a, b).await;
-        
+
         println!("[svc] adder says '{a} + {b} = {result}'");
 
         let (a, b) = (1, 2);
@@ -51,6 +55,40 @@ impl Guest for Service {
 
         print_n(str.to_string(), 4).await;
         println!("[svc] printer-n completed!");
+
+        // shapes interface — exercise every shape so its imports are linked
+        let _ = shapes::pick_color(Priority::High).await;
+        let _ = shapes::check_perms(AccessPerms::READ | AccessPerms::WRITE).await;
+        let _ = shapes::greet(Person { name: "Link".to_string(), age: 17 }).await;
+        let _ = shapes::describe_event(Event::Click(42)).await;
+        let _ = shapes::swap_pair((7, "hello".to_string())).await;
+        let _ = shapes::maybe_double(Some(21)).await;
+        let _ = shapes::divide(10, 3).await;
+        let _ = shapes::sum(vec![1, 2, 3, 4]).await;
+        let _ = shapes::to_string('Z').await;
+        let _ = shapes::aggregate(
+            Person { name: "Zelda".to_string(), age: 18 },
+            Some(2),
+        ).await;
+
+        // shapes-handles interface — exercise resource constructor + methods,
+        // make-counter / counter-current / consume-counter, and the future
+        // and stream return shapes so all imports are linked.
+        let direct = Counter::new(5).await;
+        direct.increment().await;
+        let _ = direct.current().await;
+        drop(direct);
+
+        let counter: Counter = shapes_handles::make_counter(10).await;
+        counter.increment().await;
+        let _ = shapes_handles::counter_current(&counter).await;
+        let _ = shapes_handles::consume_counter(counter).await;
+
+        let fut = shapes_handles::delayed_add(40, 2).await;
+        let _ = fut.await;
+
+        let stream = shapes_handles::countdown(3).await;
+        let _ = stream.collect().await;
 
         println!("[svc] exit!");
 
