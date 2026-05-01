@@ -1,0 +1,30 @@
+version: 1
+
+rules:
+  - between:
+      interface: "my:service/adder"
+      inner:
+        name: adder-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: typed-logger-adder
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+  - between:
+      interface: "my:service/printer1"
+      inner:
+        name: printer1-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: typed-logger-printer1
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+  - between:
+      interface: "my:service/messenger"
+      inner:
+        name: messenger-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: typed-logger-messenger
+        path: "./fixtures/typed_logger_mdl.comp.wasm"

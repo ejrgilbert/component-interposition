@@ -94,6 +94,7 @@ print_usage() {
     echo -e "  --blockN        : Splice multiple middlewares where the middle-most one chooses to block any further calls (the last middleware and the original dependency)"
     echo -e "  --noblock1      : Splice middleware that chooses to NOT block the downstream call"
     echo -e "  --noblockN      : Splice multiple middlewares where the middle-most one chooses to NOT block any further calls (the last middleware and the original dependency)"
+    echo -e "  --tier2         : Splice the tier-2 typed-logger middleware on the fan-in adder interface (logs lifted arg values via on-call)"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
@@ -194,10 +195,14 @@ build_component() {
     log_info "Building '$name' component..."
     pushd "$dir" > /dev/null
 
-    log_info "Fetching wit dependencies..."
-    if ! wkg wit fetch; then
-        log_error "wkg wit fetch failed for $name. Exiting."
-        exit 1
+    if [[ -f wkg.lock ]]; then
+        log_info "Fetching wit dependencies..."
+        if ! wkg wit fetch; then
+            log_error "wkg wit fetch failed for $name. Exiting."
+            exit 1
+        fi
+    else
+        log_info "No wkg.lock — assuming WIT deps are vendored under wit/deps/."
     fi
 
     log_info "Compiling $name to wasm32-wasip1..."
@@ -302,6 +307,9 @@ compose() {
             ;;
         --nonblockN)
             compose_blockN
+            ;;
+        --tier2)
+            compose_tier2
             ;;
         *)
             log_error "Unknown option: $1"
@@ -514,6 +522,14 @@ compose_blockN() {
         "$PATH_WAC/blockN.wac" \
         "$PATH_COMPOSED/blockN.wasm"
 }
+compose_tier2() {
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/tier2.yaml" \
+        "$PATH_WAC/tier2.wac" \
+        "$PATH_COMPOSED/tier2.wasm"
+}
 
 # -----------------------------------------------------------------------------
 # Run the composed component
@@ -681,6 +697,9 @@ run_composition() {
             COMPOSED="$PATH_COMPOSED/blockN.wasm"
             ENV_VARS="SHOULD_BLOCK=false"
             ;;
+        --tier2)
+            COMPOSED="$PATH_COMPOSED/tier2.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -771,6 +790,9 @@ viz_composition() {
         --nonblockN)
             COMPOSED="$PATH_COMPOSED/blockN.wasm"
             ;;
+        --tier2)
+            COMPOSED="$PATH_COMPOSED/tier2.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -791,8 +813,9 @@ build() {
     build_component "service_b"     "$PATH_HANDLERS/service_b"    "service_b"
     build_component "service_c"     "$PATH_HANDLERS/service_c"    "service_c"
 
-    build_component "printer_mdl"   "$PATH_PROXY_MDL/printer_mdl" "printer_mdl"
-    build_component "blocker_mdl"   "$PATH_PROXY_MDL/blocker_mdl" "blocker_mdl"
+    build_component "printer_mdl"      "$PATH_PROXY_MDL/printer_mdl"      "printer_mdl"
+    build_component "blocker_mdl"      "$PATH_PROXY_MDL/blocker_mdl"      "blocker_mdl"
+    build_component "typed_logger_mdl" "$PATH_PROXY_MDL/typed_logger_mdl" "typed_logger_mdl"
 
     build_component "adder"           "$PATH_FAN_IN/adder"            "adder"
     build_component "adder_async"     "$PATH_FAN_IN/adder_async"      "adder_async"
