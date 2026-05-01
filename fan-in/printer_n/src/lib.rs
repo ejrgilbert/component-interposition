@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "printer-n-svc",
-        async: true,
         generate_all
     });
 }
@@ -10,7 +9,7 @@ use crate::bindings::exports::my::service::printer_n::Guest;
 pub struct Service;
 
 impl Guest for Service {
-    async fn print_n(
+    fn print_n(
         msg: String,
         n: u32
     ) {
