@@ -36,6 +36,14 @@ let typed-logger-printer1-adapter-service-printer1 = new my:typed-logger-printer
     ...
 };
 
+let typed-logger-messenger = new my:typed-logger-messenger { ... };
+
+let typed-logger-messenger-adapter-service-messenger = new my:typed-logger-messenger-adapter-service-messenger {
+    "my:service/messenger": messenger-comp["my:service/messenger"],
+    "splicer:tier2/before@0.1.0": typed-logger-messenger["splicer:tier2/before@0.1.0"],
+    ...
+};
+
 let typed-logger-adder = new my:typed-logger-adder { ... };
 
 let typed-logger-adder-adapter-service-adder = new my:typed-logger-adder-adapter-service-adder {
@@ -49,7 +57,7 @@ let service-comp = new my:service-comp {
     "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
     "my:service/printer1": typed-logger-printer1-adapter-service-printer1["my:service/printer1"],
     "my:service/messenger-async": messenger-async-comp["my:service/messenger-async"],
-    "my:service/messenger": messenger-comp["my:service/messenger"],
+    "my:service/messenger": typed-logger-messenger-adapter-service-messenger["my:service/messenger"],
     "my:service/adder-async": adder-async-comp["my:service/adder-async"],
     "my:service/adder": typed-logger-adder-adapter-service-adder["my:service/adder"],
     ...

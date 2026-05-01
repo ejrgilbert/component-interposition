@@ -28,3 +28,13 @@ rules:
     inject:
       - name: typed-logger-messenger
         path: "./fixtures/typed_logger_mdl.comp.wasm"
+  # printer-n: enable once sync `print-n` lands on this branch.
+  # - between:
+  #     interface: "my:service/printer-n"
+  #     inner:
+  #       name: printer-n-comp
+  #     outer:
+  #       name: service-comp
+  #   inject:
+  #     - name: typed-logger-printer-n
+  #       path: "./fixtures/typed_logger_mdl.comp.wasm"
