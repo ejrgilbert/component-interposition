@@ -5,7 +5,8 @@ members = [
     "fan-in/service", "fan-in/adder", "fan-in/adder_async",
     "fan-in/messenger", "fan-in/messenger_async",
     "fan-in/printer1", "fan-in/printer1_async", "fan-in/printer_n",
-    "runner", "middleware/printer_mdl", "middleware/blocker_mdl"]
+    "runner", "middleware/printer_mdl", "middleware/blocker_mdl",
+    "middleware/typed_logger_mdl"]
 
 [workspace.dependencies]
 clap = { version = "4.5.58", features = ["derive"] }

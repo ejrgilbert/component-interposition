@@ -1,0 +1,5 @@
+package my:typed-logger-middleware;
+
+world typed-logger-mdl {
+    export splicer:tier2/before@0.1.0;
+}
