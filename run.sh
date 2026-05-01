@@ -712,7 +712,7 @@ run_composition() {
     local expected_file="./expected-output/${opt_name}.txt"
 
     log_info "Visualization of the component at $COMPOSED:"
-    viz "$COMPOSED"
+    viz "$COMPOSED" "$1"
     echo
 
     run "$COMPOSED" "$ENV_VARS" "$expected_file"
@@ -723,7 +723,19 @@ run_composition() {
 # -----------------------------------------------------------------------------
 viz() {
     local component=$1
-    cviz-cli "$component"
+    local opt=${2:-}
+    # Fan-in topologies aren't a `handler` chain (services connect via
+    # `my:service/*` interfaces), so the default --detail handler-chain mode
+    # reports "No service chains found". Switch to --detail full for fan-in
+    # and its descendants so the connections are visible.
+    case "$opt" in
+        --fanin*|--block*|--nonblock*|--tier2)
+            cviz-cli --detail full "$component"
+            ;;
+        *)
+            cviz-cli "$component"
+            ;;
+    esac
 }
 viz_composition() {
     case "$1" in
@@ -800,7 +812,7 @@ viz_composition() {
             ;;
     esac
 
-    viz "$COMPOSED"
+    viz "$COMPOSED" "$1"
 }
 
 # -----------------------------------------------------------------------------
