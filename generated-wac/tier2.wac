@@ -28,6 +28,14 @@ let printer-n-comp = new my:printer-n-comp {
     ...
 };
 
+let shapes-comp = new my:shapes-comp {
+    ...
+};
+
+let shapes-handles-comp = new my:shapes-handles-comp {
+    ...
+};
+
 let typed-logger-printer-n = new my:typed-logger-printer-n { ... };
 
 let typed-logger-printer-n-adapter-service-printer-n = new my:typed-logger-printer-n-adapter-service-printer-n {
@@ -92,6 +100,8 @@ let typed-logger-adder-adapter-service-adder = new my:typed-logger-adder-adapter
 };
 
 let service-comp = new my:service-comp {
+    "my:service/shapes-handles": shapes-handles-comp["my:service/shapes-handles"],
+    "my:service/shapes": shapes-comp["my:service/shapes"],
     "my:service/printer-n": typed-logger-printer-n-adapter-service-printer-n["my:service/printer-n"],
     "my:service/printer1-async": typed-logger-printer1-async-adapter-service-printer1-async["my:service/printer1-async"],
     "my:service/printer1": typed-logger-printer1-adapter-service-printer1["my:service/printer1"],

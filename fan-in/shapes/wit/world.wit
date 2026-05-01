@@ -1,0 +1,5 @@
+package example:fan-in;
+
+world shapes-svc {
+    export my:service/shapes;
+}

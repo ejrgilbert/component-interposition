@@ -28,6 +28,14 @@ let printer-n-comp = new my:printer-n-comp {
     ...
 };
 
+let shapes-comp = new my:shapes-comp {
+    ...
+};
+
+let shapes-handles-comp = new my:shapes-handles-comp {
+    ...
+};
+
 let printer1-async-mdl-c = new my:printer1-async-mdl-c { ... };
 
 let printer1-async-mdl-c-adapter-service-printer1-async = new my:printer1-async-mdl-c-adapter-service-printer1-async {
@@ -81,6 +89,8 @@ let printer1-mdl-a-adapter-service-printer1 = new my:printer1-mdl-a-adapter-serv
 };
 
 let service-comp = new my:service-comp {
+    "my:service/shapes-handles": shapes-handles-comp["my:service/shapes-handles"],
+    "my:service/shapes": shapes-comp["my:service/shapes"],
     "my:service/printer-n": printer-n-comp["my:service/printer-n"],
     "my:service/printer1-async": printer1-async-mdl-a-adapter-service-printer1-async["my:service/printer1-async"],
     "my:service/printer1": printer1-mdl-a-adapter-service-printer1["my:service/printer1"],

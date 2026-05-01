@@ -128,7 +128,7 @@ check_env() {
         "wasm-tools:1.247.0:$CARGO_INST"
         "wkg:0.13.0:$CARGO_INST"
         "splicer:2.3.0:$CARGO_INST"
-        "cviz-cli:2.0.2:$CARGO_INST"
+        "cviz-cli:2.0.3:$CARGO_INST"
         "wac:0.10.0:$CARGO_INST"
     )
 
@@ -472,7 +472,9 @@ compose_fanin() {
         "$PATH_FIXTURES/messenger_async.comp.wasm" \
         "$PATH_FIXTURES/printer1.comp.wasm" \
         "$PATH_FIXTURES/printer1_async.comp.wasm" \
-        "$PATH_FIXTURES/printer_n.comp.wasm"
+        "$PATH_FIXTURES/printer_n.comp.wasm" \
+        "$PATH_FIXTURES/shapes.comp.wasm" \
+        "$PATH_FIXTURES/shapes_handles.comp.wasm"
 }
 compose_fanin1() {
     local wasm_file="$PATH_FIXTURES/fanin.wasm"
@@ -836,6 +838,8 @@ build() {
     build_component "printer1"        "$PATH_FAN_IN/printer1"         "printer1"
     build_component "printer1_async"  "$PATH_FAN_IN/printer1_async"   "printer1_async"
     build_component "printer_n"       "$PATH_FAN_IN/printer_n"        "printer_n"
+    build_component "shapes"          "$PATH_FAN_IN/shapes"           "shapes"
+    build_component "shapes_handles"  "$PATH_FAN_IN/shapes_handles"   "shapes_handles"
     build_component "service"         "$PATH_FAN_IN/service"          "service"
 
     # Copy built components to fixtures/ for checked-in test data
