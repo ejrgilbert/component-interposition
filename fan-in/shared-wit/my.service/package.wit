@@ -19,5 +19,5 @@ interface printer1-async {
     print1-async:   async func(msg: string);
 }
 interface printer-n {
-    print-n:        async func(msg: string, n: u32);
+    print-n:        func(msg: string, n: u32);
 }
