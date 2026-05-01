@@ -11,6 +11,16 @@ rules:
       - name: typed-logger-adder
         path: "./fixtures/typed_logger_mdl.comp.wasm"
   - between:
+      interface: "my:service/adder-async"
+      inner:
+        name: adder-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: typed-logger-adder-async
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
       interface: "my:service/printer1"
       inner:
         name: printer1-comp
@@ -20,6 +30,16 @@ rules:
       - name: typed-logger-printer1
         path: "./fixtures/typed_logger_mdl.comp.wasm"
   - between:
+      interface: "my:service/printer1-async"
+      inner:
+        name: printer1-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: typed-logger-printer1-async
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
       interface: "my:service/messenger"
       inner:
         name: messenger-comp
@@ -28,13 +48,22 @@ rules:
     inject:
       - name: typed-logger-messenger
         path: "./fixtures/typed_logger_mdl.comp.wasm"
-  # printer-n: enable once sync `print-n` lands on this branch.
-  # - between:
-  #     interface: "my:service/printer-n"
-  #     inner:
-  #       name: printer-n-comp
-  #     outer:
-  #       name: service-comp
-  #   inject:
-  #     - name: typed-logger-printer-n
-  #       path: "./fixtures/typed_logger_mdl.comp.wasm"
+  - between:
+      interface: "my:service/messenger-async"
+      inner:
+        name: messenger-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: typed-logger-messenger-async
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
+
+  - between:
+      interface: "my:service/printer-n"
+      inner:
+        name: printer-n-comp
+      outer:
+        name: service-comp
+    inject:
+      - name: typed-logger-printer-n
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
