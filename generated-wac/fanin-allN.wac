@@ -227,6 +227,7 @@ let adder-mdl-a-adapter-service-adder = new my:adder-mdl-a-adapter-service-adder
 
 let service-comp = new my:service-comp {
     "my:service/shapes-handles": shapes-handles-comp["my:service/shapes-handles"],
+    "my:service/shapes-handles-types": shapes-handles-comp["my:service/shapes-handles-types"],
     "my:service/shapes": shapes-comp["my:service/shapes"],
     "my:service/printer-n": printer-n-mdl-a-adapter-service-printer-n["my:service/printer-n"],
     "my:service/printer1-async": printer1-async-mdl-a-adapter-service-printer1-async["my:service/printer1-async"],

@@ -8,9 +8,9 @@ mod bindings {
 
 use std::cell::Cell;
 
-use crate::bindings::exports::my::service::shapes_handles::{
-    Counter, CounterBorrow, Guest, GuestCounter,
-};
+use crate::bindings::exports::my::service::shapes_handles::{Counter, CounterBorrow, Guest};
+use crate::bindings::exports::my::service::shapes_handles_types::Guest as TypesGuest;
+use crate::bindings::exports::my::service::shapes_handles_types::GuestCounter;
 use wit_bindgen::{FutureReader, StreamReader};
 
 pub struct Service;
@@ -31,9 +31,11 @@ impl GuestCounter for CounterImpl {
     }
 }
 
-impl Guest for Service {
+impl TypesGuest for Service {
     type Counter = CounterImpl;
+}
 
+impl Guest for Service {
     async fn make_counter(start: i32) -> Counter {
         Counter::new(CounterImpl::new(start).await)
     }

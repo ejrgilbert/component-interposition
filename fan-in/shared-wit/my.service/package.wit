@@ -52,14 +52,23 @@ interface shapes {
     aggregate:      func(p: person, scale: option<u32>) -> result<list<s32>, string>;
 }
 
-/// Resource, future, and stream shapes.
-interface shapes-handles {
+/// Factored types for `shapes-handles`. Resources are declared
+/// here so splicer's wrapper-component pattern can preserve type
+/// identity across the import/export boundary — declaring them
+/// inline in `shapes-handles` would diverge type identities and
+/// the runtime would reject crossing handles.
+interface shapes-handles-types {
     /// Stateful resource with constructor + methods.
     resource counter {
         constructor(start: s32);
         increment: func();
         current: func() -> s32;
     }
+}
+
+/// Resource, future, and stream shapes.
+interface shapes-handles {
+    use shapes-handles-types.{counter};
 
     /// Returns a freshly-owned counter.
     make-counter:     func(start: s32) -> counter;

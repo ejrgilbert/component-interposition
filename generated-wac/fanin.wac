@@ -45,6 +45,7 @@ let service-comp = new my:service-comp {
     "my:service/printer1-async": printer1-async-comp["my:service/printer1-async"],
     "my:service/printer-n": printer-n-comp["my:service/printer-n"],
     "my:service/shapes": shapes-comp["my:service/shapes"],
+    "my:service/shapes-handles-types": shapes-handles-comp["my:service/shapes-handles-types"],
     "my:service/shapes-handles": shapes-handles-comp["my:service/shapes-handles"],
     ...
 };
