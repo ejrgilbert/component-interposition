@@ -143,6 +143,13 @@ fn cell_to_str(tree: &FieldTree, idx: u32) -> (String, String) {
         Cell::ResourceHandle(side_idx) => fmt_handle(tree, *side_idx, "resource"),
         Cell::StreamHandle(side_idx) => fmt_handle(tree, *side_idx, "stream"),
         Cell::FutureHandle(side_idx) => fmt_handle(tree, *side_idx, "future"),
+        Cell::ErrorContextHandle(side_idx) => {
+            // `type-name` is empty for error-context (the cell-disc
+            // already names the kind), so render without the
+            // `kind(type)` parenthetical the other handles use.
+            let info = side_table_get(&tree.handle_infos, *side_idx, "handle_infos");
+            ("error-context".to_string(), format!("#{}", info.id))
+        }
     }
 }
 

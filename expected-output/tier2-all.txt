@@ -37,4 +37,14 @@ Running the echo test with host-to-host disabled
      [printN] exit!
   >> [mdl-my:service/printer-n#print-n] --> ()
 [svc] printer-n completed!
+  >> [mdl-my:service/shapes-handles#make-counter] (start: int = 10)
+  >> [mdl-my:service/shapes-handles#make-counter] --> (resource(counter): #2)
+  >> [mdl-my:service/shapes-handles#counter-current] (c: resource(counter) = #1)
+  >> [mdl-my:service/shapes-handles#counter-current] --> (int: 11)
+  >> [mdl-my:service/shapes-handles#consume-counter] (c: resource(counter) = #1)
+  >> [mdl-my:service/shapes-handles#consume-counter] --> (int: 11)
+  >> [mdl-my:service/shapes-handles#delayed-add] (a: int = 40, b: int = 2)
+  >> [mdl-my:service/shapes-handles#delayed-add] --> (future(): #1)
+  >> [mdl-my:service/shapes-handles#countdown] (start: int = 3)
+  >> [mdl-my:service/shapes-handles#countdown] --> (stream(): #2)
 [svc] exit!

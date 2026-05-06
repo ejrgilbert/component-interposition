@@ -77,11 +77,10 @@ rules:
   #     - name: typed-logger-shapes
   #       path: "./fixtures/typed_logger_mdl.comp.wasm"
 
-  # blocked on resource/future/stream handle lift (Phase 2-4):
-  # - between:
-  #     interface: "my:service/shapes-handles"
-  #     inner: { name: shapes-handles-comp }
-  #     outer: { name: service-comp }
-  #   inject:
-  #     - name: typed-logger-shapes-handles
-  #       path: "./fixtures/typed_logger_mdl.comp.wasm"
+  - between:
+      interface: "my:service/shapes-handles"
+      inner: { name: shapes-handles-comp }
+      outer: { name: service-comp }
+    inject:
+      - name: typed-logger-shapes-handles
+        path: "./fixtures/typed_logger_mdl.comp.wasm"
