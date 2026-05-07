@@ -13,7 +13,6 @@ pub struct Service;
 
 impl Guest for Service {
     fn pick_color(p: Priority) -> Color {
-        // println!("     [shapes] pick-color");
         match p {
             Priority::Low => Color::Green,
             Priority::Medium => Color::Blue,
@@ -22,17 +21,14 @@ impl Guest for Service {
     }
 
     fn check_perms(p: AccessPerms) -> bool {
-        // println!("     [shapes] check-perms");
         p.contains(AccessPerms::READ) && p.contains(AccessPerms::WRITE)
     }
 
     fn greet(p: Person) -> String {
-        // println!("     [shapes] greet");
         format!("hello, {} (age {})!", p.name, p.age)
     }
 
     fn describe_event(e: Event) -> String {
-        // println!("     [shapes] describe-event");
         match e {
             Event::Click(coord) => format!("click({coord})"),
             Event::Keypress(k) => format!("keypress({k})"),
@@ -65,7 +61,6 @@ impl Guest for Service {
     }
 
     fn aggregate(p: Person, scale: Option<u32>) -> Result<Vec<i32>, String> {
-        // println!("     [shapes] aggregate");
         let s = scale.unwrap_or(1) as i32;
         Ok(vec![(p.age as i32).saturating_mul(s), (p.name.len() as i32).saturating_mul(s)])
     }

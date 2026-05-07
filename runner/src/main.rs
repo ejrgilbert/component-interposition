@@ -24,8 +24,6 @@ async fn main() -> Result<()> {
 
     println!("\nRunning the echo test with host-to-host disabled");
     test_http_echo(&main, false, false).await?;
-    // println!("\nRunning the echo test with host-to-host enabled");
-    // test_http_echo(&main, true, true).await?;
 
     Ok(())
 }
