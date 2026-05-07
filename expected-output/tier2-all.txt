@@ -1,4 +1,5 @@
 Running the echo test with host-to-host disabled
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] (request: resource(request) = #2)
 [svc] entered!
   >> [mdl-my:service/adder#add] (a: int = 1, b: int = 2)
      [adder] entered!
@@ -37,6 +38,26 @@ Running the echo test with host-to-host disabled
      [printN] exit!
   >> [mdl-my:service/printer-n#print-n] --> ()
 [svc] printer-n completed!
+  >> [mdl-my:service/shapes#pick-color] (p: enum(priority) = high)
+  >> [mdl-my:service/shapes#pick-color] --> (enum(color): red)
+  >> [mdl-my:service/shapes#check-perms] (p: flags(access-perms) = read | write)
+  >> [mdl-my:service/shapes#check-perms] --> (bool: true)
+  >> [mdl-my:service/shapes#greet] (p: record(person) = { name: "Link", age: 17 })
+  >> [mdl-my:service/shapes#greet] --> (text: "hello, Link (age 17)!")
+  >> [mdl-my:service/shapes#describe-event] (e: variant(event) = click(42))
+  >> [mdl-my:service/shapes#describe-event] --> (text: "click(42)")
+  >> [mdl-my:service/shapes#swap-pair] (pair: tuple = (7, "hello"))
+  >> [mdl-my:service/shapes#swap-pair] --> (tuple: ("hello", 7))
+  >> [mdl-my:service/shapes#maybe-double] (x: option = some(21))
+  >> [mdl-my:service/shapes#maybe-double] --> (option: some(42))
+  >> [mdl-my:service/shapes#divide] (a: int = 10, b: int = 3)
+  >> [mdl-my:service/shapes#divide] --> (result: ok(3))
+  >> [mdl-my:service/shapes#sum] (xs: list = [1, 2, 3, 4])
+  >> [mdl-my:service/shapes#sum] --> (int: 10)
+  >> [mdl-my:service/shapes#to-string] (c: text = "Z")
+  >> [mdl-my:service/shapes#to-string] --> (text: "Z")
+  >> [mdl-my:service/shapes#aggregate] (p: record(person) = { name: "Zelda", age: 18 }, scale: option = some(2))
+  >> [mdl-my:service/shapes#aggregate] --> (result: ok([36, 10]))
   >> [mdl-my:service/shapes-handles#make-counter] (start: int = 10)
   >> [mdl-my:service/shapes-handles#make-counter] --> (resource(counter): #2)
   >> [mdl-my:service/shapes-handles#counter-current] (c: resource(counter) = #1)
@@ -48,3 +69,4 @@ Running the echo test with host-to-host disabled
   >> [mdl-my:service/shapes-handles#countdown] (start: int = 3)
   >> [mdl-my:service/shapes-handles#countdown] --> (stream(): #2)
 [svc] exit!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] --> (result: ok(#4))

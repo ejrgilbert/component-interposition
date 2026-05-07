@@ -1,0 +1,72 @@
+Running the echo test with host-to-host disabled
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
+[svc] entered!
+  >> [mdl-my:service/adder#add] before!
+     [adder] entered!
+     [adder] exit!
+  >> [mdl-my:service/adder#add] after!
+[svc] adder says '1 + 2 = 3'
+  >> [mdl-my:service/adder-async#add-async] before!
+     [adder-async] entered!
+     [adder-async] exit!
+  >> [mdl-my:service/adder-async#add-async] after!
+[svc] adder-async says '1 + 2 = 3'
+  >> [mdl-my:service/messenger#get-msg] before!
+  >> [mdl-my:service/messenger#get-msg] after!
+[svc] get-msg:       'You made me swallow my gum!'
+  >> [mdl-my:service/messenger-async#get-msg-async] before!
+  >> [mdl-my:service/messenger-async#get-msg-async] after!
+[svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
+  >> [mdl-my:service/printer1#print1] before!
+     [print1] entered!
+         it's dangerous to go alone! take this 🗡️
+     [print1] exit!
+  >> [mdl-my:service/printer1#print1] after!
+[svc] printer1 completed!
+  >> [mdl-my:service/printer1-async#print1-async] before!
+     [print1-async] entered!
+         it's dangerous to go alone! take this 🗡️
+     [print1-async] exit!
+  >> [mdl-my:service/printer1-async#print1-async] after!
+[svc] printer1-async completed!
+  >> [mdl-my:service/printer-n#print-n] before!
+     [printN] entered!
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+     [printN] exit!
+  >> [mdl-my:service/printer-n#print-n] after!
+[svc] printer-n completed!
+  >> [mdl-my:service/shapes#pick-color] before!
+  >> [mdl-my:service/shapes#pick-color] after!
+  >> [mdl-my:service/shapes#check-perms] before!
+  >> [mdl-my:service/shapes#check-perms] after!
+  >> [mdl-my:service/shapes#greet] before!
+  >> [mdl-my:service/shapes#greet] after!
+  >> [mdl-my:service/shapes#describe-event] before!
+  >> [mdl-my:service/shapes#describe-event] after!
+  >> [mdl-my:service/shapes#swap-pair] before!
+  >> [mdl-my:service/shapes#swap-pair] after!
+  >> [mdl-my:service/shapes#maybe-double] before!
+  >> [mdl-my:service/shapes#maybe-double] after!
+  >> [mdl-my:service/shapes#divide] before!
+  >> [mdl-my:service/shapes#divide] after!
+  >> [mdl-my:service/shapes#sum] before!
+  >> [mdl-my:service/shapes#sum] after!
+  >> [mdl-my:service/shapes#to-string] before!
+  >> [mdl-my:service/shapes#to-string] after!
+  >> [mdl-my:service/shapes#aggregate] before!
+  >> [mdl-my:service/shapes#aggregate] after!
+  >> [mdl-my:service/shapes-handles#make-counter] before!
+  >> [mdl-my:service/shapes-handles#make-counter] after!
+  >> [mdl-my:service/shapes-handles#counter-current] before!
+  >> [mdl-my:service/shapes-handles#counter-current] after!
+  >> [mdl-my:service/shapes-handles#consume-counter] before!
+  >> [mdl-my:service/shapes-handles#consume-counter] after!
+  >> [mdl-my:service/shapes-handles#delayed-add] before!
+  >> [mdl-my:service/shapes-handles#delayed-add] after!
+  >> [mdl-my:service/shapes-handles#countdown] before!
+  >> [mdl-my:service/shapes-handles#countdown] after!
+[svc] exit!
+  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
