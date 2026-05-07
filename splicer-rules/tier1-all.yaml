@@ -6,77 +6,77 @@ rules:
       interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
       provider: { name: service-comp }
     inject:
-    - name: typed-logger-handler
-      path: "./fixtures/typed_logger_mdl.comp.wasm"
+    - name: logger-handler
+      path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/adder"
       inner: { name: adder-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-adder
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-adder
+        path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/adder-async"
       inner: { name: adder-async-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-adder-async
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-adder-async
+        path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/messenger"
       inner: { name: messenger-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-messenger
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-messenger
+        path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/messenger-async"
       inner: { name: messenger-async-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-messenger-async
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-messenger-async
+        path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/printer1"
       inner: { name: printer1-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-printer1
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-printer1
+        path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/printer1-async"
       inner: { name: printer1-async-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-printer1-async
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-printer1-async
+        path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/printer-n"
       inner: { name: printer-n-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-printer-n
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-printer-n
+        path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/shapes"
       inner: { name: shapes-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-shapes
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-shapes
+        path: "./fixtures/printer_mdl.comp.wasm"
 
   - between:
       interface: "my:service/shapes-handles"
       inner: { name: shapes-handles-comp }
       outer: { name: service-comp }
     inject:
-      - name: typed-logger-shapes-handles
-        path: "./fixtures/typed_logger_mdl.comp.wasm"
+      - name: logger-shapes-handles
+        path: "./fixtures/printer_mdl.comp.wasm"

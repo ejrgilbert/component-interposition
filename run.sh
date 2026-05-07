@@ -94,8 +94,9 @@ print_usage() {
     echo -e "  --blockN        : Splice multiple middlewares where the middle-most one chooses to block any further calls (the last middleware and the original dependency)"
     echo -e "  --noblock1      : Splice middleware that chooses to NOT block the downstream call"
     echo -e "  --noblockN      : Splice multiple middlewares where the middle-most one chooses to NOT block any further calls (the last middleware and the original dependency)"
+    echo -e "  --tier1-all     : Splice the printer middleware on every supported fan-in interface"
     echo -e "  --tier2         : Splice the tier-2 typed-logger middleware on the fan-in adder interface (logs lifted arg values via on-call)"
-    echo -e "  --tier2-all     : Splice the typed-logger middleware on every supported fan-in interface — coverage grows as splicer's lift codegen extends"
+    echo -e "  --tier2-all     : Splice the typed-logger middleware on every supported fan-in interface (logs lifted arg values via on-call)"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
@@ -309,6 +310,9 @@ compose() {
         --nonblockN)
             compose_blockN
             ;;
+        --tier1-all)
+            compose_tier1_all
+            ;;
         --tier2)
             compose_tier2
             ;;
@@ -335,20 +339,12 @@ run_splicer() {
     shift 4
 
     log_info "Running splicer with rule set '$(basename "$rule_file")'..."
-    if ! wac_cmd=$(splicer splice "$rule_file" "$wasm_file" -o "$output_wac") ; then
+    if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" ; then
         log_error "Splice with '$(basename "$rule_file")' failed! Used the following command:"
-        echo splicer splice "$rule_file" "$wasm_file" -o "$output_wac"
+        echo splicer splice "$rule_file" "$wasm_file" -o "$output_wasm"
         exit 1
     fi
-    log_success "Splicer generated splits and a wac composition with '$(basename "$rule_file")' successfully!"
-
-    log_info "Running the wac composition generated for '$(basename "$rule_file")'..."
-    if ! eval "$wac_cmd  -o $output_wasm"; then
-        log_error "Failed to run wac command:"
-        echo "$wac_cmd"
-        exit 1
-    fi
-    log_success "The 'wac compose' ran successfully '$(basename "$rule_file")'..."
+    log_success "Splicer generated a composition with '$(basename "$rule_file")' successfully!"
 }
 run_splicer_solver() {
       local output_wac="$1"
@@ -357,20 +353,12 @@ run_splicer_solver() {
       local -a wasm_files=("$@")
 
     log_info "Running splicer composition solver..."
-    if ! wac_cmd=$(splicer compose "${wasm_files[@]}" -o "$output_wac") ; then
+    if ! splicer compose "${wasm_files[@]}" -o "$output_wasm" ; then
         log_error "Splice composition solver failed! Used the following command:"
         echo splicer compose "${wasm_files[@]}" -o "$output_wac"
         exit 1
     fi
-    log_success "Splicer successfully solved the composition!"
-
-    log_info "Running the wac composition generated..."
-    if ! eval "$wac_cmd  -o $output_wasm"; then
-        log_error "Failed to run wac command:"
-        echo "$wac_cmd"
-        exit 1
-    fi
-    log_success "The 'wac compose' ran successfully..."
+    log_success "Splicer successfully solved and generated the composition!"
 }
 
 compose_single() {
@@ -527,6 +515,14 @@ compose_blockN() {
         "$PATH_RULES/blockN.yaml" \
         "$PATH_WAC/blockN.wac" \
         "$PATH_COMPOSED/blockN.wasm"
+}
+compose_tier1_all() {
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/tier1-all.yaml" \
+        "$PATH_WAC/tier1-all.wac" \
+        "$PATH_COMPOSED/tier1-all.wasm"
 }
 compose_tier2() {
     local wasm_file="$PATH_FIXTURES/fanin.wasm"
@@ -711,6 +707,9 @@ run_composition() {
             COMPOSED="$PATH_COMPOSED/blockN.wasm"
             ENV_VARS="SHOULD_BLOCK=false"
             ;;
+        --tier1-all)
+            COMPOSED="$PATH_COMPOSED/tier1-all.wasm"
+            ;;
         --tier2)
             COMPOSED="$PATH_COMPOSED/tier2.wasm"
             ;;
@@ -746,7 +745,7 @@ viz() {
     # reports "No service chains found". Switch to --detail full for fan-in
     # and its descendants so the connections are visible.
     case "$opt" in
-        --fanin*|--block*|--nonblock*|--tier2|--tier2-all)
+        --fanin*|--block*|--nonblock*|--tier1-all|--tier2|--tier2-all)
             cviz-cli --detail full "$component"
             ;;
         *)
@@ -818,6 +817,9 @@ viz_composition() {
             ;;
         --nonblockN)
             COMPOSED="$PATH_COMPOSED/blockN.wasm"
+            ;;
+        --tier1-all)
+            COMPOSED="$PATH_COMPOSED/tier1-all.wasm"
             ;;
         --tier2)
             COMPOSED="$PATH_COMPOSED/tier2.wasm"
@@ -901,6 +903,7 @@ run_tests() {
       "--fanin1" "--faninN" \
       "--fanin-all1" "--fanin-allN" \
       "--block1" "--blockN" "--nonblock1" "--nonblockN" \
+      "--tier1-all" "--tier2" "--tier2-all"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
