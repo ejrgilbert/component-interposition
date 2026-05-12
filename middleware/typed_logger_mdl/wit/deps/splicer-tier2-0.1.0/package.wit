@@ -11,14 +11,14 @@
 package splicer:tier2@0.1.0;
 
 interface before {
-    use splicer:common/types@0.1.0.{call-id, field};
+    use splicer:common/types@0.2.0.{call-id, field};
     /// Called before every invocation of a target-interface function,
     /// with the function's parameters lifted into a `list<field>`.
     on-call: async func(call: call-id, args: list<field>);
 }
 
 interface after {
-    use splicer:common/types@0.1.0.{call-id, field-tree};
+    use splicer:common/types@0.2.0.{call-id, field-tree};
     /// Called after every invocation of a target-interface function,
     /// with the result lifted into a `field-tree`. `none` for void
     /// functions; `some(tree)` otherwise. Results are unnamed in WIT,

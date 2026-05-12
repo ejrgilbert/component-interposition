@@ -3,7 +3,7 @@
 /// Tier WIT packages (`splicer:tier1`, `splicer:tier2`, ...) import
 /// types defined here so the call-identity and lifted-value shapes
 /// stay consistent across tiers as middleware authors move up.
-package splicer:common@0.1.0;
+package splicer:common@0.2.0;
 
 interface types {
     /// Identity of the wrapped call: target interface
