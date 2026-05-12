@@ -197,14 +197,17 @@ build_component() {
     log_info "Building '$name' component..."
     pushd "$dir" > /dev/null
 
-    if [[ -f wkg.lock ]]; then
-        log_info "Fetching wit dependencies..."
+    # wkg.lock and wit/deps/ are both gitignored, so a fresh checkout (CI,
+    # `git clean`) has neither. Trigger on the presence of deps, not the lock:
+    # if deps are missing, fetch; otherwise reuse what's already there.
+    if [[ ! -d wit/deps ]]; then
+        log_info "wit/deps/ missing — fetching wit dependencies..."
         if ! wkg wit fetch; then
             log_error "wkg wit fetch failed for $name. Exiting."
             exit 1
         fi
     else
-        log_info "No wkg.lock — assuming WIT deps are vendored under wit/deps/."
+        log_info "wit/deps/ present — skipping fetch."
     fi
 
     log_info "Compiling $name to wasm32-wasip1..."
