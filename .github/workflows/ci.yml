@@ -12,8 +12,8 @@ env:
   # every install step picks it up.
   WAC_VERSION: "0.10.0"
   WASM_TOOLS_VERSION: "1.247.0"
-  CVIZ_VERSION: "2.0.2"
-  SPLICER_VERSION: "2.2.0"
+  CVIZ_VERSION: "2.0.3"
+  SPLICER_VERSION: "2.3.0"
   WKG_VERSION: "0.13.0"
 
 jobs:
