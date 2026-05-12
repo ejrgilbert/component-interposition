@@ -7,6 +7,11 @@ fixtures/
 *.wat
 wkg.lock
 **/wit/deps/
+# Vendored exception: splicer:tier2 + splicer:common aren't published to
+# ghcr yet (added in feature/tier2-adapter). Remove this exception once
+# the wit is published and wkg wit fetch can resolve them.
+!middleware/typed_logger_mdl/wit/deps/
+!middleware/typed_logger_mdl/wit/deps/**
 
 *.bk
 *.pyc
