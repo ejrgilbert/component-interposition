@@ -97,6 +97,7 @@ print_usage() {
     echo -e "  --tier1-all     : Splice the printer middleware on every supported fan-in interface"
     echo -e "  --tier2         : Splice the tier-2 typed-logger middleware on the fan-in adder interface (logs lifted arg values via on-call)"
     echo -e "  --tier2-all     : Splice the typed-logger middleware on every supported fan-in interface (logs lifted arg values via on-call)"
+    echo -e "  --hello-builtin-config : Stack two hello-tier1 builtins (one with config, one default)"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
@@ -322,6 +323,9 @@ compose() {
         --tier2-all)
             compose_tier2_all
             ;;
+        --hello-builtin-config)
+            compose_hello_builtin_config
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -543,6 +547,17 @@ compose_tier2_all() {
         "$PATH_WAC/tier2-all.wac" \
         "$PATH_COMPOSED/tier2-all.wasm"
 }
+# Two-instance hello-tier1 splice; exercises the
+# `splicer:builtin-config` substrate. Splicer must be able to resolve
+# the `hello-tier1` and `config-provider` builtins (export
+# SPLICER_BUILTINS_DIR or rely on the OCI fallback).
+compose_hello_builtin_config() {
+    run_splicer \
+        "$PATH_FIXTURES/service_b.comp.wasm" \
+        "$PATH_RULES/hello-builtin-config.yaml" \
+        "$PATH_WAC/hello-builtin-config.wac" \
+        "$PATH_COMPOSED/hello-builtin-config.wasm"
+}
 
 # -----------------------------------------------------------------------------
 # Run the composed component
@@ -719,6 +734,9 @@ run_composition() {
         --tier2-all)
             COMPOSED="$PATH_COMPOSED/tier2-all.wasm"
             ;;
+        --hello-builtin-config)
+            COMPOSED="$PATH_COMPOSED/hello-builtin-config.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -830,6 +848,9 @@ viz_composition() {
         --tier2-all)
             COMPOSED="$PATH_COMPOSED/tier2-all.wasm"
             ;;
+        --hello-builtin-config)
+            COMPOSED="$PATH_COMPOSED/hello-builtin-config.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -906,7 +927,8 @@ run_tests() {
       "--fanin1" "--faninN" \
       "--fanin-all1" "--fanin-allN" \
       "--block1" "--blockN" "--nonblock1" "--nonblockN" \
-      "--tier1-all" "--tier2" "--tier2-all"
+      "--tier1-all" "--tier2" "--tier2-all" \
+      "--hello-builtin-config"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
