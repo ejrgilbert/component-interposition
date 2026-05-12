@@ -1,0 +1,28 @@
+version: 1
+
+# Demonstrates splicer's `splicer:builtin-config` substrate end-to-end:
+# inject two instances of the `hello-tier1` builtin on the same handler
+# chain, one without a `config:` block (defaults to the hardcoded
+# "hello-tier1" greeting) and one with a `greeting:` value sealed into
+# its patched provider component at splice time. Each instance shares
+# the underlying builtin wasm but resolves a different config value
+# through `splicer:builtin-config/get` at runtime.
+#
+# Stacked order (declaration order = invocation order):
+#   client -> hello-default (defaults) -> hello-configured (greeting) -> srv
+rules:
+  - before:
+      interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
+      provider:
+        # The instance name `wasi:http/handler@...-shim-instance` isn't
+        # a valid WAC identifier; alias it to a short name.
+        alias: "srv"
+    inject:
+      - builtin:
+          name: hello-tier1
+          alias: hello-default
+      - builtin:
+          name: hello-tier1
+          alias: hello-configured
+          config:
+            greeting: "wired-up-greeting"
