@@ -31,7 +31,6 @@ export WKG_CONFIG_FILE="$REPO_ROOT/wkg-registries.toml"
 # -----------------------------------------------------------------------------
 PATH_WASI_TARGET="./target/wasm32-wasip1/debug"
 PATH_COMPOSED="./compositions"
-PATH_WAC="./generated-wac"     # TODO: Remove things like this (no longer needed)
 PATH_RULES="./splicer-rules"
 PATH_FIXTURES="./fixtures"
 PATH_HANDLERS="./handlers"
@@ -98,6 +97,7 @@ print_usage() {
     echo -e "  --tier2         : Splice the tier-2 typed-logger middleware on the fan-in adder interface (logs lifted arg values via on-call)"
     echo -e "  --tier2-all     : Splice the typed-logger middleware on every supported fan-in interface (logs lifted arg values via on-call)"
     echo -e "  --builtin-hello-tier1 : Stack two hello-tier1 builtins (one with config, one default)"
+    echo -e "  --builtin-hello-tier2 : Splice hello-tier2 across fanin's adder + messenger (typed args, one default + one configured greeting)"
     echo -e "  --builtin-otel  : Stack otel-bare-{spans,metrics,logs} on wasi:http/handler (LOOP_N=3+ to see metrics flush)"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
@@ -327,6 +327,9 @@ compose() {
         --builtin-hello-tier1)
             compose_builtin_hello_tier1
             ;;
+        --builtin-hello-tier2)
+            compose_builtin_hello_tier2
+            ;;
         --builtin-otel)
             compose_otel
             ;;
@@ -345,9 +348,8 @@ compose() {
 run_splicer() {
     local wasm_file="$1"
     local rule_file="$2"
-    local output_wac="$3"
-    local output_wasm="$4"
-    shift 4
+    local output_wasm="$3"
+    shift 3
 
     log_info "Running splicer with rule set '$(basename "$rule_file")'..."
     if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" ; then
@@ -358,15 +360,14 @@ run_splicer() {
     log_success "Splicer generated a composition with '$(basename "$rule_file")' successfully!"
 }
 run_splicer_solver() {
-      local output_wac="$1"
-      local output_wasm="$2"
-      shift 2
+      local output_wasm="$1"
+      shift 1
       local -a wasm_files=("$@")
 
     log_info "Running splicer composition solver..."
     if ! splicer compose "${wasm_files[@]}" -o "$output_wasm" ; then
         log_error "Splice composition solver failed! Used the following command:"
-        echo splicer compose "${wasm_files[@]}" -o "$output_wac"
+        echo splicer compose "${wasm_files[@]}" -o "$output_wasm"
         exit 1
     fi
     log_success "Splicer successfully solved and generated the composition!"
@@ -376,21 +377,18 @@ compose_single() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/single.yaml" \
-        "$PATH_WAC/single.wac" \
         "$PATH_COMPOSED/single.wasm"
 }
 compose_multiple() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/multiple.yaml" \
-        "$PATH_WAC/multiple.wac" \
         "$PATH_COMPOSED/multiple.wasm"
 }
 compose_chain() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/chain.yaml" \
-        "$PATH_WAC/chain.wac" \
         "$PATH_COMPOSED/chained.wasm"
 }
 compose_chain1() {
@@ -398,7 +396,6 @@ compose_chain1() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/chain1.yaml" \
-        "$PATH_WAC/chain1.wac" \
         "$PATH_COMPOSED/chain1.wasm"
 }
 compose_chainN() {
@@ -406,14 +403,12 @@ compose_chainN() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/chainN.yaml" \
-        "$PATH_WAC/chainN.wac" \
         "$PATH_COMPOSED/chainN.wasm"
 }
 compose_nested() {
     run_splicer \
         "$PATH_FIXTURES/chained.wasm" \
         "$PATH_RULES/nested.yaml" \
-        "$PATH_WAC/nested.wac" \
         "$PATH_COMPOSED/nested.wasm"
 }
 compose_inner_nested1() {
@@ -421,7 +416,6 @@ compose_inner_nested1() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/inner-nested1.yaml" \
-        "$PATH_WAC/inner-nested1.wac" \
         "$PATH_COMPOSED/inner-nested1.wasm"
 }
 compose_inner_nestedN() {
@@ -429,7 +423,6 @@ compose_inner_nestedN() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/inner-nestedN.yaml" \
-        "$PATH_WAC/inner-nestedN.wac" \
         "$PATH_COMPOSED/inner-nestedN.wasm"
 }
 compose_pre_nested1() {
@@ -437,7 +430,6 @@ compose_pre_nested1() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/pre-nested1.yaml" \
-        "$PATH_WAC/pre-nested1.wac" \
         "$PATH_COMPOSED/pre-nested1.wasm"
 }
 compose_pre_nestedN() {
@@ -445,7 +437,6 @@ compose_pre_nestedN() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/pre-nestedN.yaml" \
-        "$PATH_WAC/pre-nestedN.wac" \
         "$PATH_COMPOSED/pre-nestedN.wasm"
 }
 compose_inner_pre_nested1() {
@@ -453,7 +444,6 @@ compose_inner_pre_nested1() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/inner-pre-nested1.yaml" \
-        "$PATH_WAC/inner-pre-nested1.wac" \
         "$PATH_COMPOSED/inner-pre-nested1.wasm"
 }
 compose_inner_pre_nestedN() {
@@ -461,12 +451,10 @@ compose_inner_pre_nestedN() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/inner-pre-nestedN.yaml" \
-        "$PATH_WAC/inner-pre-nestedN.wac" \
         "$PATH_COMPOSED/inner-pre-nestedN.wasm"
 }
 compose_fanin() {
     run_splicer_solver \
-        "$PATH_WAC/fanin.wac" \
         "$PATH_COMPOSED/fanin.wasm" \
         "$PATH_FIXTURES/service.comp.wasm" \
         "$PATH_FIXTURES/adder.comp.wasm" \
@@ -484,7 +472,6 @@ compose_fanin1() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/fanin1.yaml" \
-        "$PATH_WAC/fanin1.wac" \
         "$PATH_COMPOSED/fanin1.wasm"
 }
 compose_faninN() {
@@ -492,7 +479,6 @@ compose_faninN() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/faninN.yaml" \
-        "$PATH_WAC/faninN.wac" \
         "$PATH_COMPOSED/faninN.wasm"
 }
 compose_fanin_all1() {
@@ -500,7 +486,6 @@ compose_fanin_all1() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/fanin-all1.yaml" \
-        "$PATH_WAC/fanin-all1.wac" \
         "$PATH_COMPOSED/fanin-all1.wasm"
 }
 compose_fanin_allN() {
@@ -508,7 +493,6 @@ compose_fanin_allN() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/fanin-allN.yaml" \
-        "$PATH_WAC/fanin-allN.wac" \
         "$PATH_COMPOSED/fanin-allN.wasm"
 }
 compose_block1() {
@@ -516,7 +500,6 @@ compose_block1() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/block1.yaml" \
-        "$PATH_WAC/block1.wac" \
         "$PATH_COMPOSED/block1.wasm"
 }
 compose_blockN() {
@@ -524,7 +507,6 @@ compose_blockN() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/blockN.yaml" \
-        "$PATH_WAC/blockN.wac" \
         "$PATH_COMPOSED/blockN.wasm"
 }
 compose_tier1_all() {
@@ -532,7 +514,6 @@ compose_tier1_all() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/tier1-all.yaml" \
-        "$PATH_WAC/tier1-all.wac" \
         "$PATH_COMPOSED/tier1-all.wasm"
 }
 compose_tier2() {
@@ -540,7 +521,6 @@ compose_tier2() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/tier2.yaml" \
-        "$PATH_WAC/tier2.wac" \
         "$PATH_COMPOSED/tier2.wasm"
 }
 compose_tier2_all() {
@@ -548,7 +528,6 @@ compose_tier2_all() {
     run_splicer \
         "$wasm_file" \
         "$PATH_RULES/tier2-all.yaml" \
-        "$PATH_WAC/tier2-all.wac" \
         "$PATH_COMPOSED/tier2-all.wasm"
 }
 # Two-instance hello-tier1 splice; exercises the
@@ -559,8 +538,17 @@ compose_builtin_hello_tier1() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/builtin-hello-tier1.yaml" \
-        "$PATH_WAC/builtin-hello-tier1.wac" \
         "$PATH_COMPOSED/builtin-hello-tier1.wasm"
+}
+# `hello-tier2` splice across fanin's typed `my:service/*` interfaces.
+# Lifts primitive args + results so the builtin's pretty-printer has
+# real payload to render. Also exercises the builtin-config substrate
+# (one default instance, one with a `greeting:` value sealed in).
+compose_builtin_hello_tier2() {
+    run_splicer \
+        "$PATH_FIXTURES/fanin.wasm" \
+        "$PATH_RULES/builtin-hello-tier2.yaml" \
+        "$PATH_COMPOSED/builtin-hello-tier2.wasm"
 }
 # Stack otel-bare-{spans,metrics,logs} on `service_b`'s
 # `wasi:http/handler`. Runner's `wasi:otel/*` stub prints each signal
@@ -569,7 +557,6 @@ compose_otel() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/builtin-otel.yaml" \
-        "$PATH_WAC/builtin-otel.wac" \
         "$PATH_COMPOSED/builtin-otel.wasm"
 }
 
@@ -589,13 +576,15 @@ run() {
     log_info "Running component at $component..."
     pushd runner > /dev/null
 
-    local output
-    if ! output=$(eval "$env_vars cargo run -- \"../$component\"" 2>&1); then
+    local output outfile
+    outfile=$(mktemp)
+    if ! eval "$env_vars cargo run -- \"../$component\"" 2>&1 | tee "$outfile"; then
         log_error "Failed to run the component at $component."
-        echo "$output"
+        rm -f "$outfile"
         exit 1
     fi
-    echo "$output"
+    output=$(<"$outfile")
+    rm -f "$outfile"
 
     popd > /dev/null
 
@@ -751,6 +740,9 @@ run_composition() {
         --builtin-hello-tier1)
             COMPOSED="$PATH_COMPOSED/builtin-hello-tier1.wasm"
             ;;
+        --builtin-hello-tier2)
+            COMPOSED="$PATH_COMPOSED/builtin-hello-tier2.wasm"
+            ;;
         --builtin-otel)
             COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
             # Set LOOP_N=3 by default so the metrics builtin's
@@ -788,7 +780,7 @@ viz() {
     # reports "No service chains found". Switch to --detail full for fan-in
     # and its descendants so the connections are visible.
     case "$opt" in
-        --fanin*|--block*|--nonblock*|--tier1-all|--tier2|--tier2-all)
+        --fanin*|--block*|--nonblock*|--tier1-all|--tier2|--tier2-all|--builtin-hello-tier2)
             cviz-cli --detail full "$component"
             ;;
         *)
@@ -873,6 +865,9 @@ viz_composition() {
         --builtin-hello-tier1)
             COMPOSED="$PATH_COMPOSED/builtin-hello-tier1.wasm"
             ;;
+        --builtin-hello-tier2)
+            COMPOSED="$PATH_COMPOSED/builtin-hello-tier2.wasm"
+            ;;
         --builtin-otel)
             COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
             ;;
@@ -953,7 +948,7 @@ run_tests() {
       "--fanin-all1" "--fanin-allN" \
       "--block1" "--blockN" "--nonblock1" "--nonblockN" \
       "--tier1-all" "--tier2" "--tier2-all" \
-      "--builtin-hello-tier1" "--builtin-otel"
+      "--builtin-hello-tier1" "--builtin-hello-tier2" "--builtin-otel"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
