@@ -1,0 +1,26 @@
+version: 1
+
+rules:
+  - between:
+      interface: "my:service/adder"
+      inner:
+        name: adder-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: hello-tier2
+          alias: hello-tier2-adder
+
+  - between:
+      interface: "my:service/messenger"
+      inner:
+        name: messenger-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: hello-tier2
+          alias: hello-tier2-messenger
+          config:
+            greeting: "typed-messenger"
