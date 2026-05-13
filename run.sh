@@ -31,14 +31,14 @@ export WKG_CONFIG_FILE="$REPO_ROOT/wkg-registries.toml"
 # -----------------------------------------------------------------------------
 PATH_WASI_TARGET="./target/wasm32-wasip1/debug"
 PATH_COMPOSED="./compositions"
-PATH_WAC="./generated-wac"
+PATH_WAC="./generated-wac"     # TODO: Remove things like this (no longer needed)
 PATH_RULES="./splicer-rules"
 PATH_FIXTURES="./fixtures"
 PATH_HANDLERS="./handlers"
 PATH_PROXY_MDL="./middleware"
 PATH_FAN_IN="./fan-in"
 
-mkdir -p $PATH_COMPOSED $PATH_WAC $PATH_FIXTURES
+mkdir -p $PATH_COMPOSED $PATH_FIXTURES
 
 # -----------------------------------------------------------------------------
 # Color codes for logs
@@ -97,7 +97,8 @@ print_usage() {
     echo -e "  --tier1-all     : Splice the printer middleware on every supported fan-in interface"
     echo -e "  --tier2         : Splice the tier-2 typed-logger middleware on the fan-in adder interface (logs lifted arg values via on-call)"
     echo -e "  --tier2-all     : Splice the typed-logger middleware on every supported fan-in interface (logs lifted arg values via on-call)"
-    echo -e "  --hello-builtin-config : Stack two hello-tier1 builtins (one with config, one default)"
+    echo -e "  --builtin-hello-tier1 : Stack two hello-tier1 builtins (one with config, one default)"
+    echo -e "  --builtin-otel  : Stack otel-bare-{spans,metrics,logs} on wasi:http/handler (LOOP_N=3+ to see metrics flush)"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
@@ -323,8 +324,11 @@ compose() {
         --tier2-all)
             compose_tier2_all
             ;;
-        --hello-builtin-config)
-            compose_hello_builtin_config
+        --builtin-hello-tier1)
+            compose_builtin_hello_tier1
+            ;;
+        --builtin-otel)
+            compose_otel
             ;;
         *)
             log_error "Unknown option: $1"
@@ -551,12 +555,22 @@ compose_tier2_all() {
 # `splicer:builtin-config` substrate. Splicer must be able to resolve
 # the `hello-tier1` and `config-provider` builtins (export
 # SPLICER_BUILTINS_DIR or rely on the OCI fallback).
-compose_hello_builtin_config() {
+compose_builtin_hello_tier1() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
-        "$PATH_RULES/hello-builtin-config.yaml" \
-        "$PATH_WAC/hello-builtin-config.wac" \
-        "$PATH_COMPOSED/hello-builtin-config.wasm"
+        "$PATH_RULES/builtin-hello-tier1.yaml" \
+        "$PATH_WAC/builtin-hello-tier1.wac" \
+        "$PATH_COMPOSED/builtin-hello-tier1.wasm"
+}
+# Stack otel-bare-{spans,metrics,logs} on `service_b`'s
+# `wasi:http/handler`. Runner's `wasi:otel/*` stub prints each signal
+# to stdout; bump `LOOP_N` to actually witness the metrics flush.
+compose_otel() {
+    run_splicer \
+        "$PATH_FIXTURES/service_b.comp.wasm" \
+        "$PATH_RULES/builtin-otel.yaml" \
+        "$PATH_WAC/builtin-otel.wac" \
+        "$PATH_COMPOSED/builtin-otel.wasm"
 }
 
 # -----------------------------------------------------------------------------
@@ -734,8 +748,16 @@ run_composition() {
         --tier2-all)
             COMPOSED="$PATH_COMPOSED/tier2-all.wasm"
             ;;
-        --hello-builtin-config)
-            COMPOSED="$PATH_COMPOSED/hello-builtin-config.wasm"
+        --builtin-hello-tier1)
+            COMPOSED="$PATH_COMPOSED/builtin-hello-tier1.wasm"
+            ;;
+        --builtin-otel)
+            COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
+            # Set LOOP_N=3 by default so the metrics builtin's
+            # buffered window (config: buffer=3) actually closes
+            # at least once during the run. Operators tuning the
+            # demo can override by exporting LOOP_N before invoking.
+            ENV_VARS="LOOP_N=${LOOP_N:-3}"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -848,8 +870,11 @@ viz_composition() {
         --tier2-all)
             COMPOSED="$PATH_COMPOSED/tier2-all.wasm"
             ;;
-        --hello-builtin-config)
-            COMPOSED="$PATH_COMPOSED/hello-builtin-config.wasm"
+        --builtin-hello-tier1)
+            COMPOSED="$PATH_COMPOSED/builtin-hello-tier1.wasm"
+            ;;
+        --builtin-otel)
+            COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
             ;;
         *)
             log_error "Unknown option: $1"
@@ -928,7 +953,7 @@ run_tests() {
       "--fanin-all1" "--fanin-allN" \
       "--block1" "--blockN" "--nonblock1" "--nonblockN" \
       "--tier1-all" "--tier2" "--tier2-all" \
-      "--hello-builtin-config"
+      "--builtin-hello-tier1" "--builtin-otel"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
