@@ -1,0 +1,26 @@
+version: 1
+
+# Splice recorder onto two of fanin's edges; each lands its own
+# <preopen>/recordings/<edge_id>.bin via the auto-injected edge_id.
+rules:
+  - between:
+      interface: "my:service/adder"
+      inner:
+        name: adder-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: recorder
+          alias: recorder-adder
+
+  - between:
+      interface: "my:service/messenger"
+      inner:
+        name: messenger-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: recorder
+          alias: recorder-messenger

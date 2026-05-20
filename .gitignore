@@ -2,6 +2,7 @@
 splits/
 compositions/
 fixtures/
+runner/recordings-preopen/
 
 # Wasm things
 *.wat

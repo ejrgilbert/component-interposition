@@ -99,6 +99,7 @@ print_usage() {
     echo -e "  --builtin-hello-tier1 : Stack two hello-tier1 builtins (one with config, one default)"
     echo -e "  --builtin-hello-tier2 : Splice hello-tier2 across fanin's adder + messenger (typed args, one default + one configured greeting)"
     echo -e "  --builtin-otel  : Stack otel-bare-{spans,metrics,logs} on wasi:http/handler (LOOP_N=3+ to see metrics flush)"
+    echo -e "  --builtin-recorder : Splice recorder onto 2 fanin edges; verifies one .bin per edge under recordings/"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
@@ -333,6 +334,9 @@ compose() {
         --builtin-otel)
             compose_otel
             ;;
+        --builtin-recorder)
+            compose_builtin_recorder
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -559,6 +563,16 @@ compose_otel() {
         "$PATH_RULES/builtin-otel.yaml" \
         "$PATH_COMPOSED/builtin-otel.wasm"
 }
+# Splice recorder onto two of fanin's edges (adder, messenger). Each
+# instance writes its own <preopen>/recordings/<edge_id>.bin via the
+# auto-injected `_splicer_edge_id`; the run() step then asserts the
+# expected per-edge files appeared.
+compose_builtin_recorder() {
+    run_splicer \
+        "$PATH_FIXTURES/fanin.wasm" \
+        "$PATH_RULES/builtin-recorder.yaml" \
+        "$PATH_COMPOSED/builtin-recorder.wasm"
+}
 
 # -----------------------------------------------------------------------------
 # Run the composed component
@@ -751,6 +765,18 @@ run_composition() {
             # demo can override by exporting LOOP_N before invoking.
             ENV_VARS="LOOP_N=${LOOP_N:-3}"
             ;;
+        --builtin-recorder)
+            COMPOSED="$PATH_COMPOSED/builtin-recorder.wasm"
+            # Stage a clean preopen under the runner's cwd. The runner
+            # passes `PREOPEN_DIR` into wasmtime as the guest's `.`, so
+            # the recorder's `wasi:filesystem/preopens.get-directories`
+            # lands here, and writes show up at
+            # `runner/<RECORDER_PREOPEN>/recordings/<edge_id>.bin`.
+            RECORDER_PREOPEN="recordings-preopen"
+            rm -rf "runner/$RECORDER_PREOPEN"
+            mkdir -p "runner/$RECORDER_PREOPEN"
+            ENV_VARS="PREOPEN_DIR=./$RECORDER_PREOPEN"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -767,6 +793,49 @@ run_composition() {
     echo
 
     run "$COMPOSED" "$ENV_VARS" "$expected_file"
+
+    # Sink-specific post-run checks. Most demos verify via the
+    # stdout-vs-expected comparison inside `run`; the recorder writes
+    # silently to the preopened filesystem, so its proof lives here.
+    if [[ "$1" == "--builtin-recorder" ]]; then
+        verify_recorder_files "runner/$RECORDER_PREOPEN" 2
+    fi
+}
+
+# After a `--builtin-recorder` run, assert that exactly `expected`
+# `.bin` files landed under `<preopen>/recordings/` and that each
+# starts with the SDK stream-header magic (`SPLR`). Loud failure with
+# directory contents on mismatch so a stale or partial run is obvious.
+verify_recorder_files() {
+    local preopen="$1"
+    local expected="$2"
+    local rec_dir="$preopen/recordings"
+
+    if [[ ! -d "$rec_dir" ]]; then
+        log_error "recorder preopen has no 'recordings' subdir: $rec_dir"
+        ls -la "$preopen" 2>&1 || true
+        exit 1
+    fi
+    local files=( "$rec_dir"/*.bin )
+    if [[ ! -f "${files[0]:-}" ]]; then
+        log_error "expected $expected .bin files under $rec_dir, found 0"
+        ls -la "$rec_dir"
+        exit 1
+    fi
+    if [[ ${#files[@]} -ne $expected ]]; then
+        log_error "expected $expected .bin files under $rec_dir, found ${#files[@]}"
+        ls -la "$rec_dir"
+        exit 1
+    fi
+    for f in "${files[@]}"; do
+        local magic
+        magic=$(head -c 4 "$f")
+        if [[ "$magic" != "SPLR" ]]; then
+            log_error "$f does not start with SPLR magic; got $(xxd -l 8 "$f" | head -1)"
+            exit 1
+        fi
+    done
+    log_success "verified $expected per-edge recording(s) under $rec_dir"
 }
 
 # -----------------------------------------------------------------------------
@@ -780,7 +849,7 @@ viz() {
     # reports "No service chains found". Switch to --detail full for fan-in
     # and its descendants so the connections are visible.
     case "$opt" in
-        --fanin*|--block*|--nonblock*|--tier1-all|--tier2|--tier2-all|--builtin-hello-tier2)
+        --fanin*|--block*|--nonblock*|--tier1-all|--tier2|--tier2-all|--builtin-hello-tier2|--builtin-recorder)
             cviz-cli --detail full "$component"
             ;;
         *)
@@ -871,6 +940,9 @@ viz_composition() {
         --builtin-otel)
             COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
             ;;
+        --builtin-recorder)
+            COMPOSED="$PATH_COMPOSED/builtin-recorder.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -948,7 +1020,8 @@ run_tests() {
       "--fanin-all1" "--fanin-allN" \
       "--block1" "--blockN" "--nonblock1" "--nonblockN" \
       "--tier1-all" "--tier2" "--tier2-all" \
-      "--builtin-hello-tier1" "--builtin-hello-tier2" "--builtin-otel"
+      "--builtin-hello-tier1" "--builtin-hello-tier2" "--builtin-otel" \
+      "--builtin-recorder"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
