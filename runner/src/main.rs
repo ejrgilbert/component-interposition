@@ -11,7 +11,9 @@ use std::io::Write;
 use tokio::try_join;
 use wasmtime::component::{Component, Linker, ResourceTable, Val};
 use wasmtime::{Result, Store, WasmBacktraceDetails};
-use wasmtime_wasi::{TrappableError, WasiCtx, WasiCtxBuilder, WasiCtxView, WasiView};
+use wasmtime_wasi::{
+    DirPerms, FilePerms, TrappableError, WasiCtx, WasiCtxBuilder, WasiCtxView, WasiView,
+};
 use wasmtime_wasi_http::p3::bindings::http::types::ErrorCode;
 use wasmtime_wasi_http::p3::{
     self, Request, RequestOptions, WasiHttpCtx, WasiHttpCtxView, WasiHttpView,
@@ -281,6 +283,10 @@ impl WasiHttpCtx for TestHttpCtx {
 }
 
 const SHOULD_BLOCK: &str = "SHOULD_BLOCK";
+/// Env var pointing at a host directory to preopen as the guest's
+/// `.`. Set by demos that need filesystem access (e.g. `--builtin-
+/// recorder`'s file sink). Unset = no preopen, identical to before.
+const PREOPEN_DIR: &str = "PREOPEN_DIR";
 
 struct Ctx {
     table: ResourceTable,
@@ -290,10 +296,18 @@ struct Ctx {
 
 impl Ctx {
     fn new(request_body_tx: Sender<UnsyncBoxBody<Bytes, ErrorCode>>) -> Self {
+        let mut builder = WasiCtxBuilder::new();
+        builder
+            .env(SHOULD_BLOCK, Self::get_should_block())
+            .inherit_stdio();
+        if let Ok(path) = env::var(PREOPEN_DIR) {
+            builder
+                .preopened_dir(&path, ".", DirPerms::all(), FilePerms::all())
+                .unwrap_or_else(|e| panic!("preopen {path:?} failed: {e:#}"));
+        }
         Self {
             table: ResourceTable::default(),
-            wasi: WasiCtxBuilder::new()
-                .env(SHOULD_BLOCK, Self::get_should_block()).inherit_stdio().build(),
+            wasi: builder.build(),
             http: TestHttpCtx {
                 request_body_tx: Some(request_body_tx),
             },
