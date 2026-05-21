@@ -1,0 +1,15 @@
+version: 1
+
+# Tier-3 (transform) builtin: codegen generates a typed wrapper that
+# imports + exports my:service/adder-async, dispatches each call
+# through the hello-tier3 strategy. The strategy is a pass-through
+# that prints before / after each wrapped call's interface#function.
+rules:
+  - between:
+      interface: "my:service/adder-async"
+      inner:
+        name: adder-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin: hello-tier3
