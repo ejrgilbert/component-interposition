@@ -98,6 +98,8 @@ print_usage() {
     echo -e "  --tier2-all     : Splice the typed-logger middleware on every supported fan-in interface (logs lifted arg values via on-call)"
     echo -e "  --builtin-hello-tier1 : Stack two hello-tier1 builtins (one with config, one default)"
     echo -e "  --builtin-hello-tier2 : Splice hello-tier2 across fanin's adder + messenger (typed args, one default + one configured greeting)"
+    echo -e "  --builtin-hello-tier3 : Splice tier-3 (transform) hello-tier3 between fanin's adder-async and service"
+    echo -e "  --builtin-hello-tier4 : Splice tier-4 (virtualize) hello-tier4 in place of adder-async"
     echo -e "  --builtin-otel  : Stack otel-bare-{spans,metrics,logs} on wasi:http/handler (LOOP_N=3+ to see metrics flush)"
     echo -e "  --builtin-recorder : Splice recorder onto 2 fanin edges; verifies one .bin per edge under recordings/"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
@@ -331,6 +333,12 @@ compose() {
         --builtin-hello-tier2)
             compose_builtin_hello_tier2
             ;;
+        --builtin-hello-tier3)
+            compose_builtin_hello_tier3
+            ;;
+        --builtin-hello-tier4)
+            compose_builtin_hello_tier4
+            ;;
         --builtin-otel)
             compose_otel
             ;;
@@ -534,29 +542,30 @@ compose_tier2_all() {
         "$PATH_RULES/tier2-all.yaml" \
         "$PATH_COMPOSED/tier2-all.wasm"
 }
-# Two-instance hello-tier1 splice; exercises the
-# `splicer:builtin-config` substrate. Splicer must be able to resolve
-# the `hello-tier1` and `config-provider` builtins (export
-# SPLICER_BUILTINS_DIR or rely on the OCI fallback).
 compose_builtin_hello_tier1() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
         "$PATH_RULES/builtin-hello-tier1.yaml" \
         "$PATH_COMPOSED/builtin-hello-tier1.wasm"
 }
-# `hello-tier2` splice across fanin's typed `my:service/*` interfaces.
-# Lifts primitive args + results so the builtin's pretty-printer has
-# real payload to render. Also exercises the builtin-config substrate
-# (one default instance, one with a `greeting:` value sealed in).
 compose_builtin_hello_tier2() {
     run_splicer \
         "$PATH_FIXTURES/fanin.wasm" \
         "$PATH_RULES/builtin-hello-tier2.yaml" \
         "$PATH_COMPOSED/builtin-hello-tier2.wasm"
 }
-# Stack otel-bare-{spans,metrics,logs} on `service_b`'s
-# `wasi:http/handler`. Runner's `wasi:otel/*` stub prints each signal
-# to stdout; bump `LOOP_N` to actually witness the metrics flush.
+compose_builtin_hello_tier3() {
+    run_splicer \
+        "$PATH_FIXTURES/fanin.wasm" \
+        "$PATH_RULES/builtin-hello-tier3.yaml" \
+        "$PATH_COMPOSED/builtin-hello-tier3.wasm"
+}
+compose_builtin_hello_tier4() {
+    run_splicer \
+        "$PATH_FIXTURES/fanin.wasm" \
+        "$PATH_RULES/builtin-hello-tier4.yaml" \
+        "$PATH_COMPOSED/builtin-hello-tier4.wasm"
+}
 compose_otel() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
@@ -757,6 +766,12 @@ run_composition() {
         --builtin-hello-tier2)
             COMPOSED="$PATH_COMPOSED/builtin-hello-tier2.wasm"
             ;;
+        --builtin-hello-tier3)
+            COMPOSED="$PATH_COMPOSED/builtin-hello-tier3.wasm"
+            ;;
+        --builtin-hello-tier4)
+            COMPOSED="$PATH_COMPOSED/builtin-hello-tier4.wasm"
+            ;;
         --builtin-otel)
             COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
             # Set LOOP_N=3 by default so the metrics builtin's
@@ -849,7 +864,7 @@ viz() {
     # reports "No service chains found". Switch to --detail full for fan-in
     # and its descendants so the connections are visible.
     case "$opt" in
-        --fanin*|--block*|--nonblock*|--tier1-all|--tier2|--tier2-all|--builtin-hello-tier2|--builtin-recorder)
+        --fanin*|--block*|--nonblock*|--tier1-all|--tier2|--tier2-all|--builtin-hello-tier2|--builtin-recorder|--builtin-hello-tier3|--builtin-hello-tier4)
             cviz-cli --detail full "$component"
             ;;
         *)
@@ -937,6 +952,12 @@ viz_composition() {
         --builtin-hello-tier2)
             COMPOSED="$PATH_COMPOSED/builtin-hello-tier2.wasm"
             ;;
+        --builtin-hello-tier3)
+            COMPOSED="$PATH_COMPOSED/builtin-hello-tier3.wasm"
+            ;;
+        --builtin-hello-tier4)
+            COMPOSED="$PATH_COMPOSED/builtin-hello-tier4.wasm"
+            ;;
         --builtin-otel)
             COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
             ;;
@@ -1020,8 +1041,9 @@ run_tests() {
       "--fanin-all1" "--fanin-allN" \
       "--block1" "--blockN" "--nonblock1" "--nonblockN" \
       "--tier1-all" "--tier2" "--tier2-all" \
-      "--builtin-hello-tier1" "--builtin-hello-tier2" "--builtin-otel" \
-      "--builtin-recorder"
+      "--builtin-hello-tier1" "--builtin-hello-tier2" \
+      "--builtin-hello-tier3" "--builtin-hello-tier4" \
+      "--builtin-otel" "--builtin-recorder"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
