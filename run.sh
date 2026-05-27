@@ -134,7 +134,7 @@ check_env() {
         "cargo:1.93.0:brew"
         "wasm-tools:1.247.0:$CARGO_INST"
         "wkg:0.13.0:$CARGO_INST"
-        "splicer:2.4.0:$CARGO_INST"
+        "splicer:2.4.1:$CARGO_INST"
         "cviz-cli:2.0.3:$CARGO_INST"
         "wac:0.10.0:$CARGO_INST"
     )
