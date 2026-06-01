@@ -1,0 +1,81 @@
+version: 1
+
+# End-to-end demonstration of `all-funcs:` predication on a real fan-in
+# composition. Each rule fires the same broad glob and lets `all-funcs:`
+# filter; the injected `hello-tier1` prints a label naming the constraint
+# that matched it, so one run lists which interfaces each axis selected.
+#
+# What to look for in the output:
+#   adder / messenger / printer1 / printer-n (and their async siblings)
+#       → all three of [RESULTS-CONCRETE], [RESULTS-DEFAULTABLE], plus
+#         [ALL-ASYNC] or [ALL-SYNC] depending on direction.
+#   shapes (sync, every fn has concrete args/results — but `divide` and
+#   `aggregate` return `result<…>`)
+#       → [ALL-SYNC] + [RESULTS-CONCRETE], but NOT [RESULTS-DEFAULTABLE]:
+#         demonstrates concrete and defaultable are independent.
+#   shapes-handles (sync; resource handles + future + stream)
+#       → [ALL-SYNC] only; concrete and defaultable both excluded.
+rules:
+  # ── Every function is async ────────────────────────────────────────
+  - between:
+      interface: "my:service*"
+      inner:
+        name: "*-comp"
+      outer:
+        name: service-comp
+      all-funcs:
+        async: true
+    inject:
+      - builtin:
+          name: hello-tier1
+          alias: gate-async
+          config:
+            greeting: "[ALL-ASYNC]"
+
+  # ── Every function is sync ─────────────────────────────────────────
+  - between:
+      interface: "my:service*"
+      inner:
+        name: "*-comp"
+      outer:
+        name: service-comp
+      all-funcs:
+        async: false
+    inject:
+      - builtin:
+          name: hello-tier1
+          alias: gate-sync
+          config:
+            greeting: "[ALL-SYNC]"
+
+  # ── Every result is `concrete` (no resource/async-handle/error-context) ─
+  - between:
+      interface: "my:service*"
+      inner:
+        name: "*-comp"
+      outer:
+        name: service-comp
+      all-funcs:
+        results: concrete
+    inject:
+      - builtin:
+          name: hello-tier1
+          alias: gate-concrete
+          config:
+            greeting: "[RESULTS-CONCRETE]"
+
+  # ── Every result is `defaultable` (synthesizable default) ─────────
+  - between:
+      interface: "my:service*"
+      inner:
+        name: "*-comp"
+      outer:
+        name: service-comp
+      all-funcs:
+        results: defaultable
+    inject:
+      - builtin:
+          name: hello-tier1
+          alias: gate-defaultable
+          config:
+            greeting: "[RESULTS-DEFAULTABLE]"

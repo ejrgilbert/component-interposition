@@ -89,6 +89,7 @@ print_usage() {
     echo -e "  --faninN        : Splice fan-in topology composition with MULTIPLE middlewares on a specific downstream dependency call"
     echo -e "  --fanin-all1    : Splice fan-in topology composition with a SINGLE middleware between all downstream dependency calls"
     echo -e "  --fanin-allN    : Splice fan-in topology composition with MULTIPLE middlewares between all downstream dependency calls"
+    echo -e "  --fanin-filter  : End-to-end demo of \`all-funcs:\` predication on the fan-in composition"
     echo -e "  --block1        : Splice middleware that chooses to block the downstream call"
     echo -e "  --blockN        : Splice multiple middlewares where the middle-most one chooses to block any further calls (the last middleware and the original dependency)"
     echo -e "  --noblock1      : Splice middleware that chooses to NOT block the downstream call"
@@ -203,16 +204,22 @@ build_component() {
     pushd "$dir" > /dev/null
 
     # wkg.lock and wit/deps/ are both gitignored, so a fresh checkout (CI,
-    # `git clean`) has neither. Trigger on the presence of deps, not the lock:
-    # if deps are missing, fetch; otherwise reuse what's already there.
-    if [[ ! -d wit/deps ]]; then
-        log_info "wit/deps/ missing — fetching wit dependencies..."
+    # `git clean`) has neither — fetch then. Also refetch when wit/world.wit
+    # has been edited since the last successful fetch (mtime > lock), so a
+    # bumped WIT import doesn't silently reuse stale deps. Path-override
+    # fetches produce an empty `packages = []` lock with no fingerprint to
+    # compare against (cheap local copy anyway), so refetch them every
+    # time their lock is empty.
+    if [[ ! -d wit/deps ]] || [[ ! -f wkg.lock ]] \
+        || [[ wit/world.wit -nt wkg.lock ]] \
+        || ! grep -q '^packages = \[{' wkg.lock; then
+        log_info "wit/deps stale or missing — fetching wit dependencies..."
         if ! wkg wit fetch; then
             log_error "wkg wit fetch failed for $name. Exiting."
             exit 1
         fi
     else
-        log_info "wit/deps/ present — skipping fetch."
+        log_info "wkg.lock current — skipping fetch."
     fi
 
     log_info "Compiling $name to wasm32-wasip1..."
@@ -305,6 +312,9 @@ compose() {
             ;;
         --fanin-allN)
             compose_fanin_allN
+            ;;
+        --fanin-filter)
+            compose_fanin_filter
             ;;
         --block1)
             compose_block1
@@ -507,6 +517,13 @@ compose_fanin_allN() {
         "$PATH_RULES/fanin-allN.yaml" \
         "$PATH_COMPOSED/fanin-allN.wasm"
 }
+compose_fanin_filter() {
+    local wasm_file="$PATH_FIXTURES/fanin.wasm"
+    run_splicer \
+        "$wasm_file" \
+        "$PATH_RULES/fanin-filter.yaml" \
+        "$PATH_COMPOSED/fanin-filter.wasm"
+}
 compose_block1() {
     local wasm_file="$PATH_FIXTURES/fanin.wasm"
     run_splicer \
@@ -655,6 +672,7 @@ run_services() {
     FANIN_N="$PATH_COMPOSED/faninN.wasm"
     FANIN_ALL1="$PATH_COMPOSED/fanin-all1.wasm"
     FANIN_ALL_N="$PATH_COMPOSED/fanin-allN.wasm"
+    FANIN_FILTER="$PATH_COMPOSED/fanin-filter.wasm"
     BLOCK1="$PATH_COMPOSED/block1.wasm"
     BLOCK_N="$PATH_COMPOSED/blockN.wasm"
 
@@ -674,6 +692,7 @@ run_services() {
     run $FANIN_N
     run $FANIN_ALL1
     run $FANIN_ALL_N
+    run $FANIN_FILTER
 
     run $BLOCK1 "SHOULD_BLOCK=true"
     run $BLOCK_N "SHOULD_BLOCK=true"
@@ -734,6 +753,9 @@ run_composition() {
             ;;
         --fanin-allN)
             COMPOSED="$PATH_COMPOSED/fanin-allN.wasm"
+            ;;
+        --fanin-filter)
+            COMPOSED="$PATH_COMPOSED/fanin-filter.wasm"
             ;;
         --block1)
             COMPOSED="$PATH_COMPOSED/block1.wasm"
@@ -925,6 +947,9 @@ viz_composition() {
         --fanin-allN)
             COMPOSED="$PATH_COMPOSED/fanin-allN.wasm"
             ;;
+        --fanin-filter)
+            COMPOSED="$PATH_COMPOSED/fanin-filter.wasm"
+            ;;
         --block1)
             COMPOSED="$PATH_COMPOSED/block1.wasm"
             ;;
@@ -1039,6 +1064,7 @@ run_tests() {
       "--fanin" \
       "--fanin1" "--faninN" \
       "--fanin-all1" "--fanin-allN" \
+      "--fanin-filter" \
       "--block1" "--blockN" "--nonblock1" "--nonblockN" \
       "--tier1-all" "--tier2" "--tier2-all" \
       "--builtin-hello-tier1" "--builtin-hello-tier2" \

@@ -1,0 +1,118 @@
+Running the echo test with host-to-host disabled
+[svc] entered!
+[[ALL-SYNC]] before my:service/adder#add
+[[RESULTS-CONCRETE]] before my:service/adder#add
+[[RESULTS-DEFAULTABLE]] before my:service/adder#add
+     [adder] entered!
+     [adder] exit!
+[[RESULTS-DEFAULTABLE]] after  my:service/adder#add
+[[RESULTS-CONCRETE]] after  my:service/adder#add
+[[ALL-SYNC]] after  my:service/adder#add
+[svc] adder says '1 + 2 = 3'
+[[ALL-ASYNC]] before my:service/adder-async#add-async
+[[RESULTS-CONCRETE]] before my:service/adder-async#add-async
+[[RESULTS-DEFAULTABLE]] before my:service/adder-async#add-async
+     [adder-async] entered!
+     [adder-async] exit!
+[[RESULTS-DEFAULTABLE]] after  my:service/adder-async#add-async
+[[RESULTS-CONCRETE]] after  my:service/adder-async#add-async
+[[ALL-ASYNC]] after  my:service/adder-async#add-async
+[svc] adder-async says '1 + 2 = 3'
+[[ALL-SYNC]] before my:service/messenger#get-msg
+[[RESULTS-CONCRETE]] before my:service/messenger#get-msg
+[[RESULTS-DEFAULTABLE]] before my:service/messenger#get-msg
+[[RESULTS-DEFAULTABLE]] after  my:service/messenger#get-msg
+[[RESULTS-CONCRETE]] after  my:service/messenger#get-msg
+[[ALL-SYNC]] after  my:service/messenger#get-msg
+[svc] get-msg:       'You made me swallow my gum!'
+[[ALL-ASYNC]] before my:service/messenger-async#get-msg-async
+[[RESULTS-CONCRETE]] before my:service/messenger-async#get-msg-async
+[[RESULTS-DEFAULTABLE]] before my:service/messenger-async#get-msg-async
+[[RESULTS-DEFAULTABLE]] after  my:service/messenger-async#get-msg-async
+[[RESULTS-CONCRETE]] after  my:service/messenger-async#get-msg-async
+[[ALL-ASYNC]] after  my:service/messenger-async#get-msg-async
+[svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
+[[ALL-SYNC]] before my:service/printer1#print1
+[[RESULTS-CONCRETE]] before my:service/printer1#print1
+[[RESULTS-DEFAULTABLE]] before my:service/printer1#print1
+     [print1] entered!
+         it's dangerous to go alone! take this 🗡️
+     [print1] exit!
+[[RESULTS-DEFAULTABLE]] after  my:service/printer1#print1
+[[RESULTS-CONCRETE]] after  my:service/printer1#print1
+[[ALL-SYNC]] after  my:service/printer1#print1
+[svc] printer1 completed!
+[[ALL-ASYNC]] before my:service/printer1-async#print1-async
+[[RESULTS-CONCRETE]] before my:service/printer1-async#print1-async
+[[RESULTS-DEFAULTABLE]] before my:service/printer1-async#print1-async
+     [print1-async] entered!
+         it's dangerous to go alone! take this 🗡️
+     [print1-async] exit!
+[[RESULTS-DEFAULTABLE]] after  my:service/printer1-async#print1-async
+[[RESULTS-CONCRETE]] after  my:service/printer1-async#print1-async
+[[ALL-ASYNC]] after  my:service/printer1-async#print1-async
+[svc] printer1-async completed!
+[[ALL-SYNC]] before my:service/printer-n#print-n
+[[RESULTS-CONCRETE]] before my:service/printer-n#print-n
+[[RESULTS-DEFAULTABLE]] before my:service/printer-n#print-n
+     [printN] entered!
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+         it's dangerous to go alone! take this 🗡️
+     [printN] exit!
+[[RESULTS-DEFAULTABLE]] after  my:service/printer-n#print-n
+[[RESULTS-CONCRETE]] after  my:service/printer-n#print-n
+[[ALL-SYNC]] after  my:service/printer-n#print-n
+[svc] printer-n completed!
+[[ALL-SYNC]] before my:service/shapes#pick-color
+[[RESULTS-CONCRETE]] before my:service/shapes#pick-color
+[[RESULTS-CONCRETE]] after  my:service/shapes#pick-color
+[[ALL-SYNC]] after  my:service/shapes#pick-color
+[[ALL-SYNC]] before my:service/shapes#check-perms
+[[RESULTS-CONCRETE]] before my:service/shapes#check-perms
+[[RESULTS-CONCRETE]] after  my:service/shapes#check-perms
+[[ALL-SYNC]] after  my:service/shapes#check-perms
+[[ALL-SYNC]] before my:service/shapes#greet
+[[RESULTS-CONCRETE]] before my:service/shapes#greet
+[[RESULTS-CONCRETE]] after  my:service/shapes#greet
+[[ALL-SYNC]] after  my:service/shapes#greet
+[[ALL-SYNC]] before my:service/shapes#describe-event
+[[RESULTS-CONCRETE]] before my:service/shapes#describe-event
+[[RESULTS-CONCRETE]] after  my:service/shapes#describe-event
+[[ALL-SYNC]] after  my:service/shapes#describe-event
+[[ALL-SYNC]] before my:service/shapes#swap-pair
+[[RESULTS-CONCRETE]] before my:service/shapes#swap-pair
+[[RESULTS-CONCRETE]] after  my:service/shapes#swap-pair
+[[ALL-SYNC]] after  my:service/shapes#swap-pair
+[[ALL-SYNC]] before my:service/shapes#maybe-double
+[[RESULTS-CONCRETE]] before my:service/shapes#maybe-double
+[[RESULTS-CONCRETE]] after  my:service/shapes#maybe-double
+[[ALL-SYNC]] after  my:service/shapes#maybe-double
+[[ALL-SYNC]] before my:service/shapes#divide
+[[RESULTS-CONCRETE]] before my:service/shapes#divide
+[[RESULTS-CONCRETE]] after  my:service/shapes#divide
+[[ALL-SYNC]] after  my:service/shapes#divide
+[[ALL-SYNC]] before my:service/shapes#sum
+[[RESULTS-CONCRETE]] before my:service/shapes#sum
+[[RESULTS-CONCRETE]] after  my:service/shapes#sum
+[[ALL-SYNC]] after  my:service/shapes#sum
+[[ALL-SYNC]] before my:service/shapes#to-string
+[[RESULTS-CONCRETE]] before my:service/shapes#to-string
+[[RESULTS-CONCRETE]] after  my:service/shapes#to-string
+[[ALL-SYNC]] after  my:service/shapes#to-string
+[[ALL-SYNC]] before my:service/shapes#aggregate
+[[RESULTS-CONCRETE]] before my:service/shapes#aggregate
+[[RESULTS-CONCRETE]] after  my:service/shapes#aggregate
+[[ALL-SYNC]] after  my:service/shapes#aggregate
+[[ALL-SYNC]] before my:service/shapes-handles#make-counter
+[[ALL-SYNC]] after  my:service/shapes-handles#make-counter
+[[ALL-SYNC]] before my:service/shapes-handles#counter-current
+[[ALL-SYNC]] after  my:service/shapes-handles#counter-current
+[[ALL-SYNC]] before my:service/shapes-handles#consume-counter
+[[ALL-SYNC]] after  my:service/shapes-handles#consume-counter
+[[ALL-SYNC]] before my:service/shapes-handles#delayed-add
+[[ALL-SYNC]] after  my:service/shapes-handles#delayed-add
+[[ALL-SYNC]] before my:service/shapes-handles#countdown
+[[ALL-SYNC]] after  my:service/shapes-handles#countdown
+[svc] exit!
