@@ -65,6 +65,7 @@ print_usage() {
     echo -e "${BLUE}Commands:${NC}"
     echo -e "  env         : Check the environment and verify required tools and versions"
     echo -e "  build       : Build the service and middleware components"
+    echo -e "  preview     : Preview the splicer config's side-effects on the target composition"
     echo -e "  compose     : Compose the service and middleware(s) into a single component"
     echo -e "  run         : Run the composed component"
     echo -e "  run-service : Run the service standalone (without middleware(s))"
@@ -136,7 +137,7 @@ check_env() {
         "wasm-tools:1.247.0:$CARGO_INST"
         "wkg:0.13.0:$CARGO_INST"
         "splicer:2.4.1:$CARGO_INST"
-        "cviz-cli:2.0.3:$CARGO_INST"
+        "cviz-cli:3.0.0:$CARGO_INST"
         "wac:0.10.0:$CARGO_INST"
     )
 
@@ -251,7 +252,11 @@ build_component() {
 # Compose service and middleware
 # -----------------------------------------------------------------------------
 compose() {
-    log_info "Composing service and middleware(s)..."
+    if [[ "${SPLICER_PREVIEW:-0}" == "1" ]]; then
+        log_info "Previewing splicer side-effects..."
+    else
+        log_info "Composing service and middleware(s)..."
+    fi
 
     case "$1" in
         --single)
@@ -367,24 +372,48 @@ compose() {
 # Generic wrapper for invoking `wac compose`.
 # -----------------------------------------------------------------------------
 
+# Splice a target wasm with a rule set, or — when SPLICER_PREVIEW=1 — render
+# the rule set's matched edges against that wasm to stdout. Same arg order in
+# both modes so callers don't fork.
 run_splicer() {
     local wasm_file="$1"
     local rule_file="$2"
     local output_wasm="$3"
     shift 3
 
-    log_info "Running splicer with rule set '$(basename "$rule_file")'..."
+    local rule_name
+    rule_name="$(basename "$rule_file")"
+
+    if [[ "${SPLICER_PREVIEW:-0}" == "1" ]]; then
+        log_info "Previewing splicer rule set '$rule_name'..."
+        if ! splicer preview "$rule_file" "$wasm_file" ; then
+            log_error "Preview with '$rule_name' failed! Used the following command:"
+            echo splicer preview "$rule_file" "$wasm_file" --no-types
+            exit 1
+        fi
+        log_success "Splicer rendered preview for '$rule_name' successfully!"
+        return
+    fi
+
+    log_info "Running splicer with rule set '$rule_name'..."
     if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" ; then
-        log_error "Splice with '$(basename "$rule_file")' failed! Used the following command:"
+        log_error "Splice with '$rule_name' failed! Used the following command:"
         echo splicer splice "$rule_file" "$wasm_file" -o "$output_wasm"
         exit 1
     fi
-    log_success "Splicer generated a composition with '$(basename "$rule_file")' successfully!"
+    log_success "Splicer generated a composition with '$rule_name' successfully!"
 }
 run_splicer_solver() {
       local output_wasm="$1"
       shift 1
       local -a wasm_files=("$@")
+
+    # Solver invocations have no rule set, so there's nothing to preview —
+    # the base composition is whatever `splicer compose` produces.
+    if [[ "${SPLICER_PREVIEW:-0}" == "1" ]]; then
+        log_info "Solver-based composition has no rule set; preview skipped."
+        return
+    fi
 
     log_info "Running splicer composition solver..."
     if ! splicer compose "${wasm_files[@]}" -o "$output_wasm" ; then
@@ -881,18 +910,8 @@ verify_recorder_files() {
 viz() {
     local component=$1
     local opt=${2:-}
-    # Fan-in topologies aren't a `handler` chain (services connect via
-    # `my:service/*` interfaces), so the default --detail handler-chain mode
-    # reports "No service chains found". Switch to --detail full for fan-in
-    # and its descendants so the connections are visible.
-    case "$opt" in
-        --fanin*|--block*|--nonblock*|--tier1-all|--tier2|--tier2-all|--builtin-hello-tier2|--builtin-recorder|--builtin-hello-tier3|--builtin-hello-tier4)
-            cviz-cli --detail full "$component"
-            ;;
-        *)
-            cviz-cli "$component"
-            ;;
-    esac
+
+    cviz-cli "$component" --no-types
 }
 viz_composition() {
     case "$1" in
@@ -1054,6 +1073,16 @@ update_fixtures() {
     log_success "Fixtures updated in $PATH_FIXTURES/"
 }
 
+# -----------------------------------------------------------------------------
+# Preview the splicer side-effects
+# -----------------------------------------------------------------------------
+
+# Reuse compose()'s dispatch but flip run_splicer into preview mode, so each
+# option's rule set renders to stdout instead of producing a spliced wasm.
+preview() {
+    SPLICER_PREVIEW=1 compose "$1"
+}
+
 run_tests() {
     implemented_options=( \
       "--single" "--multiple" \
@@ -1081,6 +1110,7 @@ run_tests() {
     # Iterate and build a command for each item
     for opt in "${implemented_options[@]}"; do
         log_info "Executing with option: $opt"
+        preview "$opt"
         compose "$opt"
         run_composition "$opt"
         log_info "Option completed successfully: $opt"
@@ -1116,6 +1146,10 @@ case "$CMD" in
     build)
         build
         ;;
+    preview)
+        check_env
+        preview "$OPT"
+        ;;
     compose)
         check_env
         compose "$OPT"
@@ -1136,6 +1170,7 @@ case "$CMD" in
         if [ "$SKIP_BUILD" -eq 0 ]; then
             build
         fi
+        preview "$OPT"
         compose "$OPT"
         run_composition "$OPT"
         log_success "All steps completed successfully!"
