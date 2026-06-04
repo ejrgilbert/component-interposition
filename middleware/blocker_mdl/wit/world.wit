@@ -1,5 +1,5 @@
 package my:printing-middleware;
 
 world blocker-mdl {
-    export splicer:tier1/blocking@0.3.0;
+    export splicer:tier1/gate@0.4.0;
 }
