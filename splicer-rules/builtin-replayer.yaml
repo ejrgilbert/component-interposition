@@ -1,0 +1,32 @@
+version: 1
+
+# Splice replayer onto fanin's async-adder edge. The strategy reads a
+# recorded tier-2 trace at runtime (path via the SPLICER_REPLAY_TRACE
+# env var, set by run.sh) and returns each wrapped call's result from
+# the trace instead of forwarding to adder-async-comp.
+#
+# Async edge specifically: tier-4 codegen for sync WIT direct-
+# delegates to the import side, which doesn't exist under virtualize.
+# The async variant routes through `VirtualizeStrategy::handle` which
+# is where the replayer plugs in.
+#
+# Single-edge scope: replayer's per-instance config isn't yet wired
+# through splicer:builtin-config, so all instances in a process would
+# read the same SPLICER_REPLAY_TRACE. Multi-edge replay lands when
+# builtin-config flows into replayer's tape-path resolution.
+#
+# Prerequisites: run `--builtin-recorder` first so the adder-async
+# edge's <preopen>/recordings/<edge_id>.bin exists; run.sh exports
+# SPLICER_REPLAY_TRACE pointing at that bin before invoking the
+# composed wasm.
+rules:
+  - between:
+      interface: "my:service/adder-async"
+      inner:
+        name: adder-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: replayer
+          alias: replayer-adder-async

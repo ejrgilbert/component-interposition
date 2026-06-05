@@ -115,4 +115,6 @@ Running the echo test with host-to-host disabled
 [[ALL-SYNC]] after  my:service/shapes-handles#delayed-add
 [[ALL-SYNC]] before my:service/shapes-handles#countdown
 [[ALL-SYNC]] after  my:service/shapes-handles#countdown
+[[ALL-ASYNC]] before my:service/async-bucket#open
+[[ALL-ASYNC]] after  my:service/async-bucket#open
 [svc] exit!

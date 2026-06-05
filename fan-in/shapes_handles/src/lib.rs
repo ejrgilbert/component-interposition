@@ -13,8 +13,9 @@ use std::collections::HashMap;
 use crate::bindings::exports::my::service::shapes_handles::{Counter, CounterBorrow, Guest};
 use crate::bindings::exports::my::service::shapes_handles_types::Guest as TypesGuest;
 use crate::bindings::exports::my::service::shapes_handles_types::GuestCounter;
-use crate::bindings::exports::my::service::async_bucket::{
-    Bucket as AsyncBucket, Guest as AsyncBucketGuest, GuestBucket as AsyncGuestBucket,
+use crate::bindings::exports::my::service::async_bucket::Guest as AsyncBucketGuest;
+use crate::bindings::exports::my::service::async_bucket_types::{
+    Bucket as AsyncBucket, Guest as AsyncBucketTypesGuest, GuestBucket as AsyncGuestBucket,
 };
 use wit_bindgen::{FutureReader, StreamReader};
 
@@ -89,8 +90,11 @@ impl AsyncGuestBucket for BucketImpl {
     }
 }
 
-impl AsyncBucketGuest for Service {
+impl AsyncBucketTypesGuest for Service {
     type Bucket = BucketImpl;
+}
+
+impl AsyncBucketGuest for Service {
     async fn open(seed: u32) -> AsyncBucket {
         AsyncBucket::new(BucketImpl::new(seed).await)
     }

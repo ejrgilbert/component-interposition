@@ -104,6 +104,7 @@ print_usage() {
     echo -e "  --builtin-hello-tier4 : Splice tier-4 (virtualize) hello-tier4 in place of adder-async"
     echo -e "  --builtin-otel  : Stack otel-bare-{spans,metrics,logs} on wasi:http/handler (LOOP_N=3+ to see metrics flush)"
     echo -e "  --builtin-recorder : Splice recorder onto 2 fanin edges; verifies one .bin per edge under recordings/"
+    echo -e "  --builtin-replayer : Splice replayer onto fanin's adder edge; replays the trace produced by --builtin-recorder (must be run first)"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
@@ -359,6 +360,9 @@ compose() {
             ;;
         --builtin-recorder)
             compose_builtin_recorder
+            ;;
+        --builtin-replayer)
+            compose_builtin_replayer
             ;;
         *)
             log_error "Unknown option: $1"
@@ -628,6 +632,15 @@ compose_builtin_recorder() {
         "$PATH_RULES/builtin-recorder.yaml" \
         "$PATH_COMPOSED/builtin-recorder.wasm"
 }
+# Splice replayer onto fanin's adder edge. Requires a prior recorder
+# run so the adder edge's trace .bin exists; run_composition sets
+# SPLICER_REPLAY_TRACE to that file before invoking the runner.
+compose_builtin_replayer() {
+    run_splicer \
+        "$PATH_FIXTURES/fanin.wasm" \
+        "$PATH_RULES/builtin-replayer.yaml" \
+        "$PATH_COMPOSED/builtin-replayer.wasm"
+}
 
 # -----------------------------------------------------------------------------
 # Run the composed component
@@ -843,6 +856,21 @@ run_composition() {
             mkdir -p "runner/$RECORDER_PREOPEN"
             ENV_VARS="PREOPEN_DIR=./$RECORDER_PREOPEN"
             ;;
+        --builtin-replayer)
+            COMPOSED="$PATH_COMPOSED/builtin-replayer.wasm"
+            # Reuse the recorder's preopen so the adder-async edge's
+            # trace bin is reachable from the guest. The bin must
+            # already exist; re-run `--builtin-recorder` first if not.
+            RECORDER_PREOPEN="recordings-preopen"
+            local trace_host="runner/$RECORDER_PREOPEN/recordings/_my_service_adder-async__service-comp-_adder-async-comp_.bin"
+            if [[ ! -f "$trace_host" ]]; then
+                log_error "replayer needs the adder-async trace bin at $trace_host; run \`./run.sh run --builtin-recorder\` first"
+                exit 1
+            fi
+            # SPLICER_REPLAY_TRACE is a guest-side path resolved
+            # against the preopen mounted at `.` (recordings/...bin).
+            ENV_VARS="PREOPEN_DIR=./$RECORDER_PREOPEN SPLICER_REPLAY_TRACE=recordings/_my_service_adder-async__service-comp-_adder-async-comp_.bin"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -1008,6 +1036,9 @@ viz_composition() {
         --builtin-recorder)
             COMPOSED="$PATH_COMPOSED/builtin-recorder.wasm"
             ;;
+        --builtin-replayer)
+            COMPOSED="$PATH_COMPOSED/builtin-replayer.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -1098,7 +1129,7 @@ run_tests() {
       "--tier1-all" "--tier2" "--tier2-all" \
       "--builtin-hello-tier1" "--builtin-hello-tier2" \
       "--builtin-hello-tier3" "--builtin-hello-tier4" \
-      "--builtin-otel" "--builtin-recorder"
+      "--builtin-otel" "--builtin-recorder" "--builtin-replayer"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 

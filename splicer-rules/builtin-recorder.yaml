@@ -1,18 +1,23 @@
 version: 1
 
-# Splice recorder onto two of fanin's edges; each lands its own
-# <preopen>/recordings/<edge_id>.bin via the auto-injected edge_id.
+# Splice recorder onto two of fanin's value-typed edges; each lands
+# its own <preopen>/recordings/<edge_id>.bin via the auto-injected
+# edge_id. The recorder pair here is also the trace source for the
+# replayer demo (see builtin-replayer.yaml). Resource-bearing edges
+# (e.g. async-bucket) are intentionally excluded; tier-2 lift can
+# capture handles but the resource state behind them isn't
+# round-trippable through the wrapper boundary today.
 rules:
   - between:
-      interface: "my:service/adder"
+      interface: "my:service/adder-async"
       inner:
-        name: adder-comp
+        name: adder-async-comp
       outer:
         name: service-comp
     inject:
       - builtin:
           name: recorder
-          alias: recorder-adder
+          alias: recorder-adder-async
 
   - between:
       interface: "my:service/messenger"

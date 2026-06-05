@@ -84,12 +84,21 @@ interface shapes-handles {
     countdown:        func(start: s32) -> stream<s32>;
 }
 
-/// Async-only resource iface.
-interface async-bucket {
+/// Factored types for `async-bucket`. The resource has to live in a
+/// sibling types interface so splicer's wrapper-component pattern can
+/// preserve resource type identity across the wrap boundary —
+/// declaring it inline in `async-bucket` itself trips splicer's
+/// inline-resource rejection at compose time.
+interface async-bucket-types {
     resource bucket {
         constructor(seed: u32);
         get:  async func(key: u32) -> option<u32>;
         put:  async func(key: u32, val: u32);
     }
+}
+
+/// Async-only resource iface.
+interface async-bucket {
+    use async-bucket-types.{bucket};
     open:     async func(seed: u32) -> bucket;
 }

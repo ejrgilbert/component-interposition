@@ -287,6 +287,10 @@ const SHOULD_BLOCK: &str = "SHOULD_BLOCK";
 /// `.`. Set by demos that need filesystem access (e.g. `--builtin-
 /// recorder`'s file sink). Unset = no preopen, identical to before.
 const PREOPEN_DIR: &str = "PREOPEN_DIR";
+/// Path of the recorded trace the replayer reads at runtime.
+/// Forwarded verbatim into the guest so the replayer's
+/// `std::env::var(SPLICER_REPLAY_TRACE)` lookup resolves.
+const SPLICER_REPLAY_TRACE: &str = "SPLICER_REPLAY_TRACE";
 
 struct Ctx {
     table: ResourceTable,
@@ -304,6 +308,9 @@ impl Ctx {
             builder
                 .preopened_dir(&path, ".", DirPerms::all(), FilePerms::all())
                 .unwrap_or_else(|e| panic!("preopen {path:?} failed: {e:#}"));
+        }
+        if let Ok(trace) = env::var(SPLICER_REPLAY_TRACE) {
+            builder.env(SPLICER_REPLAY_TRACE, trace);
         }
         Self {
             table: ResourceTable::default(),

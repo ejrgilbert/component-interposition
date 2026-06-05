@@ -12,13 +12,15 @@ rules:
           name: hello-tier3
           alias: hello-tier3-adder
 
-  - between:
-      interface: "my:service/async-bucket"
-      inner:
-        name: shapes-handles-comp
-      outer:
-        name: service-comp
+  # Tier-3 wrap on wasi:http/handler exercises the factored-types
+  # codegen path: handler `use`s request / response / error-code from
+  # wasi:http/types, so the wrapper crate needs the AbsolutizeResources
+  # visitor to absolutize all `use`d named types (not just resources).
+  - before:
+      interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
+      provider:
+        alias: "srv"
     inject:
       - builtin:
           name: hello-tier3
-          alias: hello-tier3-bucket
+          alias: hello-tier3-handler

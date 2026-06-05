@@ -13,3 +13,5 @@ rules:
         name: service-comp
     inject:
       - builtin: hello-tier4
+        config:
+          greeting: "hiii"
