@@ -4,6 +4,15 @@ version: 1
 # imports + exports my:service/adder-async, dispatches each call
 # through the hello-tier3 strategy. The strategy is a pass-through
 # that prints before / after each wrapped call's interface#function.
+#
+# Two rules:
+#   1. On the async-WIT target `my:service/adder-async` — direct
+#      mirror-free path; wrapper lifts the target as-is.
+#   2. On the sync-WIT target `my:service/adder` — exercises the
+#      sync→async bridge: splicer synthesizes an async-WIT mirror of
+#      `adder`, the hello-tier3 wrapper lifts that mirror, and a
+#      bridge component is inserted at the chain head to translate
+#      sync caller calls into the wrapper's async surface.
 rules:
   - between:
       interface: "my:service/adder-async"
@@ -13,3 +22,13 @@ rules:
         name: service-comp
     inject:
       - builtin: hello-tier3
+  - between:
+      interface: "my:service/adder"
+      inner:
+        name: adder-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: hello-tier3
+          alias: hello-tier3-bridged

@@ -1,8 +1,7 @@
 Running the echo test with host-to-host disabled
 [svc] entered!
-     [adder] entered!
-     [adder] exit!
-[svc] adder says '1 + 2 = 3'
+[hello-tier4] virtualizing my:service/adder#add
+[svc] adder says '1 + 2 = 0'
 [hello-tier4] virtualizing my:service/adder-async#add_async
 [svc] adder-async says '1 + 2 = 0'
 [svc] get-msg:       'You made me swallow my gum!'

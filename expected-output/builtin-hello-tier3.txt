@@ -1,7 +1,9 @@
 Running the echo test with host-to-host disabled
 [svc] entered!
+[hello-tier3] before my:service/adder#add
      [adder] entered!
      [adder] exit!
+[hello-tier3] after  my:service/adder#add
 [svc] adder says '1 + 2 = 3'
 [hello-tier3] before my:service/adder-async#add_async
      [adder-async] entered!
