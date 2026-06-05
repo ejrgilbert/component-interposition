@@ -17,6 +17,7 @@ use bindings::my::service::shapes::{
     self, AccessPerms, Event, Person, Priority,
 };
 use bindings::my::service::shapes_handles::{self, Counter};
+use bindings::my::service::async_bucket::{self as async_bucket, Bucket as AsyncBucket};
 
 use bindings::exports::wasi::http::handler::Guest;
 use bindings::exports::wasi::http::handler;
@@ -89,6 +90,17 @@ impl Guest for Service {
 
         let stream = shapes_handles::countdown(3).await;
         let _ = stream.collect().await;
+
+        // Resource with all async funcs
+        let b1: AsyncBucket = AsyncBucket::new(1).await;
+        b1.put(10, 100).await;
+        let _ = b1.get(10).await;
+        drop(b1);
+
+        let b2: AsyncBucket = async_bucket::open(2).await;
+        b2.put(20, 200).await;
+        let _ = b2.get(20).await;
+        drop(b2);
 
         println!("[svc] exit!");
 

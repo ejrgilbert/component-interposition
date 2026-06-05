@@ -3,4 +3,5 @@ package example:fan-in;
 world shapes-handles-svc {
     export my:service/shapes-handles-types;
     export my:service/shapes-handles;
+    export my:service/async-bucket;
 }

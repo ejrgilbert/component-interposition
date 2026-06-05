@@ -10,6 +10,7 @@ world service {
     import my:service/printer-n;
     import my:service/shapes;
     import my:service/shapes-handles;
+    import my:service/async-bucket;
 
     include wasi:http/service@0.3.0-rc-2026-01-06;
 }

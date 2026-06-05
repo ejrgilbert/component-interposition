@@ -7,10 +7,15 @@ mod bindings {
 }
 
 use std::cell::Cell;
+use std::cell::RefCell;
+use std::collections::HashMap;
 
 use crate::bindings::exports::my::service::shapes_handles::{Counter, CounterBorrow, Guest};
 use crate::bindings::exports::my::service::shapes_handles_types::Guest as TypesGuest;
 use crate::bindings::exports::my::service::shapes_handles_types::GuestCounter;
+use crate::bindings::exports::my::service::async_bucket::{
+    Bucket as AsyncBucket, Guest as AsyncBucketGuest, GuestBucket as AsyncGuestBucket,
+};
 use wit_bindgen::{FutureReader, StreamReader};
 
 pub struct Service;
@@ -64,6 +69,30 @@ impl Guest for Service {
             }
         });
         rx
+    }
+}
+
+// async-bucket: in-memory u32->u32 resource.
+pub struct BucketImpl {
+    store: RefCell<HashMap<u32, u32>>,
+}
+
+impl AsyncGuestBucket for BucketImpl {
+    async fn new(_seed: u32) -> Self {
+        BucketImpl { store: RefCell::new(HashMap::new()) }
+    }
+    async fn get(&self, key: u32) -> Option<u32> {
+        self.store.borrow().get(&key).copied()
+    }
+    async fn put(&self, key: u32, val: u32) {
+        self.store.borrow_mut().insert(key, val);
+    }
+}
+
+impl AsyncBucketGuest for Service {
+    type Bucket = BucketImpl;
+    async fn open(seed: u32) -> AsyncBucket {
+        AsyncBucket::new(BucketImpl::new(seed).await)
     }
 }
 

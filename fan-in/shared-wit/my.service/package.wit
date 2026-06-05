@@ -83,3 +83,13 @@ interface shapes-handles {
     /// Returns a stream that produces a countdown of integers.
     countdown:        func(start: s32) -> stream<s32>;
 }
+
+/// Async-only resource iface.
+interface async-bucket {
+    resource bucket {
+        constructor(seed: u32);
+        get:  async func(key: u32) -> option<u32>;
+        put:  async func(key: u32, val: u32);
+    }
+    open:     async func(seed: u32) -> bucket;
+}
