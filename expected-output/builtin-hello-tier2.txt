@@ -1,14 +1,15 @@
 Running the echo test with host-to-host disabled
-[hello-handler] before wasi:http/handler@0.3.0-rc-2026-01-06#handle
 [svc] entered!
+[hello-tier2] before my:service/adder#add (a: int = 1, b: int = 2)
      [adder] entered!
      [adder] exit!
+[hello-tier2] after  my:service/adder#add --> int: 3
 [svc] adder says '1 + 2 = 3'
-[hello-adder] before my:service/adder-async#add_async
      [adder-async] entered!
      [adder-async] exit!
-[hello-adder] after  my:service/adder-async#add_async
 [svc] adder-async says '1 + 2 = 3'
+[typed-messenger] before my:service/messenger#get-msg ()
+[typed-messenger] after  my:service/messenger#get-msg --> text: "You made me swallow my gum!"
 [svc] get-msg:       'You made me swallow my gum!'
 [svc] get-msg-async: 'That's going to be in my digestive tract for seven years!'
      [print1] entered!
@@ -26,7 +27,4 @@ Running the echo test with host-to-host disabled
          it's dangerous to go alone! take this 🗡️
      [printN] exit!
 [svc] printer-n completed!
-[hello-bucket] before my:service/async-bucket#open
-[hello-bucket] after  my:service/async-bucket#open
 [svc] exit!
-[hello-handler] after  wasi:http/handler@0.3.0-rc-2026-01-06#handle

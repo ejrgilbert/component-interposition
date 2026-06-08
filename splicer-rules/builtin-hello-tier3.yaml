@@ -14,6 +14,19 @@ rules:
           config:
             greeting: "hello-adder"
 
+  - between:
+      interface: "my:service/async-bucket"
+      inner:
+        name: shapes-handles-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: hello-tier3
+          alias: hello-tier3-bucket
+          config:
+            greeting: "hello-bucket"
+
   # Tier-3 wrap on wasi:http/handler exercises the factored-types
   # codegen path: handler `use`s request / response / error-code from
   # wasi:http/types, so the wrapper crate needs the AbsolutizeResources
