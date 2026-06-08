@@ -12,6 +12,7 @@ rules:
       outer:
         name: service-comp
     inject:
-      - builtin: hello-tier4
-        config:
-          greeting: "hiii"
+      - builtin:
+          name: hello-tier4
+          config:
+            greeting: "hello-adder"

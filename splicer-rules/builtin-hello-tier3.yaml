@@ -11,6 +11,8 @@ rules:
       - builtin:
           name: hello-tier3
           alias: hello-tier3-adder
+          config:
+            greeting: "hello-adder"
 
   # Tier-3 wrap on wasi:http/handler exercises the factored-types
   # codegen path: handler `use`s request / response / error-code from
@@ -24,3 +26,5 @@ rules:
       - builtin:
           name: hello-tier3
           alias: hello-tier3-handler
+          config:
+            greeting: "hello-handler"
