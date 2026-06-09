@@ -102,3 +102,20 @@ interface async-bucket {
     use async-bucket-types.{bucket};
     open:     async func(seed: u32) -> bucket;
 }
+
+/// Factored types for `bucket-as-arg`, distinct from
+/// `async-bucket-types`. Keeping the resource identity local to its
+/// own iface family lets us tier-4-wrap `bucket-as-arg` without
+/// dragging in unrelated consumers of the bucket type.
+interface bucket-as-arg-types {
+    resource bucket {
+        constructor(seed: u32);
+        get:  async func(key: u32) -> option<u32>;
+        put:  async func(key: u32, val: u32);
+    }
+}
+
+interface bucket-as-arg {
+    use bucket-as-arg-types.{bucket};
+    get:     async func(b: bucket) -> string;
+}

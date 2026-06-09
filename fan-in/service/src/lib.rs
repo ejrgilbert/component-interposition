@@ -18,6 +18,8 @@ use bindings::my::service::shapes::{
 };
 use bindings::my::service::shapes_handles::{self, Counter};
 use bindings::my::service::async_bucket::{self as async_bucket, Bucket as AsyncBucket};
+use bindings::my::service::bucket_as_arg::get as bucket_as_arg_get;
+use bindings::my::service::bucket_as_arg_types::Bucket as BaaBucket;
 
 use bindings::exports::wasi::http::handler::Guest;
 use bindings::exports::wasi::http::handler;
@@ -101,6 +103,19 @@ impl Guest for Service {
         b2.put(20, 200).await;
         let _ = b2.get(20).await;
         drop(b2);
+
+        // bucket-as-arg: resource flows in the argument position.
+        // Bucket belongs to bucket-as-arg-types, NOT async-bucket-
+        // types, so tier-4 wraps on bucket-as-arg own this resource
+        // family without conflicting with AsyncBucket. Exercise
+        // put/get before passing so service-comp's view of the
+        // bucket resource embeds the full method surface (otherwise
+        // wit-bindgen prunes unused methods and the embedded type
+        // hash drifts from shapes-handles-comp's exported type).
+        let b3: BaaBucket = BaaBucket::new(3).await;
+        b3.put(30, 300).await;
+        let _ = b3.get(30).await;
+        let _ = bucket_as_arg_get(b3).await;
 
         println!("[svc] exit!");
 

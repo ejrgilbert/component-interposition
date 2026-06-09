@@ -5,4 +5,6 @@ world shapes-handles-svc {
     export my:service/shapes-handles;
     export my:service/async-bucket-types;
     export my:service/async-bucket;
+    export my:service/bucket-as-arg-types;
+    export my:service/bucket-as-arg;
 }

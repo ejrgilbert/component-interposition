@@ -14,8 +14,12 @@ use crate::bindings::exports::my::service::shapes_handles::{Counter, CounterBorr
 use crate::bindings::exports::my::service::shapes_handles_types::Guest as TypesGuest;
 use crate::bindings::exports::my::service::shapes_handles_types::GuestCounter;
 use crate::bindings::exports::my::service::async_bucket::Guest as AsyncBucketGuest;
+use crate::bindings::exports::my::service::bucket_as_arg::Guest as BucketAsArgGuest;
 use crate::bindings::exports::my::service::async_bucket_types::{
     Bucket as AsyncBucket, Guest as AsyncBucketTypesGuest, GuestBucket as AsyncGuestBucket,
+};
+use crate::bindings::exports::my::service::bucket_as_arg_types::{
+    Bucket as BaaBucket, Guest as BaaTypesGuest, GuestBucket as BaaGuestBucket,
 };
 use wit_bindgen::{FutureReader, StreamReader};
 
@@ -96,7 +100,35 @@ impl AsyncBucketTypesGuest for Service {
 
 impl AsyncBucketGuest for Service {
     async fn open(seed: u32) -> AsyncBucket {
-        AsyncBucket::new(BucketImpl::new(seed).await)
+        AsyncBucket::new(<BucketImpl as AsyncGuestBucket>::new(seed).await)
+    }
+}
+
+// bucket-as-arg owns its own bucket resource type. Reuse BucketImpl
+// as the backing storage; the export-side resource type is distinct
+// from async-bucket's, so tier-4 wraps on bucket-as-arg don't
+// conflict with other consumers of the AsyncBucket type identity.
+impl BaaGuestBucket for BucketImpl {
+    async fn new(_seed: u32) -> Self {
+        BucketImpl { store: RefCell::new(HashMap::new()) }
+    }
+    async fn get(&self, key: u32) -> Option<u32> {
+        self.store.borrow().get(&key).copied()
+    }
+    async fn put(&self, key: u32, val: u32) {
+        self.store.borrow_mut().insert(key, val);
+    }
+}
+
+impl BaaTypesGuest for Service {
+    type Bucket = BucketImpl;
+}
+
+impl BucketAsArgGuest for Service {
+    async fn get(b: BaaBucket) -> String {
+        let inner = b.into_inner::<BucketImpl>();
+        BaaGuestBucket::put(&inner, 0, 1).await;
+        format!("{:?}", BaaGuestBucket::get(&inner, 0).await)
     }
 }
 

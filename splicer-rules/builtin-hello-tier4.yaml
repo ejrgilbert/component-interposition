@@ -1,9 +1,5 @@
 version: 1
 
-# Tier-4 (virtualize) builtin: codegen generates a typed wrapper that
-# exports my:service/adder-async without importing it — calls don't
-# pass through to adder-async-comp. The hello-tier4 strategy returns
-# `R::default()` (0 for s32), so the caller sees `1 + 2 = 0`.
 rules:
   - between:
       interface: "my:service/adder-async"
@@ -16,3 +12,16 @@ rules:
           name: hello-tier4
           config:
             greeting: "hello-adder"
+
+  - between:
+      interface: "my:service/bucket-as-arg"
+      inner:
+        name: shapes-handles-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: hello-tier4
+          alias: hello-tier4-bucket
+          config:
+            greeting: "hello-bucket"

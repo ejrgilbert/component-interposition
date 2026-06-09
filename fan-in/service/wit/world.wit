@@ -12,6 +12,8 @@ world service {
     import my:service/shapes-handles;
     import my:service/async-bucket-types;
     import my:service/async-bucket;
+    import my:service/bucket-as-arg-types;
+    import my:service/bucket-as-arg;
 
     include wasi:http/service@0.3.0-rc-2026-01-06;
 }
