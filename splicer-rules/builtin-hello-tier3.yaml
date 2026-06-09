@@ -1,5 +1,24 @@
 version: 1
 
+# Tier-3 (transform) builtin: codegen generates a typed wrapper that
+# imports + exports the target interface, dispatches each call through
+# the hello-tier3 strategy. The strategy is a pass-through that prints
+# before / after each wrapped call's interface#function, optionally
+# tagged with a per-rule `greeting` config value.
+#
+# Rules:
+#   1. On the async-WIT target `my:service/adder-async` -- direct
+#      mirror-free path; wrapper lifts the target as-is.
+#   2. On the sync-WIT target `my:service/adder` -- exercises the
+#      sync->async bridge: splicer synthesizes an async-WIT mirror of
+#      `adder`, the hello-tier3 wrapper lifts that mirror, and a
+#      bridge component is inserted at the chain head to translate
+#      sync caller calls into the wrapper's async surface.
+#   3. On `my:service/async-bucket` -- resource-bearing async target,
+#      exercises the factored-types resource codegen path.
+#   4. On `wasi:http/handler` -- factored-types codegen with `use`d
+#      named types (request / response / error-code) from a sibling
+#      types interface.
 rules:
   - between:
       interface: "my:service/adder-async"
@@ -15,6 +34,19 @@ rules:
             greeting: "hello-adder"
 
   - between:
+      interface: "my:service/adder"
+      inner:
+        name: adder-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: hello-tier3
+          alias: hello-tier3-bridged
+          config:
+            greeting: "hello-bridged"
+
+  - between:
       interface: "my:service/async-bucket"
       inner:
         name: shapes-handles-comp
@@ -27,10 +59,6 @@ rules:
           config:
             greeting: "hello-bucket"
 
-  # Tier-3 wrap on wasi:http/handler exercises the factored-types
-  # codegen path: handler `use`s request / response / error-code from
-  # wasi:http/types, so the wrapper crate needs the AbsolutizeResources
-  # visitor to absolutize all `use`d named types (not just resources).
   - before:
       interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
       provider:
