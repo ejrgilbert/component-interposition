@@ -37,6 +37,8 @@ PATH_HANDLERS="./handlers"
 PATH_PROXY_MDL="./middleware"
 PATH_FAN_IN="./fan-in"
 
+RECORDER_PREOPEN="recordings-preopen"
+
 mkdir -p $PATH_COMPOSED $PATH_FIXTURES
 
 # -----------------------------------------------------------------------------
@@ -846,30 +848,15 @@ run_composition() {
             ;;
         --builtin-recorder)
             COMPOSED="$PATH_COMPOSED/builtin-recorder.wasm"
-            # Stage a clean preopen under the runner's cwd. The runner
-            # passes `PREOPEN_DIR` into wasmtime as the guest's `.`, so
-            # the recorder's `wasi:filesystem/preopens.get-directories`
-            # lands here, and writes show up at
-            # `runner/<RECORDER_PREOPEN>/recordings/<edge_id>.bin`.
-            RECORDER_PREOPEN="recordings-preopen"
+            # Writes show up at: `runner/<RECORDER_PREOPEN>/recordings/<edge_id>.bin`.
             rm -rf "runner/$RECORDER_PREOPEN"
             mkdir -p "runner/$RECORDER_PREOPEN"
             ENV_VARS="PREOPEN_DIR=./$RECORDER_PREOPEN"
             ;;
         --builtin-replayer)
             COMPOSED="$PATH_COMPOSED/builtin-replayer.wasm"
-            # Reuse the recorder's preopen so the adder-async edge's
-            # trace bin is reachable from the guest. The bin must
-            # already exist; re-run `--builtin-recorder` first if not.
-            RECORDER_PREOPEN="recordings-preopen"
-            local trace_host="runner/$RECORDER_PREOPEN/recordings/_my_service_adder-async__service-comp-_adder-async-comp_.bin"
-            if [[ ! -f "$trace_host" ]]; then
-                log_error "replayer needs the adder-async trace bin at $trace_host; run \`./run.sh run --builtin-recorder\` first"
-                exit 1
-            fi
-            # SPLICER_REPLAY_TRACE is a guest-side path resolved
-            # against the preopen mounted at `.` (recordings/...bin).
-            ENV_VARS="PREOPEN_DIR=./$RECORDER_PREOPEN SPLICER_REPLAY_TRACE=recordings/_my_service_adder-async__service-comp-_adder-async-comp_.bin"
+            # Recordings read from: `runner/<RECORDER_PREOPEN>/recordings/<edge_id>.bin`.
+            ENV_VARS="PREOPEN_DIR=./$RECORDER_PREOPEN"
             ;;
         *)
             log_error "Unknown option: $1"
