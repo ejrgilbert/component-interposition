@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "blocker-mdl",
-        async: true,
         generate_all
     });
 }
@@ -13,7 +12,7 @@ use crate::bindings::splicer::common::types::CallId;
 pub struct Service;
 
 impl Guest for Service {
-    async fn should_call(call: CallId) -> bool {
+    fn should_call(call: CallId) -> bool {
         // `SHOULD_BLOCK=true` means the user wants to skip downstream;
         // the new gate hook returns `true` to call, so invert.
         let should_call = !should_i_block_call();

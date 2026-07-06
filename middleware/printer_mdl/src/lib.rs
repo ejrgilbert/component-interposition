@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "printer-mdl",
-        async: true,
         generate_all
     });
 }
@@ -13,13 +12,13 @@ use crate::bindings::splicer::common::types::CallId;
 pub struct Service;
 
 impl BeforeGuest for Service {
-    async fn on_call(call: CallId) {
+    fn on_call(call: CallId) {
         println!("  >> [mdl-{}#{}] before!", call.interface_name, call.function_name);
     }
 }
 
 impl AfterGuest for Service {
-    async fn on_return(call: CallId) -> () {
+    fn on_return(call: CallId) -> () {
         println!("  >> [mdl-{}#{}] after!", call.interface_name, call.function_name);
     }
 }
