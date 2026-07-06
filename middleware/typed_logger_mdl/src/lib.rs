@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "typed-logger-mdl",
-        async: true,
         generate_all
     });
 }
@@ -13,7 +12,7 @@ use crate::bindings::splicer::common::types::{CallId, Cell, Field, FieldTree};
 pub struct Service;
 
 impl BeforeGuest for Service {
-    async fn on_call(call: CallId, args: Vec<Field>) {
+    fn on_call(call: CallId, args: Vec<Field>) {
         let rendered: Vec<String> = args.iter().map(fmt_arg).collect();
         let suffix = if rendered.is_empty() {
             " ()".to_string()
@@ -28,7 +27,7 @@ impl BeforeGuest for Service {
 }
 
 impl AfterGuest for Service {
-    async fn on_return(call: CallId, result: Option<FieldTree>) {
+    fn on_return(call: CallId, result: Option<FieldTree>) {
         let suffix = if let Some(tree) = &result {
             format!(" --> {}", fmt_res(tree))
         } else {
