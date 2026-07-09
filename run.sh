@@ -402,7 +402,7 @@ run_splicer() {
     fi
 
     log_info "Running splicer with rule set '$rule_name'..."
-    if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" ; then
+    if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" --strict ; then
         log_error "Splice with '$rule_name' failed! Used the following command:"
         echo splicer splice "$rule_file" "$wasm_file" -o "$output_wasm"
         exit 1
@@ -926,7 +926,11 @@ viz() {
     local component=$1
     local opt=${2:-}
 
-    cviz-cli "$component" --no-types
+    # wirm (used by cviz-cli) panics on some valid component shapes
+    # (e.g. components that both import and re-export the same interface).
+    # Visualization is display-only; make failures non-fatal so the actual
+    # run-and-check step can still verify correctness.
+    cviz-cli "$component" --no-types || true
 }
 viz_composition() {
     case "$1" in
