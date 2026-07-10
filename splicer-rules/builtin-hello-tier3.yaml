@@ -59,18 +59,18 @@ rules:
           config:
             greeting: "hello-bucket"
 
-#  - between:
-#      interface: "my:service/shapes-handles"
-#      inner:
-#        name: shapes-handles-comp
-#      outer:
-#        name: service-comp
-#    inject:
-#      - builtin:
-#          name: hello-tier3
-#          alias: hello-tier3-shapes
-#          config:
-#            greeting: "hello-bucket"
+  - between:
+      interface: "my:service/shapes-handles"
+      inner:
+        name: shapes-handles-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: hello-tier3
+          alias: hello-tier3-shapes
+          config:
+            greeting: "hello-bucket"
 
   - before:
       interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
