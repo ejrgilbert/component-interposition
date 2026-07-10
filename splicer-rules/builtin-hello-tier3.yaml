@@ -59,6 +59,10 @@ rules:
           config:
             greeting: "hello-bucket"
 
+  # NOTE: This will only interpose invocation on Counter for intra-component calls!
+  #       This is why we don't see a `my:service/shapes-handles#current` print after the
+  #       call to `my:service/shapes-handles#counter_current` (it's an internal call inside
+  #       the component).
   - between:
       interface: "my:service/shapes-handles"
       inner:
