@@ -123,4 +123,10 @@ Running the echo test with host-to-host disabled
 [[RESULTS-DEFAULTABLE]] after  my:service/bucket-as-arg#get
 [[RESULTS-CONCRETE]] after  my:service/bucket-as-arg#get
 [[ALL-ASYNC]] after  my:service/bucket-as-arg#get
+[[ALL-ASYNC]] before my:service/bucket-as-arg#get
+[[RESULTS-CONCRETE]] before my:service/bucket-as-arg#get
+[[RESULTS-DEFAULTABLE]] before my:service/bucket-as-arg#get
+[[RESULTS-DEFAULTABLE]] after  my:service/bucket-as-arg#get
+[[RESULTS-CONCRETE]] after  my:service/bucket-as-arg#get
+[[ALL-ASYNC]] after  my:service/bucket-as-arg#get
 [svc] exit!

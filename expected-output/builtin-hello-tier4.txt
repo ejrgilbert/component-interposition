@@ -21,7 +21,11 @@ Running the echo test with host-to-host disabled
          it's dangerous to go alone! take this 🗡️
      [printN] exit!
 [svc] printer-n completed!
+[hello-bucket] virtualizing my:service/bucket-as-arg#new
 [hello-bucket] virtualizing my:service/bucket-as-arg#put
+[hello-bucket] virtualizing my:service/bucket-as-arg#get
+[hello-bucket] virtualizing my:service/bucket-as-arg#get
+[hello-bucket] virtualizing my:service/bucket-as-arg#from_seed
 [hello-bucket] virtualizing my:service/bucket-as-arg#get
 [hello-bucket] virtualizing my:service/bucket-as-arg#get
 [svc] exit!

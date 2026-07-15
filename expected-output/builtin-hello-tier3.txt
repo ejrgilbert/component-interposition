@@ -58,5 +58,11 @@ Running the echo test with host-to-host disabled
 [hello-bucket] after  my:service/async-bucket#put
 [hello-bucket] before my:service/async-bucket#get
 [hello-bucket] after  my:service/async-bucket#get
+[hello-bucket] before my:service/async-bucket#from_seed
+[hello-bucket] after  my:service/async-bucket#from_seed
+[hello-bucket] before my:service/async-bucket#put
+[hello-bucket] after  my:service/async-bucket#put
+[hello-bucket] before my:service/async-bucket#get
+[hello-bucket] after  my:service/async-bucket#get
 [svc] exit!
 [hello-handler] after  wasi:http/handler@0.3.0-rc-2026-01-06#handle

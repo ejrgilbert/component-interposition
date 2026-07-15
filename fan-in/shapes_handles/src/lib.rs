@@ -86,6 +86,9 @@ impl AsyncGuestBucket for BucketImpl {
     async fn new(_seed: u32) -> Self {
         BucketImpl { store: RefCell::new(HashMap::new()) }
     }
+    async fn from_seed(_seed: u32) -> AsyncBucket {
+        AsyncBucket::new(BucketImpl { store: RefCell::new(HashMap::new()) })
+    }
     async fn get(&self, key: u32) -> Option<u32> {
         self.store.borrow().get(&key).copied()
     }
@@ -111,6 +114,9 @@ impl AsyncBucketGuest for Service {
 impl BaaGuestBucket for BucketImpl {
     async fn new(_seed: u32) -> Self {
         BucketImpl { store: RefCell::new(HashMap::new()) }
+    }
+    async fn from_seed(_seed: u32) -> BaaBucket {
+        BaaBucket::new(BucketImpl { store: RefCell::new(HashMap::new()) })
     }
     async fn get(&self, key: u32) -> Option<u32> {
         self.store.borrow().get(&key).copied()

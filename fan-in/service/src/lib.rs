@@ -104,7 +104,17 @@ impl Guest for Service {
         let _ = b2.get(20).await;
         drop(b2);
 
+        // Static factory on async-bucket-types.bucket: exercises the
+        // [static]bucket.from-seed codegen path through the tier-3 wrapper.
+        let b_sf: AsyncBucket = AsyncBucket::from_seed(3).await;
+        b_sf.put(30, 300).await;
+        let _ = b_sf.get(30).await;
+        drop(b_sf);
+
         // bucket-as-arg: resource flows in the argument position.
+        // The static factory call exercises [static]bucket.from-seed through
+        // the tier-4 wrapper (mint_mock_resource for sync, VirtualizeStrategy
+        // dispatch for async).
         // Bucket belongs to bucket-as-arg-types, NOT async-bucket-
         // types, so tier-4 wraps on bucket-as-arg own this resource
         // family without conflicting with AsyncBucket. Exercise
@@ -116,6 +126,10 @@ impl Guest for Service {
         b3.put(30, 300).await;
         let _ = b3.get(30).await;
         let _ = bucket_as_arg_get(b3).await;
+
+        let b_sf2: BaaBucket = BaaBucket::from_seed(4).await;
+        let _ = b_sf2.get(40).await;
+        let _ = bucket_as_arg_get(b_sf2).await;
 
         println!("[svc] exit!");
 
