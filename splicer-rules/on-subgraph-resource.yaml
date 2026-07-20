@@ -1,0 +1,24 @@
+version: 1
+
+# on_subgraph test: resource handle interposition at subgraph edges.
+#
+# The subgraph contains only subgraph-service-comp. The on_subgraph rule
+# expands to a Between rule on the outbound edge where subgraph-service-comp
+# calls shapes-handles-comp. The hello-tier3 builtin fires before/after each
+# call that crosses that boundary.
+#
+# shapes-viewer-comp is OUTSIDE the subgraph. Its internal Counter::new /
+# make-counter calls go directly to shapes-handles-comp and are not
+# instrumented, demonstrating that the T' wrapper only fires for calls
+# made from inside the subgraph.
+rules:
+  - on_subgraph:
+      nodes: [subgraph-service-comp]
+      direction: outbound
+      interface: "my:service/shapes-handles"
+    inject:
+      - builtin:
+          name: hello-tier3
+          alias: hello-tier3-subgraph-shapes
+          config:
+            greeting: "hello-shapes"

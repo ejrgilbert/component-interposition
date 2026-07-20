@@ -105,8 +105,9 @@ print_usage() {
     echo -e "  --builtin-hello-tier3 : Splice tier-3 (transform) hello-tier3 between fanin's adder-async and service"
     echo -e "  --builtin-hello-tier4 : Splice tier-4 (virtualize) hello-tier4 in place of adder-async"
     echo -e "  --builtin-otel  : Stack otel-bare-{spans,metrics,logs} on wasi:http/handler (LOOP_N=3+ to see metrics flush)"
-    echo -e "  --builtin-recorder : Splice recorder onto 2 fanin edges; verifies one .bin per edge under recordings/"
+    echo -e "  --builtin-recorder : Splice recorder onto fanin edges; verifies one .bin per edge under recordings/"
     echo -e "  --builtin-replayer : Splice replayer onto fanin's adder edge; replays the trace produced by --builtin-recorder (must be run first)"
+    echo -e "  --on-subgraph-resource : Splice hello-tier3 on the outbound shapes-handles edge of the subgraph service; verifies only in-subgraph calls are instrumented"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
 }
@@ -365,6 +366,9 @@ compose() {
             ;;
         --builtin-replayer)
             compose_builtin_replayer
+            ;;
+        --on-subgraph-resource)
+            compose_on_subgraph_resource
             ;;
         *)
             log_error "Unknown option: $1"
@@ -643,6 +647,12 @@ compose_builtin_replayer() {
         "$PATH_RULES/builtin-replayer.yaml" \
         "$PATH_COMPOSED/builtin-replayer.wasm"
 }
+compose_on_subgraph_resource() {
+    run_splicer \
+        "$PATH_FIXTURES/on-subgraph-resource-base.wasm" \
+        "$PATH_RULES/on-subgraph-resource.yaml" \
+        "$PATH_COMPOSED/on-subgraph-resource.wasm"
+}
 
 # -----------------------------------------------------------------------------
 # Run the composed component
@@ -858,6 +868,9 @@ run_composition() {
             # Recordings read from: `runner/<RECORDER_PREOPEN>/recordings/<edge_id>.bin`.
             ENV_VARS="PREOPEN_DIR=./$RECORDER_PREOPEN"
             ;;
+        --on-subgraph-resource)
+            COMPOSED="$PATH_COMPOSED/on-subgraph-resource.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -879,7 +892,7 @@ run_composition() {
     # stdout-vs-expected comparison inside `run`; the recorder writes
     # silently to the preopened filesystem, so its proof lives here.
     if [[ "$1" == "--builtin-recorder" ]]; then
-        verify_recorder_files "runner/$RECORDER_PREOPEN" 2
+        verify_recorder_files "runner/$RECORDER_PREOPEN" 3
     fi
 }
 
@@ -1030,6 +1043,9 @@ viz_composition() {
         --builtin-replayer)
             COMPOSED="$PATH_COMPOSED/builtin-replayer.wasm"
             ;;
+        --on-subgraph-resource)
+            COMPOSED="$PATH_COMPOSED/on-subgraph-resource.wasm"
+            ;;
         *)
             log_error "Unknown option: $1"
             print_usage
@@ -1063,6 +1079,8 @@ build() {
     build_component "printer_n"       "$PATH_FAN_IN/printer_n"        "printer_n"
     build_component "shapes"          "$PATH_FAN_IN/shapes"           "shapes"
     build_component "shapes_handles"  "$PATH_FAN_IN/shapes_handles"   "shapes_handles"
+    build_component "shapes_viewer"   "$PATH_FAN_IN/shapes_viewer"    "shapes_viewer"
+    build_component "subgraph_service" "$PATH_FAN_IN/subgraph_service" "subgraph_service"
     build_component "service"         "$PATH_FAN_IN/service"          "service"
 
     # Copy built components to fixtures/ for checked-in test data
@@ -1081,6 +1099,15 @@ build() {
     cp "$PATH_COMPOSED/nested.wasm"  "$PATH_FIXTURES/nested.wasm"
     compose_fanin
     cp "$PATH_COMPOSED/fanin.wasm"   "$PATH_FIXTURES/fanin.wasm"
+
+    # Base composition for the on-subgraph-resource test.
+    run_splicer_solver \
+        "$PATH_COMPOSED/on-subgraph-resource-base.wasm" \
+        "$PATH_FIXTURES/subgraph_service.comp.wasm" \
+        "$PATH_FIXTURES/shapes_handles.comp.wasm" \
+        "$PATH_FIXTURES/shapes_viewer.comp.wasm"
+    cp "$PATH_COMPOSED/on-subgraph-resource-base.wasm" \
+       "$PATH_FIXTURES/on-subgraph-resource-base.wasm"
 }
 
 # Copy all built .comp.wasm files to the fixtures/ directory.
@@ -1120,7 +1147,8 @@ run_tests() {
       "--tier1-all" "--tier2" "--tier2-all" \
       "--builtin-hello-tier1" "--builtin-hello-tier2" \
       "--builtin-hello-tier3" "--builtin-hello-tier4" \
-      "--builtin-otel" "--builtin-recorder" "--builtin-replayer"
+      "--builtin-otel" "--builtin-recorder" "--builtin-replayer" \
+      "--on-subgraph-resource"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 

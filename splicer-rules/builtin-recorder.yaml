@@ -22,3 +22,14 @@ rules:
       - builtin:
           name: recorder
           alias: recorder-messenger
+
+  - between:
+      interface: "my:service/shapes-handles"
+      inner:
+        name: shapes-handles-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: recorder
+          alias: recorder-shapes-handles

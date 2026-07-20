@@ -1,0 +1,9 @@
+package example:fan-in;
+
+world subgraph-service-svc {
+    import my:service/shapes-handles-types;
+    import my:service/shapes-handles;
+    import my:service/shapes-viewer;
+
+    include wasi:http/service@0.3.0-rc-2026-01-06;
+}

@@ -121,3 +121,12 @@ interface bucket-as-arg {
     use bucket-as-arg-types.{bucket};
     get:     async func(b: bucket) -> string;
 }
+
+/// Calls shapes-handles from outside the subgraph; used by the
+/// on-subgraph-resource integration test to show that instrumentation
+/// only fires for calls made inside the targeted subgraph.
+interface shapes-viewer {
+    use shapes-handles-types.{counter};
+    view: func() -> s32;
+    view-with-counter: func(c: counter) -> s32;
+}

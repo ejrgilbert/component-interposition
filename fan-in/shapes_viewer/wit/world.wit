@@ -1,0 +1,7 @@
+package example:fan-in;
+
+world shapes-viewer-svc {
+    import my:service/shapes-handles-types;
+    import my:service/shapes-handles;
+    export my:service/shapes-viewer;
+}

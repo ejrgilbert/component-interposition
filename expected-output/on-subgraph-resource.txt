@@ -1,0 +1,17 @@
+Running the echo test with host-to-host disabled
+[subgraph-svc] shapes-viewer says: 17
+[hello-shapes] before my:service/shapes-handles#new
+[hello-shapes] after  my:service/shapes-handles#new
+[hello-shapes] before my:service/shapes-handles#increment
+[hello-shapes] after  my:service/shapes-handles#increment
+[hello-shapes] before my:service/shapes-handles#current
+[hello-shapes] after  my:service/shapes-handles#current
+[hello-shapes] before my:service/shapes-handles#make_counter
+[hello-shapes] after  my:service/shapes-handles#make_counter
+[hello-shapes] before my:service/shapes-handles#increment
+[hello-shapes] after  my:service/shapes-handles#increment
+[hello-shapes] before my:service/shapes-handles#counter_current
+[hello-shapes] after  my:service/shapes-handles#counter_current
+[hello-shapes] before my:service/shapes-handles#consume_counter
+[hello-shapes] after  my:service/shapes-handles#consume_counter
+[subgraph-svc] done
