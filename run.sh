@@ -406,7 +406,7 @@ run_splicer() {
     fi
 
     log_info "Running splicer with rule set '$rule_name'..."
-    if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" --strict ; then
+    if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" --strict --metrics ; then
         log_error "Splice with '$rule_name' failed! Used the following command:"
         echo splicer splice "$rule_file" "$wasm_file" -o "$output_wasm"
         exit 1
