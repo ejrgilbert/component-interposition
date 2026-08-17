@@ -1,0 +1,17 @@
+version: 1
+
+rules:
+
+  - between:
+      interface: "my:service/messenger"
+      inner:
+        name: messenger-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: redact-strings
+          config:
+            patterns:
+              - "sw[a-z]*"  # should replace 'swallow' with 'chew'
+            replacement: "chew"

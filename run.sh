@@ -107,6 +107,7 @@ print_usage() {
     echo -e "  --builtin-otel  : Stack otel-bare-{spans,metrics,logs} on wasi:http/handler (LOOP_N=3+ to see metrics flush)"
     echo -e "  --builtin-recorder : Splice recorder onto fanin edges; verifies one .bin per edge under recordings/"
     echo -e "  --builtin-replayer : Splice replayer onto fanin's adder edge; replays the trace produced by --builtin-recorder (must be run first)"
+    echo -e "  --builtin-redact   : Splice redact string builtin"
     echo -e "  --on-subgraph-resource : Splice hello-tier3 on the outbound shapes-handles edge of the subgraph service; verifies only in-subgraph calls are instrumented"
     echo -e "  --skip-build    : Skip the build step (use with \`all\` when fixtures/ already holds built components, e.g. in parallel test harnesses)"
     echo ""
@@ -366,6 +367,9 @@ compose() {
             ;;
         --builtin-replayer)
             compose_builtin_replayer
+            ;;
+        --builtin-redact)
+            compose_builtin_redact
             ;;
         --on-subgraph-resource)
             compose_on_subgraph_resource
@@ -638,14 +642,17 @@ compose_builtin_recorder() {
         "$PATH_RULES/builtin-recorder.yaml" \
         "$PATH_COMPOSED/builtin-recorder.wasm"
 }
-# Splice replayer onto fanin's adder edge. Requires a prior recorder
-# run so the adder edge's trace .bin exists; run_composition sets
-# SPLICER_REPLAY_TRACE to that file before invoking the runner.
 compose_builtin_replayer() {
     run_splicer \
         "$PATH_FIXTURES/fanin.wasm" \
         "$PATH_RULES/builtin-replayer.yaml" \
         "$PATH_COMPOSED/builtin-replayer.wasm"
+}
+compose_builtin_redact() {
+    run_splicer \
+        "$PATH_FIXTURES/fanin.wasm" \
+        "$PATH_RULES/builtin-redact.yaml" \
+        "$PATH_COMPOSED/builtin-redact.wasm"
 }
 compose_on_subgraph_resource() {
     run_splicer \
@@ -868,6 +875,9 @@ run_composition() {
             # Recordings read from: `runner/<RECORDER_PREOPEN>/recordings/<edge_id>.bin`.
             ENV_VARS="PREOPEN_DIR=./$RECORDER_PREOPEN"
             ;;
+        --builtin-redact)
+            COMPOSED="$PATH_COMPOSED/builtin-redact.wasm"
+            ;;
         --on-subgraph-resource)
             COMPOSED="$PATH_COMPOSED/on-subgraph-resource.wasm"
             ;;
@@ -1043,6 +1053,9 @@ viz_composition() {
         --builtin-replayer)
             COMPOSED="$PATH_COMPOSED/builtin-replayer.wasm"
             ;;
+        --builtin-redact)
+            COMPOSED="$PATH_COMPOSED/builtin-redact.wasm"
+            ;;
         --on-subgraph-resource)
             COMPOSED="$PATH_COMPOSED/on-subgraph-resource.wasm"
             ;;
@@ -1148,7 +1161,7 @@ run_tests() {
       "--builtin-hello-tier1" "--builtin-hello-tier2" \
       "--builtin-hello-tier3" "--builtin-hello-tier4" \
       "--builtin-otel" "--builtin-recorder" "--builtin-replayer" \
-      "--on-subgraph-resource"
+       "--builtin-redact" "--on-subgraph-resource"
     )
     log_info "Running all different configurations, these should all execute successfully!\n"
 
