@@ -1,58 +1,30 @@
 version: 1
 
-# Stack the three `otel-bare-*` builtins on the service's
-# `wasi:http/handler` interface so every wrapped request emits a span,
-# a metrics flush (when its window closes), and a log record. The
-# runner's `wasi:otel/*` stub prints a one-liner per signal to stdout
-# — enough to eyeball the signal flow without standing up an OTLP
-# collector.
-#
-# Every config knob is set explicitly so you can comment lines out or
-# change values during a live demo and re-splice to see the behavior
-# shift. The defaults each builtin would apply if the keys were
-# unset are noted alongside.
-#
-# Aggregation visibility: the runner instantiates the spliced wasm
-# once and reuses the same instance across `LOOP_N` requests, so
-# `otel-bare-metrics`'s accumulator carries across calls — exactly
-# how a long-lived HTTP runtime (wasmCloud, wasmtime-serve) would
-# host the component. Pick `LOOP_N >= buffer` to actually witness
-# the window close (with `buffer: 3` below, set `LOOP_N=3` and the
-# `[OTEL/METRIC]` line appears on the 3rd iteration).
-#
-# Stacked order (declaration order = invocation order):
-#   client -> otel-bare-spans -> otel-bare-metrics -> otel-bare-logs -> srv
 rules:
   - before:
       interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
       provider:
         alias: "srv"
     inject:
-      # Span per wrapped call. `span_kind: server` is the OTel-correct
-      # choice when wrapping an incoming-request handler; the builtin
-      # default is `internal`, which makes trace UIs render the span
-      # as a hop instead of a request.
       - builtin:
           name: otel-bare-spans
           config:
             span_kind: server
 
-      # Aggregated count + duration histogram. `buffer` controls how
-      # many samples fold into one delta window before flushing;
-      # `flush_after_seconds` is the wall-clock staleness fallback so
-      # a window that goes quiet still drains on the next call.
-      # Defaults: buffer=1 (always flush), flush_after_seconds=10.0.
       - builtin:
           name: otel-bare-metrics
           config:
             buffer: 3
             flush_after_seconds: 10.0
 
-      # Structured log record per wrapped call. `severity` accepts
-      # TRACE/DEBUG/INFO/WARN/ERROR/FATAL (case-insensitive); the
-      # builtin default is INFO. Pipelines that filter by level can
-      # be exercised by switching this without changing anything else.
       - builtin:
           name: otel-bare-logs
           config:
             severity: WARN
+
+      - builtin:
+          name: otel-payload-metrics
+          config:
+            buffer: 3
+            flush_after_seconds: 10.0
+            payloads: both
