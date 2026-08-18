@@ -104,6 +104,7 @@ print_usage() {
     echo -e "  --builtin-hello-tier2 : Splice hello-tier2 across fanin's adder + messenger (typed args, one default + one configured greeting)"
     echo -e "  --builtin-hello-tier3 : Splice tier-3 (transform) hello-tier3 between fanin's adder-async and service"
     echo -e "  --builtin-hello-tier4 : Splice tier-4 (virtualize) hello-tier4 in place of adder-async"
+    echo -e "  --builtin-fuzz-results : Splice tier-4 (virtualize) fuzz-results in place of adder-async"
     echo -e "  --builtin-otel  : Stack otel-bare-{spans,metrics,logs} on wasi:http/handler (LOOP_N=3+ to see metrics flush)"
     echo -e "  --builtin-recorder : Splice recorder onto fanin edges; verifies one .bin per edge under recordings/"
     echo -e "  --builtin-replayer : Splice replayer onto fanin's adder edge; replays the trace produced by --builtin-recorder (must be run first)"
@@ -358,6 +359,9 @@ compose() {
             ;;
         --builtin-hello-tier4)
             compose_builtin_hello_tier4
+            ;;
+        --builtin-fuzz-results)
+            compose_builtin_fuzz_results
             ;;
         --builtin-otel)
             compose_otel
@@ -626,6 +630,12 @@ compose_builtin_hello_tier4() {
         "$PATH_RULES/builtin-hello-tier4.yaml" \
         "$PATH_COMPOSED/builtin-hello-tier4.wasm"
 }
+compose_builtin_fuzz_results() {
+    run_splicer \
+        "$PATH_FIXTURES/fanin.wasm" \
+        "$PATH_RULES/builtin-fuzz-results.yaml" \
+        "$PATH_COMPOSED/builtin-fuzz-results.wasm"
+}
 compose_otel() {
     run_splicer \
         "$PATH_FIXTURES/service_b.comp.wasm" \
@@ -855,6 +865,9 @@ run_composition() {
         --builtin-hello-tier4)
             COMPOSED="$PATH_COMPOSED/builtin-hello-tier4.wasm"
             ;;
+        --builtin-fuzz-results)
+            COMPOSED="$PATH_COMPOSED/builtin-fuzz-results.wasm"
+            ;;
         --builtin-otel)
             COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
             # Set LOOP_N=3 by default so the metrics builtin's
@@ -1044,6 +1057,9 @@ viz_composition() {
         --builtin-hello-tier4)
             COMPOSED="$PATH_COMPOSED/builtin-hello-tier4.wasm"
             ;;
+        --builtin-fuzz-results)
+            COMPOSED="$PATH_COMPOSED/builtin-fuzz-results.wasm"
+            ;;
         --builtin-otel)
             COMPOSED="$PATH_COMPOSED/builtin-otel.wasm"
             ;;
@@ -1160,6 +1176,7 @@ run_tests() {
       "--tier1-all" "--tier2" "--tier2-all" \
       "--builtin-hello-tier1" "--builtin-hello-tier2" \
       "--builtin-hello-tier3" "--builtin-hello-tier4" \
+      "--builtin-fuzz-results" \
       "--builtin-otel" "--builtin-recorder" "--builtin-replayer" \
        "--builtin-redact" "--on-subgraph-resource"
     )

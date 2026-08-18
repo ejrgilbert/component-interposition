@@ -1,0 +1,21 @@
+version: 1
+
+# Tier-4 (virtualize) fuzz builtin: codegen generates a typed wrapper
+# that exports the target without importing it, so calls never reach the
+# original adder. The fuzz-results strategy returns a type-driven random
+# value (here a u32) for every call instead of `1 + 2`. A fixed `seed`
+# makes the run reproducible; `log: value` prints each fabricated return
+# as WAVE text alongside its per-call seed.
+rules:
+  - between:
+      interface: "my:service/adder-async"
+      inner:
+        name: adder-async-comp
+      outer:
+        name: service-comp
+    inject:
+      - builtin:
+          name: fuzz-results
+          config:
+            seed: 42
+            log: value
