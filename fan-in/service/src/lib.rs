@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "service",
-        async: true,
         generate_all
     });
 }
@@ -36,7 +35,7 @@ impl Guest for Service {
         println!("[svc] entered!");
 
         let (a, b) = (1, 2);
-        let result = add(a, b).await;
+        let result = add(a, b);
 
         println!("[svc] adder says '{a} + {b} = {result}'");
 
@@ -45,39 +44,39 @@ impl Guest for Service {
 
         println!("[svc] adder-async says '{a} + {b} = {result_async}'");
 
-        let msg = get_msg().await;
+        let msg = get_msg();
         println!("[svc] get-msg:       '{msg}'");
         let msg_async = get_msg_async().await;
         println!("[svc] get-msg-async: '{msg_async}'");
 
         let str = "it's dangerous to go alone! take this 🗡️";
-        print1(str.to_string()).await;
+        print1(str);
         println!("[svc] printer1 completed!");
         print1_async(str.to_string()).await;
         println!("[svc] printer1-async completed!");
 
-        print_n(str.to_string(), 4).await;
+        print_n(str, 4);
         println!("[svc] printer-n completed!");
 
         // shapes interface — exercise every shape so its imports are linked
-        let _ = shapes::pick_color(Priority::High).await;
-        let _ = shapes::check_perms(AccessPerms::READ | AccessPerms::WRITE).await;
-        let _ = shapes::greet(Person { name: "Link".to_string(), age: 17 }).await;
-        let _ = shapes::describe_event(Event::Click(42)).await;
-        let _ = shapes::swap_pair((7, "hello".to_string())).await;
-        let _ = shapes::maybe_double(Some(21)).await;
-        let _ = shapes::divide(10, 3).await;
-        let _ = shapes::sum(vec![1, 2, 3, 4]).await;
-        let _ = shapes::to_string('Z').await;
+        let _ = shapes::pick_color(Priority::High);
+        let _ = shapes::check_perms(AccessPerms::READ | AccessPerms::WRITE);
+        let _ = shapes::greet(&Person { name: "Link".to_string(), age: 17 });
+        let _ = shapes::describe_event(&Event::Click(42));
+        let _ = shapes::swap_pair((7, "hello"));
+        let _ = shapes::maybe_double(Some(21));
+        let _ = shapes::divide(10, 3);
+        let _ = shapes::sum(&[1, 2, 3, 4]);
+        let _ = shapes::to_string('Z');
         let _ = shapes::aggregate(
-            Person { name: "Zelda".to_string(), age: 18 },
+            &Person { name: "Zelda".to_string(), age: 18 },
             Some(2),
-        ).await;
+        );
 
         // shapes-handles interface — exercise resource constructor + methods,
         // make-counter / counter-current / consume-counter, and the future
         // and stream return shapes so all imports are linked.
-        let direct = Counter::new(5).await;
+        let direct = Counter::new(5);
         direct.increment().await;
         let _ = direct.current().await;
         drop(direct);
@@ -94,7 +93,7 @@ impl Guest for Service {
         let _ = stream.collect().await;
 
         // Resource with all async funcs
-        let b1: AsyncBucket = AsyncBucket::new(1).await;
+        let b1: AsyncBucket = AsyncBucket::new(1);
         b1.put(10, 100).await;
         let _ = b1.get(10).await;
         drop(b1);
@@ -122,7 +121,7 @@ impl Guest for Service {
         // bucket resource embeds the full method surface (otherwise
         // wit-bindgen prunes unused methods and the embedded type
         // hash drifts from shapes-handles-comp's exported type).
-        let b3: BaaBucket = BaaBucket::new(3).await;
+        let b3: BaaBucket = BaaBucket::new(3);
         b3.put(30, 300).await;
         let _ = b3.get(30).await;
         let _ = bucket_as_arg_get(b3).await;
@@ -134,13 +133,13 @@ impl Guest for Service {
         println!("[svc] exit!");
 
         // Just copy the request's headers
-        let headers = request.get_headers().await;
+        let headers = request.get_headers();
 
         // Just copy the request's body
         let (_, result_rx) = wit_future::new(|| Ok(()));
-        let (body, trailers) = Request::consume_body(request, result_rx).await;
+        let (body, trailers) = Request::consume_body(request, result_rx);
 
-        Ok(Response::new(headers, Some(body), trailers).await.0)
+        Ok(Response::new(headers, Some(body), trailers).0)
     }
 }
 

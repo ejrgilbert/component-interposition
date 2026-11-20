@@ -1,5 +1,8 @@
 Running the echo test with host-to-host disabled
 [subgraph-svc] shapes-viewer says: 17
+[hello-shapes] before my:service/shapes-handles#make_counter
+[hello-shapes] after  my:service/shapes-handles#make_counter
+[subgraph-svc] view-with-counter says: 8
 [hello-shapes] before my:service/shapes-handles#new
 [hello-shapes] after  my:service/shapes-handles#new
 [hello-shapes] before my:service/shapes-handles#increment
@@ -14,4 +17,8 @@ Running the echo test with host-to-host disabled
 [hello-shapes] after  my:service/shapes-handles#counter_current
 [hello-shapes] before my:service/shapes-handles#consume_counter
 [hello-shapes] after  my:service/shapes-handles#consume_counter
+[hello-shapes] before my:service/shapes-handles#delayed_add
+[hello-shapes] after  my:service/shapes-handles#delayed_add
+[hello-shapes] before my:service/shapes-handles#countdown
+[hello-shapes] after  my:service/shapes-handles#countdown
 [subgraph-svc] done

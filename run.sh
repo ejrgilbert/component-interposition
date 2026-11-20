@@ -139,9 +139,9 @@ check_env() {
     MISSING_TOOLS=0
 
     REQUIRED_TOOLS=(
-        "cargo:1.93.0:brew"
-        "wasm-tools:1.247.0:$CARGO_INST"
-        "wkg:0.13.0:$CARGO_INST"
+        "cargo:1.97.0:brew"
+        "wasm-tools:1.254.0:$CARGO_INST"
+        "wkg:0.16.2:$CARGO_INST"
         "splicer:2.4.1:$CARGO_INST"
         "cviz-cli:3.0.0:$CARGO_INST"
         "wac:0.10.0:$CARGO_INST"
@@ -414,7 +414,7 @@ run_splicer() {
     fi
 
     log_info "Running splicer with rule set '$rule_name'..."
-    if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" --strict --metrics ; then
+    if ! splicer splice "$rule_file" "$wasm_file" -o "$output_wasm" --strict ; then
         log_error "Splice with '$rule_name' failed! Used the following command:"
         echo splicer splice "$rule_file" "$wasm_file" -o "$output_wasm"
         exit 1

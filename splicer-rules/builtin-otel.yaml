@@ -2,7 +2,7 @@ version: 1
 
 rules:
   - before:
-      interface: "wasi:http/handler@0.3.0-rc-2026-01-06"
+      interface: "wasi:http/handler@0.3.0"
       provider:
         alias: "srv"
     inject:
@@ -22,9 +22,10 @@ rules:
           config:
             severity: WARN
 
-      - builtin:
-          name: otel-payload-metrics
-          config:
-            buffer: 3
-            flush_after_seconds: 10.0
-            payloads: both
+      # TODO: Uncomment this out when we've merged into next branch
+#      - builtin:
+#          name: otel-payload-metrics
+#          config:
+#            buffer: 3
+#            flush_after_seconds: 10.0
+#            payloads: both

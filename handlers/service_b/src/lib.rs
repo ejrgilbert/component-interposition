@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "service",
-        async: true,
         generate_all
     });
 }
@@ -20,13 +19,13 @@ impl Guest for Service {
         println!("    [svcB] entered!");
         
         // Just copy the request's headers
-        let headers = request.get_headers().await;
+        let headers = request.get_headers();
 
         // Just copy the request's body
         let (_, result_rx) = wit_future::new(|| Ok(()));
-        let (body, trailers) = Request::consume_body(request, result_rx).await;
+        let (body, trailers) = Request::consume_body(request, result_rx);
 
-        Ok(Response::new(headers, Some(body), trailers).await.0)
+        Ok(Response::new(headers, Some(body), trailers).0)
     }
 }
 

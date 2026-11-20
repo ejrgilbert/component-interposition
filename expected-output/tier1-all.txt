@@ -1,5 +1,5 @@
 Running the echo test with host-to-host disabled
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0#handle] before!
 [svc] entered!
   >> [mdl-my:service/adder#add] before!
      [adder] entered!
@@ -69,4 +69,4 @@ Running the echo test with host-to-host disabled
   >> [mdl-my:service/shapes-handles#countdown] before!
   >> [mdl-my:service/shapes-handles#countdown] after!
 [svc] exit!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0#handle] after!

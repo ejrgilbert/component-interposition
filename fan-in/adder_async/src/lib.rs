@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "adder-async-svc",
-        async: true,
         generate_all
     });
 }

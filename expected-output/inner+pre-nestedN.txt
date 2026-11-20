@@ -1,18 +1,18 @@
 Running the echo test with host-to-host disabled
     [svcC] entered!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0#handle] before!
     [svcA] entered!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0#handle] before!
+  >> [mdl-wasi:http/handler@0.3.0#handle] before!
     [svcB] entered!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0#handle] after!
     [svcA] received response from svcB!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
-  >> [mdl-wasi:http/handler@0.3.0-rc-2026-01-06#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0#handle] after!
+  >> [mdl-wasi:http/handler@0.3.0#handle] after!
     [svcC] received response from svcA!

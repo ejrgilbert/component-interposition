@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "service",
-        async: true,
         generate_all
     });
 }
