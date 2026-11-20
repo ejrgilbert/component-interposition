@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "shapes-handles-svc",
-        async: true,
         generate_all
     });
 }
@@ -30,7 +29,7 @@ pub struct CounterImpl {
 }
 
 impl GuestCounter for CounterImpl {
-    async fn new(start: i32) -> Self {
+    fn new(start: i32) -> Self {
         CounterImpl { value: Cell::new(start) }
     }
     async fn increment(&self) {
@@ -47,7 +46,7 @@ impl TypesGuest for Service {
 
 impl Guest for Service {
     async fn make_counter(start: i32) -> Counter {
-        Counter::new(CounterImpl::new(start).await)
+        Counter::new(CounterImpl::new(start))
     }
 
     async fn counter_current(c: CounterBorrow<'_>) -> i32 {
@@ -60,7 +59,7 @@ impl Guest for Service {
 
     async fn delayed_add(a: i32, b: i32) -> FutureReader<i32> {
         let (tx, rx) = bindings::wit_future::new(|| 0);
-        wit_bindgen::spawn(async move {
+        wit_bindgen::spawn_local(async move {
             let _ = tx.write(a + b).await;
         });
         rx
@@ -68,7 +67,7 @@ impl Guest for Service {
 
     async fn countdown(start: i32) -> StreamReader<i32> {
         let (mut tx, rx) = bindings::wit_stream::new();
-        wit_bindgen::spawn(async move {
+        wit_bindgen::spawn_local(async move {
             for i in (0..=start).rev() {
                 let _ = tx.write(vec![i]).await;
             }
@@ -83,7 +82,7 @@ pub struct BucketImpl {
 }
 
 impl AsyncGuestBucket for BucketImpl {
-    async fn new(_seed: u32) -> Self {
+    fn new(_seed: u32) -> Self {
         BucketImpl { store: RefCell::new(HashMap::new()) }
     }
     async fn from_seed(_seed: u32) -> AsyncBucket {
@@ -103,7 +102,7 @@ impl AsyncBucketTypesGuest for Service {
 
 impl AsyncBucketGuest for Service {
     async fn open(seed: u32) -> AsyncBucket {
-        AsyncBucket::new(<BucketImpl as AsyncGuestBucket>::new(seed).await)
+        AsyncBucket::new(<BucketImpl as AsyncGuestBucket>::new(seed))
     }
 }
 
@@ -112,7 +111,7 @@ impl AsyncBucketGuest for Service {
 // from async-bucket's, so tier-4 wraps on bucket-as-arg don't
 // conflict with other consumers of the AsyncBucket type identity.
 impl BaaGuestBucket for BucketImpl {
-    async fn new(_seed: u32) -> Self {
+    fn new(_seed: u32) -> Self {
         BucketImpl { store: RefCell::new(HashMap::new()) }
     }
     async fn from_seed(_seed: u32) -> BaaBucket {

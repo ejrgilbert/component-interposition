@@ -61,8 +61,8 @@ interface shapes-handles-types {
     /// Stateful resource with constructor + methods.
     resource counter {
         constructor(start: s32);
-        increment: func();
-        current: func() -> s32;
+        increment: async func();
+        current: async func() -> s32;
     }
 }
 
@@ -71,17 +71,17 @@ interface shapes-handles {
     use shapes-handles-types.{counter};
 
     /// Returns a freshly-owned counter.
-    make-counter:     func(start: s32) -> counter;
+    make-counter:     async func(start: s32) -> counter;
     /// Reads the current value through a borrowed handle.
-    counter-current:  func(c: borrow<counter>) -> s32;
+    counter-current:  async func(c: borrow<counter>) -> s32;
     /// Consumes the handle, returning its current value.
-    consume-counter:  func(c: counter) -> s32;
+    consume-counter:  async func(c: counter) -> s32;
 
     /// Returns a future that resolves to the sum.
-    delayed-add:      func(a: s32, b: s32) -> future<s32>;
+    delayed-add:      async func(a: s32, b: s32) -> future<s32>;
 
     /// Returns a stream that produces a countdown of integers.
-    countdown:        func(start: s32) -> stream<s32>;
+    countdown:        async func(start: s32) -> stream<s32>;
 }
 
 /// Factored types for `async-bucket`. The resource has to live in a
@@ -127,6 +127,6 @@ interface bucket-as-arg {
 /// only fires for calls made inside the targeted subgraph.
 interface shapes-viewer {
     use shapes-handles-types.{counter};
-    view: func() -> s32;
-    view-with-counter: func(c: counter) -> s32;
+    view: async func() -> s32;
+    view-with-counter: async func(c: counter) -> s32;
 }

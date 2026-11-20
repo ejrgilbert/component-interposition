@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "subgraph-service-svc",
-        async: true,
         generate_all
     });
 }
@@ -29,7 +28,7 @@ impl Guest for SubgraphService {
         println!("[subgraph-svc] view-with-counter says: {viewer_result2}");
 
         // These calls cross the subgraph boundary and are instrumented via T'.
-        let direct = Counter::new(5).await;
+        let direct = Counter::new(5);
         direct.increment().await;
         let _ = direct.current().await;
         drop(direct);
@@ -48,10 +47,10 @@ impl Guest for SubgraphService {
 
         println!("[subgraph-svc] done");
 
-        let headers = request.get_headers().await;
+        let headers = request.get_headers();
         let (_, result_rx) = wit_future::new(|| Ok(()));
-        let (body, trailers) = Request::consume_body(request, result_rx).await;
-        Ok(Response::new(headers, Some(body), trailers).await.0)
+        let (body, trailers) = Request::consume_body(request, result_rx);
+        Ok(Response::new(headers, Some(body), trailers).0)
     }
 }
 

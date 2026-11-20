@@ -1,7 +1,6 @@
 mod bindings {
     wit_bindgen::generate!({
         world: "shapes-viewer-svc",
-        async: true,
         generate_all
     });
 }
@@ -22,7 +21,7 @@ impl Guest for ShapesViewer {
     // no instrumentation. Demonstrates the contrast with subgraph-service's
     // instrumented calls.
     async fn view() -> i32 {
-        let direct = Counter::new(5).await;
+        let direct = Counter::new(5);
         direct.increment().await;
         let v1 = direct.current().await; // 6
 
@@ -33,9 +32,9 @@ impl Guest for ShapesViewer {
 
         // Exercise remaining freestanding shapes-handles functions so they
         // appear in the component type and match shapes-handles-comp's export.
-        let borrow_c = Counter::new(0).await;
+        let borrow_c = Counter::new(0);
         let _ = shapes_handles::counter_current(&borrow_c).await;
-        let own_c = Counter::new(1).await;
+        let own_c = Counter::new(1);
         let _ = shapes_handles::consume_counter(own_c).await;
 
         let fut = shapes_handles::delayed_add(1, 2).await;

@@ -6,19 +6,20 @@ use flate2::write::{DeflateDecoder, DeflateEncoder};
 use futures::SinkExt;
 use http::HeaderValue;
 use http_body::Body;
-use http_body_util::{BodyExt as _, Collected, combinators::UnsyncBoxBody};
+use http_body_util::{BodyExt as _, Collected};
 use std::io::Write;
 use tokio::try_join;
 use wasmtime::component::{Component, Linker, ResourceTable, Val};
+use wasmtime::error::Context as _;
 use wasmtime::{Result, Store, WasmBacktraceDetails};
-use wasmtime_wasi::{
-    DirPerms, FilePerms, TrappableError, WasiCtx, WasiCtxBuilder, WasiCtxView, WasiView,
-};
+use wasmtime_wasi::{FsPerms, WasiCtx, WasiCtxBuilder, WasiCtxView, WasiView};
+use wasmtime_wasi_http::p3::bindings::Service;
 use wasmtime_wasi_http::p3::bindings::http::types::ErrorCode;
-use wasmtime_wasi_http::p3::{
-    self, Request, RequestOptions, WasiHttpCtx, WasiHttpCtxView, WasiHttpView,
+use wasmtime_wasi_http::p3::Request;
+use wasmtime_wasi_http::{
+    DEFAULT_FORBIDDEN_HEADERS, Error as HttpError, ForbiddenHeaderFilter, RequestOptions, WasiBody,
+    WasiHttpCtx, WasiHttpCtxView, WasiHttpHooks, WasiHttpView, default_send_request,
 };
-use wasmtime_wasi_http::types::DEFAULT_FORBIDDEN_HEADERS;
 
 #[tokio::main]
 async fn main() -> Result<()> {
@@ -34,7 +35,6 @@ async fn main() -> Result<()> {
     // samples across requests rather than seeing a fresh accumulator
     // every call.
     let engine = engine(|config| {
-        config.async_support(true);
         config.wasm_component_model_async(true);
         config.wasm_component_model_async_stackful(true);
         config.wasm_backtrace_details(WasmBacktraceDetails::Enable);
@@ -53,12 +53,10 @@ async fn main() -> Result<()> {
     // wasm makes an outgoing request against the `p3-test` authority
     // (a host-to-host plumbing test). The echo path doesn't hit it,
     // so we wire a dummy channel that lives for the run.
-    let (dummy_tx, _dummy_rx) = tokio::sync::mpsc::channel::<UnsyncBoxBody<Bytes, ErrorCode>>(1);
+    let (dummy_tx, _dummy_rx) = tokio::sync::mpsc::channel::<WasiBody>(1);
     let mut store = Store::new(&engine, Ctx::new(dummy_tx));
-    let service = wasmtime_wasi_http::p3::bindings::Service::instantiate_async(
-        &mut store, &component, &linker,
-    )
-    .await?;
+    let service =
+        Service::instantiate_async(&mut store, &component, &linker).await?;
 
     println!("\nRunning the echo test with host-to-host disabled");
     for i in 1..=loop_n {
@@ -85,7 +83,7 @@ fn loop_n_from_env() -> u32 {
 
 async fn test_http_echo(
     store: &mut Store<Ctx>,
-    service: &wasmtime_wasi_http::p3::bindings::Service,
+    service: &Service,
     use_compression: bool,
     host_to_host: bool,
 ) -> Result<()> {
@@ -191,68 +189,62 @@ async fn test_http_echo(
 /// Dispatch a single HTTP request against the long-lived spliced
 /// wasm instance owned by `store` + `service`. Called once per
 /// `LOOP_N` iteration so stateful builtins see the same instance.
-async fn do_one_request<E: Into<ErrorCode> + 'static>(
+async fn do_one_request<E: Into<HttpError> + 'static>(
     store: &mut Store<Ctx>,
-    service: &wasmtime_wasi_http::p3::bindings::Service,
+    service: &Service,
     req: http::Request<impl Body<Data = Bytes, Error = E> + Send + Sync + 'static>,
 ) -> Result<Result<http::Response<Collected<Bytes>>, Option<ErrorCode>>> {
-    let (req, io) = Request::from_http(req);
-    let (tx, rx) = tokio::sync::oneshot::channel();
-    let ((handle_result, ()), res) = try_join!(
-        async move {
-            store
-                .run_concurrent(async |store| {
-                    try_join!(
-                        async {
-                            let (res, task) = match service.handle(store, req).await? {
-                                Ok(pair) => pair,
-                                Err(err) => return Ok(Err(Some(err))),
-                            };
-                            _ = tx
-                                .send(store.with(|store| res.into_http(store, async { Ok(()) }))?);
-                            task.block(store).await;
-                            Ok(Ok(()))
-                        },
-                        async { io.await.context("failed to consume request body") }
-                    )
-                })
-                .await?
-        },
-        async move {
-            let res = rx.await?;
-            let (parts, body) = res.into_parts();
-            let body = body.collect().await.context("failed to collect body")?;
-            Ok(http::Response::from_parts(parts, body))
-        }
-    )?;
-
-    Ok(handle_result.map(|()| res))
+    let (req, io) = Request::from_http(&mut store.data_mut().hooks, req);
+    store
+        .run_concurrent(async |store| {
+            let (res, ()) = try_join!(
+                async {
+                    let res = match service.handle(store, req).await? {
+                        Ok(res) => res,
+                        Err(err) => return Ok(Err(Some(err))),
+                    };
+                    let res = store.with(|store| res.into_http(store, async { Ok(()) }))?;
+                    let (parts, body) = res.into_parts();
+                    let body = body.collect().await.context("failed to collect body")?;
+                    wasmtime::error::Ok(Ok(http::Response::from_parts(parts, body)))
+                },
+                async { io.await.context("failed to consume request body") }
+            )?;
+            Ok(res)
+        })
+        .await?
 }
 
-struct TestHttpCtx {
-    request_body_tx: Option<Sender<UnsyncBoxBody<Bytes, ErrorCode>>>,
+/// Embedder hooks for `wasi:http`. In wasmtime 51 the per-request
+/// context (`WasiHttpCtx`) is a plain value and all customizable
+/// behavior — forbidden-header policy and outbound `send_request` —
+/// lives on this separate `WasiHttpHooks` implementation.
+struct TestHooks {
+    request_body_tx: Option<Sender<WasiBody>>,
 }
 
-impl WasiHttpCtx for TestHttpCtx {
-    fn is_forbidden_header(&mut self, name: &http::header::HeaderName) -> bool {
-        name.as_str() == "custom-forbidden-header" || DEFAULT_FORBIDDEN_HEADERS.contains(name)
+impl WasiHttpHooks for TestHooks {
+    fn forbidden_header_filter(&mut self) -> ForbiddenHeaderFilter {
+        std::sync::Arc::new(|name| {
+            name.as_str() == "custom-forbidden-header" || DEFAULT_FORBIDDEN_HEADERS.contains(name)
+        })
     }
 
     fn send_request(
         &mut self,
-        request: http::Request<UnsyncBoxBody<Bytes, ErrorCode>>,
+        request: http::Request<WasiBody>,
         options: Option<RequestOptions>,
-        fut: Box<dyn Future<Output = Result<(), ErrorCode>> + Send>,
+        fut: Box<dyn Future<Output = Result<(), HttpError>> + Send>,
     ) -> Box<
         dyn Future<
-            Output = Result<
-                (
-                    http::Response<UnsyncBoxBody<Bytes, ErrorCode>>,
-                    Box<dyn Future<Output = Result<(), ErrorCode>> + Send>,
-                ),
-                TrappableError<ErrorCode>,
-            >,
-        > + Send,
+                Output = Result<
+                    (
+                        http::Response<WasiBody>,
+                        Box<dyn Future<Output = Result<(), HttpError>> + Send>,
+                    ),
+                    HttpError,
+                >,
+            > + Send,
     > {
         println!("Sending request inside ctx");
         _ = fut;
@@ -272,7 +264,7 @@ impl WasiHttpCtx for TestHttpCtx {
             Box::new(async move {
                 use http_body_util::BodyExt;
 
-                let (res, io) = p3::default_send_request(request, options).await?;
+                let (res, io) = default_send_request(request, options).await?;
                 Ok((
                     res.map(BodyExt::boxed_unsync),
                     Box::new(io) as Box<dyn Future<Output = _> + Send>,
@@ -295,18 +287,19 @@ const SPLICER_REPLAY_TRACE: &str = "SPLICER_REPLAY_TRACE";
 struct Ctx {
     table: ResourceTable,
     wasi: WasiCtx,
-    http: TestHttpCtx,
+    http: WasiHttpCtx,
+    hooks: TestHooks,
 }
 
 impl Ctx {
-    fn new(request_body_tx: Sender<UnsyncBoxBody<Bytes, ErrorCode>>) -> Self {
+    fn new(request_body_tx: Sender<WasiBody>) -> Self {
         let mut builder = WasiCtxBuilder::new();
         builder
             .env(SHOULD_BLOCK, Self::get_should_block())
             .inherit_stdio();
         if let Ok(path) = env::var(PREOPEN_DIR) {
             builder
-                .preopened_dir(&path, ".", DirPerms::all(), FilePerms::all())
+                .preopened_dir(&path, ".", FsPerms::ReadWrite)
                 .unwrap_or_else(|e| panic!("preopen {path:?} failed: {e:#}"));
         }
         if let Ok(trace) = env::var(SPLICER_REPLAY_TRACE) {
@@ -315,7 +308,8 @@ impl Ctx {
         Self {
             table: ResourceTable::default(),
             wasi: builder.build(),
-            http: TestHttpCtx {
+            http: WasiHttpCtx::new(),
+            hooks: TestHooks {
                 request_body_tx: Some(request_body_tx),
             },
         }
@@ -340,6 +334,7 @@ impl WasiHttpView for Ctx {
         WasiHttpCtxView {
             ctx: &mut self.http,
             table: &mut self.table,
+            hooks: &mut self.hooks,
         }
     }
 }
@@ -347,7 +342,6 @@ impl WasiHttpView for Ctx {
 use std::borrow::Cow;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
-use anyhow::Context;
 use tokio::sync::mpsc::Sender;
 use wasmtime::{CacheStore, Config, Engine};
 
